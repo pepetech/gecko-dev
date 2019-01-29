@@ -6,17 +6,16 @@ _min_stack_size = 0x400;
 MEMORY
 {
     irom0  (rx)     : ORIGIN = 0x00000000, LENGTH = 0x200000
-    irom1  (rx)     : ORIGIN = 0x00004000, LENGTH = 0x000000
+    irom1  (rx)     : ORIGIN = 0x0FE10000, LENGTH = 0x008000
+    irom2  (rx)     : ORIGIN = 0x04000000, LENGTH = 0x800000
+    drom0  (r)      : ORIGIN = 0x0FE00000, LENGTH = 0x001000
+    drom1  (r)      : ORIGIN = 0xC0000000, LENGTH = 0x800000
     iram0  (rwx)    : ORIGIN = 0x10000000, LENGTH = 0x080000
     dram0  (rw)     : ORIGIN = 0x20000000, LENGTH = 0x080000
 }
 
 /* Initial stack pointer (must be 8 byte aligned) */
-_estack = (ORIGIN(dram0) + LENGTH(dram0) - 1) & ~7;
-
-/* Internal device memory */
-PROVIDE(_system_unique_id = 0x0FE081B0 + 0x028);
-PROVIDE(_system_memory = 0x0FE08000);
+_estack = (ORIGIN(dram0) + LENGTH(dram0)) & ~7;
 
 SECTIONS
 {
@@ -107,7 +106,33 @@ SECTIONS
         _eiram0 = .;
     } > iram0 AT > irom0
 
-    /* Data */
+    /* Bootloader Code */
+    .irom1.text :
+    {
+        . = ALIGN(4);
+        _sirom1 = .;
+
+        *(.irom1.text)           /* .text sections (code) */
+        *(.irom1.text*)          /* .text* sections (code) */
+
+        . = ALIGN(4);
+        _eirom1 = .;
+    } > irom1
+
+    /* QSPI Code */
+    .irom2.text :
+    {
+        . = ALIGN(4);
+        _sirom2 = .;
+
+        *(.irom2.text)           /* .text sections (code) */
+        *(.irom2.text*)          /* .text* sections (code) */
+
+        . = ALIGN(4);
+        _eirom2 = .;
+    } > irom2
+
+    /* RAM Data */
     _sidata = LOADADDR(.data);
 
     .data :
@@ -121,6 +146,32 @@ SECTIONS
         . = ALIGN(4);
         _edata = .;        /* define a global symbol at data end */
     } > dram0 AT > irom0
+
+    /* Flash Data */
+    .drom0.data :
+    {
+        . = ALIGN(4);
+        _sdrom0 = .;
+
+        *(.drom0.data)           /* .data sections */
+        *(.drom0.data*)          /* .data* sections */
+
+        . = ALIGN(4);
+        _edrom0 = .;
+    } > drom0
+
+    /* QSPI Data */
+    .drom1.data :
+    {
+        . = ALIGN(4);
+        _sdrom1 = .;
+
+        *(.drom1.data)           /* .data sections */
+        *(.drom1.data*)          /* .data* sections */
+
+        . = ALIGN(4);
+        _edrom1 = .;
+    } > drom1
 
     /* BSS */
     .bss :

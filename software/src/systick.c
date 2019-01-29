@@ -8,9 +8,9 @@ void _systick_isr()
 }
 void systick_init()
 {
-    SysTick->LOAD = (HFRCO_VALUE / 1000) - 1; // TODO: Change this
+    SysTick->LOAD = (HFCORE_CLOCK_FREQ / 1000) - 1; // TODO: Change this
     SysTick->VAL = 0;
-    SysTick->CTRL = SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk;
+    SysTick->CTRL = SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk | SysTick_CTRL_CLKSOURCE_Msk;
 
     SCB->SHP[11] = 7 << (8 - __NVIC_PRIO_BITS); // Set priority 3,1 (min)
 }

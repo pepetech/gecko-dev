@@ -1,10 +1,11 @@
-LIBROOT = /home/joao/Desktop/sf_projects/ARM/ARMdev/lib/EFM32_Gecko_SDK_Suite_v2.4
-DEVICEDIR = $(LIBROOT)/Device/SiliconLabs/EFM32GG11B/Include
-COREDIR = $(LIBROOT)/CMSIS/Include
+LIBROOT = /mnt/e/Projetos/ARM/ARMdev/lib/
+DEVICEDIR = $(LIBROOT)/SiliconLabs.EFM32GG11B_DFP.5.7.0/Device/SiliconLabs/EFM32GG11B/Include
+COREDIR = $(LIBROOT)/ARM.CMSIS.5.4.0/CMSIS/Include
 MCU_TYPE = EFM32GG11B820F2048GQ100
-HFXO_CLOCK_FREQ = 8000000UL
-HFRCO_CLOCK_FREQ = 19000000UL
+HFXO_VALUE = 8000000UL
+LFXO_VALUE = 32768UL
 APP_ADDRESS = 0x00000000
+APP_NAME = test
 
 #######################################################
 
@@ -21,7 +22,7 @@ INCLUDEDIRSTRUCT := $(filter %/include, $(STRUCT)) $(DEVICEDIR)/ $(COREDIR)/
 OBJECTDIRSTRUCT := $(subst $(SOURCEDIR), $(OBJECTDIR), $(SOURCEDIRSTRUCT))
 
 # Build type
-BUILD_TYPE ?= release
+BUILD_TYPE ?= debug
 
 # Version
 $(shell if ! test -f $(TARGETDIR)/.version; then echo 0 > $(TARGETDIR)/.version; fi)
@@ -30,6 +31,7 @@ INC_VERSION ?= n
 BUILD_VERSION = $(shell cat $(TARGETDIR)/.version)
 
 ifeq ($(INC_VERSION), y)
+$(shell if test -f .vscode/launch.json; then sed -i 's/v$(BUILD_VERSION).$(APP_NAME)/v$(shell echo $$(($(BUILD_VERSION) + 1))).$(APP_NAME)/g' .vscode/launch.json; fi)
 $(shell echo $$(($(BUILD_VERSION) + 1)) > $(TARGETDIR)/.version)
 $(shell rm -rf $(OBJECTDIR)/*)
 BUILD_VERSION = $(shell cat $(TARGETDIR)/.version)
@@ -53,9 +55,9 @@ GDB = arm-none-eabi-gdb
 
 # Compillers & Linker flags
 ASFLAGS = -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
-CFLAGS = $(addprefix -I,$(INCLUDEDIRSTRUCT)) -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -nostartfiles -ffunction-sections -fdata-sections -ffreestanding -Os -std=gnu99 -Wpointer-arith -Wundef -Werror -D$(MCU_TYPE) -DHFXO_VALUE=$(HFXO_CLOCK_FREQ) -DHFRCO_VALUE=$(HFRCO_CLOCK_FREQ) -DBUILD_VERSION=$(BUILD_VERSION)
+CFLAGS = $(addprefix -I,$(INCLUDEDIRSTRUCT)) -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -nostartfiles -ffunction-sections -fdata-sections -ffreestanding -Os -std=gnu99 -Wpointer-arith -Wundef -Werror -D$(MCU_TYPE) -DHFXO_VALUE=$(HFXO_VALUE) -DLFXO_VALUE=$(LFXO_VALUE) -DBUILD_VERSION=$(BUILD_VERSION)
 CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
-LDFLAGS = -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -specs=nano.specs -specs=nosys.specs -nostdlib -nostartfiles -ffunction-sections -fdata-sections -ffreestanding -Wl,--gc-sections
+LDFLAGS = -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 --specs=nano.specs --specs=nosys.specs -nostdlib -nostartfiles -ffunction-sections -fdata-sections -ffreestanding -Wl,--gc-sections
 LDLIBS = -lm -lc -lgcc -lnosys
 
 ifeq ($(BUILD_TYPE), debug)
@@ -64,10 +66,10 @@ CXXFLAGS += -g
 endif
 
 ## Linker scripts
-LDSCRIPT = ld/efm32gg11b820f2048_app.ld
+LDSCRIPT = ld/efm32gg11bx20f2048_app.ld
 
 # Target
-TARGET = $(TARGETDIR)/v$(BUILD_VERSION).node
+TARGET = $(TARGETDIR)/v$(BUILD_VERSION).$(APP_NAME)
 
 # Sources & objects
 SRCFILES := $(addsuffix /*, $(SOURCEDIRSTRUCT))
@@ -94,11 +96,18 @@ $(TARGET).lss: $(TARGET).elf
 
 $(TARGET).bin: $(TARGET).elf
 	@echo Creating BIN file \'$@\'...
-	@$(OBJCOPY) -O binary $< $@
+	@$(OBJCOPY) -O binary --only-section=.isr_vector --only-section=.text --only-section=.iram0.text --only-section=.data $< $(TARGET).irom0.bin
+	@$(OBJCOPY) -O binary --only-section=.irom1.text $< $(TARGET).irom1.bin
+	@$(OBJCOPY) -O binary --only-section=.irom2.text $< $(TARGET).irom2.bin
+	@$(OBJCOPY) -O binary --only-section=.drom0.data $< $(TARGET).drom0.bin
+	@$(OBJCOPY) -O binary --only-section=.drom1.data $< $(TARGET).drom1.bin
 
 $(TARGET).hex: $(TARGET).elf
 	@echo Creating HEX file \'$@\'...
-	@$(OBJCOPY) -O ihex $< $@
+	@$(OBJCOPY) -O ihex --remove-section=.irom2.text --remove-section=.drom1.data $< $@
+	@$(OBJCOPY) -O ihex --only-section=.isr_vector --only-section=.text --only-section=.iram0.text --only-section=.data --only-section=.drom0.data $< $(TARGET).flash.hex
+	@$(OBJCOPY) -O ihex --only-section=.irom1.text $< $(TARGET).boot.hex
+	@$(OBJCOPY) -O ihex --only-section=.irom2.text --only-section=.drom1.data $< $(TARGET).qspi.hex
 
 $(TARGET).elf: $(OBJECTS)
 	@echo ---------------------------------------------------------------------------
@@ -135,9 +144,11 @@ reset:
 
 inc-version:
 	@echo $$(($(BUILD_VERSION) + 1)) > $(TARGETDIR)/.version
+	@if test -f .vscode/launch.json; then sed -i 's/v$(BUILD_VERSION).$(APP_NAME)/v$(shell echo $$(($(BUILD_VERSION) + 1))).$(APP_NAME)/g' .vscode/launch.json; fi
 
 dec-version:
 	@echo $$(($(BUILD_VERSION) - 1)) > $(TARGETDIR)/.version
+	@if test -f .vscode/launch.json; then sed -i 's/v$(BUILD_VERSION).$(APP_NAME)/v$(shell echo $$(($(BUILD_VERSION) - 1))).$(APP_NAME)/g' .vscode/launch.json; fi
 
 version:
 	@echo Build version: v$(BUILD_VERSION)

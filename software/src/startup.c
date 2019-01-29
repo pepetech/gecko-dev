@@ -63,7 +63,10 @@ void _reset_isr()
 
     SCB->VTOR = (uint32_t)&_svect; // ISR Vectors offset
     SCB->AIRCR = 0x05FA0000 | (5 << 8); // Interrupt priority - 2 bits Group, 1 bit Sub-group
-    SCB->CPACR |= 0xF << 20; // Enable CP10 & CP11 (FPU)
+    SCB->SHCSR = SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk | SCB_SHCSR_MEMFAULTENA_Msk; // Enable separate fault handlers
+    SCB->SCR |= SCB_SCR_SEVONPEND_Msk; // Pending disabled interrupt generates event
+    SCB->CCR |= SCB_CCR_DIV_0_TRP_Msk; // Enable division by zero faults
+    SCB->CPACR |= 0xF << 20; // Enable CP10 & CP11 (FPU) in priv. and non priv. mode
 
     init();
     main();
@@ -74,7 +77,7 @@ void _reset_isr()
 
 void _nmi_isr()                           __attribute__ ((weak,  alias (DEFAULT_ISR)));
 void _hardfault_isr()                     __attribute__ ((weak,  alias (DEFAULT_ISR)));
-void _memmange_isr()                      __attribute__ ((weak,  alias (DEFAULT_ISR)));
+void _memmanage_isr()                     __attribute__ ((weak,  alias (DEFAULT_ISR)));
 void _busfault_isr()                      __attribute__ ((weak,  alias (DEFAULT_ISR)));
 void _usagefault_isr()                    __attribute__ ((weak,  alias (DEFAULT_ISR)));
 void _svc_isr()                           __attribute__ ((weak,  alias (DEFAULT_ISR)));
@@ -155,7 +158,7 @@ __attribute__ ((section(".isr_vector"))) void (* const g_pfnVectors[])() = {
     _reset_isr,
     _nmi_isr,
     _hardfault_isr,
-    _memmange_isr,
+    _memmanage_isr,
     _busfault_isr,
     _usagefault_isr,
     0,
