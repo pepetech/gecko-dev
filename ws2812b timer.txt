@@ -1,0 +1,4 @@
+timer at 36 MHz
+top = 44
+0 > set at 12
+1 > set at 31

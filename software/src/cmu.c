@@ -109,6 +109,9 @@ void cmu_init()
     CMU->HFPERPRESCB = 0 << _CMU_HFPERPRESCB_PRESC_SHIFT;
     CMU->HFPERPRESCC = 1 << _CMU_HFPERPRESCC_PRESC_SHIFT;
 
+    // Enable clock to peripherals
+    CMU->CTRL |= CMU_CTRL_HFPERCLKEN;
+
     // Switch main clock to HFRCO and wait for it to be selected
     CMU->HFCLKSEL = CMU_HFCLKSEL_HF_HFRCO;
     while((CMU->HFCLKSTATUS & _CMU_HFCLKSTATUS_SELECTED_MASK) != CMU_HFCLKSTATUS_SELECTED_HFRCO);

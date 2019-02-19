@@ -79,7 +79,7 @@ void emu_init()
 }
 float emu_get_temperature()
 {
-    EMU->IFC = EMU_IF_TEMP;
+    EMU->IFC = EMU_IFC_TEMP;
 
     while(!(EMU->IF & EMU_IF_TEMP));
 

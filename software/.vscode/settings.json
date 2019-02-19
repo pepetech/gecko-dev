@@ -16,5 +16,6 @@
         "adc.h": "c",
         "qspi.h": "c",
         "i2c.h": "c"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Enabled"
 }

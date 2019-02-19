@@ -34,5 +34,5 @@ void rtcc_set_alarm(uint32_t ulAlarm)
 {
     RTCC->CC[1].CCV = ulAlarm;
 
-    RTCC->IFC = _RTCC_IFC_MASK;
+    RTCC->IFC = RTCC_IFC_CC1;
 }

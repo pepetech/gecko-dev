@@ -131,14 +131,14 @@ Discarded input sections
  .text          0x0000000000000000        0x0 bin/obj/msc.o
  .data          0x0000000000000000        0x0 bin/obj/msc.o
  .bss           0x0000000000000000        0x0 bin/obj/msc.o
- .text.msc_flash_lock
-                0x0000000000000000        0x2 bin/obj/msc.o
- .text.msc_flash_unlock
-                0x0000000000000000        0x2 bin/obj/msc.o
  .text.msc_flash_page_erase
-                0x0000000000000000        0x2 bin/obj/msc.o
+                0x0000000000000000       0x50 bin/obj/msc.o
  .text.msc_flash_page_write
-                0x0000000000000000        0x2 bin/obj/msc.o
+                0x0000000000000000       0x84 bin/obj/msc.o
+ .text.msc_flash_word_write
+                0x0000000000000000       0x56 bin/obj/msc.o
+ .data.g_psLockBits
+                0x0000000000000000        0x4 bin/obj/msc.o
  .text          0x0000000000000000        0x0 bin/obj/qspi.o
  .data          0x0000000000000000        0x0 bin/obj/qspi.o
  .bss           0x0000000000000000        0x0 bin/obj/qspi.o
@@ -198,15 +198,13 @@ Discarded input sections
  .data          0x0000000000000000        0x0 bin/obj/i2c.o
  .bss           0x0000000000000000        0x0 bin/obj/i2c.o
  .text.i2c0_init
-                0x0000000000000000       0x78 bin/obj/i2c.o
+                0x0000000000000000       0x74 bin/obj/i2c.o
  .text.i2c0_transmit
-                0x0000000000000000       0x90 bin/obj/i2c.o
- .text.i2c1_transmit
-                0x0000000000000000       0x8c bin/obj/i2c.o
+                0x0000000000000000       0xb4 bin/obj/i2c.o
  .text.i2c2_init
-                0x0000000000000000       0x7c bin/obj/i2c.o
+                0x0000000000000000       0x78 bin/obj/i2c.o
  .text.i2c2_transmit
-                0x0000000000000000       0x8c bin/obj/i2c.o
+                0x0000000000000000       0xac bin/obj/i2c.o
  .text          0x0000000000000000        0x0 bin/obj/startup.o
  .data          0x0000000000000000        0x0 bin/obj/startup.o
  .bss           0x0000000000000000        0x0 bin/obj/startup.o
@@ -377,7 +375,7 @@ LOAD /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/.
                 0x0000000000000150                . = ALIGN (0x4)
                 0x0000000000000150                _evect = .
 
-.text           0x0000000000000150     0x5168
+.text           0x0000000000000150     0x53d8
                 0x0000000000000150                . = ALIGN (0x4)
                 0x0000000000000150                _stext = .
  *(.text)
@@ -442,471 +440,481 @@ LOAD /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/.
                 0x0000000000001238       0x2c bin/obj/cmu.o
                 0x0000000000001238                cmu_hfrco_calib
  .text.cmu_init
-                0x0000000000001264      0x194 bin/obj/cmu.o
+                0x0000000000001264      0x19c bin/obj/cmu.o
                 0x0000000000001264                cmu_init
  .text.cmu_ushfrco_calib
-                0x00000000000013f8       0x58 bin/obj/cmu.o
-                0x00000000000013f8                cmu_ushfrco_calib
+                0x0000000000001400       0x58 bin/obj/cmu.o
+                0x0000000000001400                cmu_ushfrco_calib
  .text.cmu_auxhfrco_calib
-                0x0000000000001450       0x48 bin/obj/cmu.o
-                0x0000000000001450                cmu_auxhfrco_calib
+                0x0000000000001458       0x48 bin/obj/cmu.o
+                0x0000000000001458                cmu_auxhfrco_calib
  .text.cmu_hfxo_startup_calib
-                0x0000000000001498       0x2c bin/obj/cmu.o
-                0x0000000000001498                cmu_hfxo_startup_calib
+                0x00000000000014a0       0x2c bin/obj/cmu.o
+                0x00000000000014a0                cmu_hfxo_startup_calib
  .text.cmu_hfxo_get_startup_current
-                0x00000000000014c4       0x24 bin/obj/cmu.o
-                0x00000000000014c4                cmu_hfxo_get_startup_current
+                0x00000000000014cc       0x24 bin/obj/cmu.o
+                0x00000000000014cc                cmu_hfxo_get_startup_current
  .text.cmu_hfxo_get_startup_cap
-                0x00000000000014e8       0x2c bin/obj/cmu.o
-                0x00000000000014e8                cmu_hfxo_get_startup_cap
+                0x00000000000014f0       0x2c bin/obj/cmu.o
+                0x00000000000014f0                cmu_hfxo_get_startup_cap
  .text.cmu_hfxo_steady_calib
-                0x0000000000001514       0x2c bin/obj/cmu.o
-                0x0000000000001514                cmu_hfxo_steady_calib
+                0x000000000000151c       0x2c bin/obj/cmu.o
+                0x000000000000151c                cmu_hfxo_steady_calib
  .text.cmu_hfxo_get_steady_current
-                0x0000000000001540       0x24 bin/obj/cmu.o
-                0x0000000000001540                cmu_hfxo_get_steady_current
+                0x0000000000001548       0x24 bin/obj/cmu.o
+                0x0000000000001548                cmu_hfxo_get_steady_current
  .text.cmu_hfxo_get_steady_cap
-                0x0000000000001564       0x2c bin/obj/cmu.o
-                0x0000000000001564                cmu_hfxo_get_steady_cap
+                0x000000000000156c       0x2c bin/obj/cmu.o
+                0x000000000000156c                cmu_hfxo_get_steady_cap
  .text.cmu_hfxo_get_pda_ibtrim
-                0x0000000000001590       0x2c bin/obj/cmu.o
-                0x0000000000001590                cmu_hfxo_get_pda_ibtrim
+                0x0000000000001598       0x2c bin/obj/cmu.o
+                0x0000000000001598                cmu_hfxo_get_pda_ibtrim
  .text.cmu_hfxo_get_pda_current
-                0x00000000000015bc       0x44 bin/obj/cmu.o
-                0x00000000000015bc                cmu_hfxo_get_pda_current
+                0x00000000000015c4       0x44 bin/obj/cmu.o
+                0x00000000000015c4                cmu_hfxo_get_pda_current
  .text.cmu_hfxo_get_pma_ibtrim
-                0x0000000000001600       0x1c bin/obj/cmu.o
-                0x0000000000001600                cmu_hfxo_get_pma_ibtrim
+                0x0000000000001608       0x1c bin/obj/cmu.o
+                0x0000000000001608                cmu_hfxo_get_pma_ibtrim
  .text.cmu_hfxo_get_pma_current
-                0x000000000000161c       0x40 bin/obj/cmu.o
-                0x000000000000161c                cmu_hfxo_get_pma_current
+                0x0000000000001624       0x40 bin/obj/cmu.o
+                0x0000000000001624                cmu_hfxo_get_pma_current
  .text.crc_init
-                0x000000000000165c       0x28 bin/obj/crc.o
-                0x000000000000165c                crc_init
+                0x0000000000001664       0x28 bin/obj/crc.o
+                0x0000000000001664                crc_init
  .text.dbg_init
-                0x0000000000001684       0x10 bin/obj/dbg.o
-                0x0000000000001684                dbg_init
+                0x000000000000168c       0x10 bin/obj/dbg.o
+                0x000000000000168c                dbg_init
  .text.dbg_swo_config
-                0x0000000000001694       0x60 bin/obj/dbg.o
-                0x0000000000001694                dbg_swo_config
+                0x000000000000169c       0x60 bin/obj/dbg.o
+                0x000000000000169c                dbg_swo_config
  .text.dbg_swo_send_uint8
-                0x00000000000016f4       0x26 bin/obj/dbg.o
-                0x00000000000016f4                dbg_swo_send_uint8
+                0x00000000000016fc       0x26 bin/obj/dbg.o
+                0x00000000000016fc                dbg_swo_send_uint8
  .text._putchar
-                0x000000000000171a        0x6 bin/obj/dbg.o
-                0x000000000000171a                _putchar
+                0x0000000000001722        0x6 bin/obj/dbg.o
+                0x0000000000001722                _putchar
  .text.crypto_init
-                0x0000000000001720       0x14 bin/obj/crypto.o
-                0x0000000000001720                crypto_init
+                0x0000000000001728       0x14 bin/obj/crypto.o
+                0x0000000000001728                crypto_init
  .text._hardfault_isr
-                0x0000000000001734       0x18 bin/obj/exc_handler.o
-                0x0000000000001734                _hardfault_isr
+                0x000000000000173c       0x18 bin/obj/exc_handler.o
+                0x000000000000173c                _hardfault_isr
  .text._memmanage_isr
-                0x000000000000174c       0x18 bin/obj/exc_handler.o
-                0x000000000000174c                _memmanage_isr
+                0x0000000000001754       0x18 bin/obj/exc_handler.o
+                0x0000000000001754                _memmanage_isr
  .text._busfault_isr
-                0x0000000000001764       0x18 bin/obj/exc_handler.o
-                0x0000000000001764                _busfault_isr
+                0x000000000000176c       0x18 bin/obj/exc_handler.o
+                0x000000000000176c                _busfault_isr
  .text._usagefault_isr
-                0x000000000000177c       0x18 bin/obj/exc_handler.o
-                0x000000000000177c                _usagefault_isr
+                0x0000000000001784       0x18 bin/obj/exc_handler.o
+                0x0000000000001784                _usagefault_isr
  .text.hardfault_trace_stack
-                0x0000000000001794       0xe4 bin/obj/exc_handler.o
-                0x0000000000001794                hardfault_trace_stack
+                0x000000000000179c       0xe4 bin/obj/exc_handler.o
+                0x000000000000179c                hardfault_trace_stack
  .text.memmanage_trace_stack
-                0x0000000000001878       0xf4 bin/obj/exc_handler.o
-                0x0000000000001878                memmanage_trace_stack
+                0x0000000000001880       0xf4 bin/obj/exc_handler.o
+                0x0000000000001880                memmanage_trace_stack
  .text.busfault_trace_stack
-                0x000000000000196c      0x100 bin/obj/exc_handler.o
-                0x000000000000196c                busfault_trace_stack
+                0x0000000000001974      0x100 bin/obj/exc_handler.o
+                0x0000000000001974                busfault_trace_stack
  .text.usagefault_trace_stack
-                0x0000000000001a6c       0xe8 bin/obj/exc_handler.o
-                0x0000000000001a6c                usagefault_trace_stack
+                0x0000000000001a74       0xe8 bin/obj/exc_handler.o
+                0x0000000000001a74                usagefault_trace_stack
+ .text.msc_flash_lock
+                0x0000000000001b5c       0x16 bin/obj/msc.o
+                0x0000000000001b5c                msc_flash_lock
+ .text.msc_flash_unlock
+                0x0000000000001b72       0x20 bin/obj/msc.o
+                0x0000000000001b72                msc_flash_unlock
  .text.msc_init
-                0x0000000000001b54       0x24 bin/obj/msc.o
-                0x0000000000001b54                msc_init
+                0x0000000000001b92       0x36 bin/obj/msc.o
+                0x0000000000001b92                msc_init
  .text.msc_config_waitstates
-                0x0000000000001b78       0x9c bin/obj/msc.o
-                0x0000000000001b78                msc_config_waitstates
+                0x0000000000001bc8       0xa8 bin/obj/msc.o
+                0x0000000000001bc8                msc_config_waitstates
  .text.qspi_flash_cmd.part.1
-                0x0000000000001c14      0x16c bin/obj/qspi.o
+                0x0000000000001c70      0x16c bin/obj/qspi.o
  .text.qspi_flash_cmd
-                0x0000000000001d80       0x44 bin/obj/qspi.o
-                0x0000000000001d80                qspi_flash_cmd
+                0x0000000000001ddc       0x44 bin/obj/qspi.o
+                0x0000000000001ddc                qspi_flash_cmd
  .text.qspi_flash_reset
-                0x0000000000001dc4       0x36 bin/obj/qspi.o
-                0x0000000000001dc4                qspi_flash_reset
+                0x0000000000001e20       0x36 bin/obj/qspi.o
+                0x0000000000001e20                qspi_flash_reset
  .text.qspi_flash_read_status
-                0x0000000000001dfa       0x2a bin/obj/qspi.o
-                0x0000000000001dfa                qspi_flash_read_status
+                0x0000000000001e56       0x2a bin/obj/qspi.o
+                0x0000000000001e56                qspi_flash_read_status
  .text.qspi_flash_read_config
-                0x0000000000001e24       0x2a bin/obj/qspi.o
-                0x0000000000001e24                qspi_flash_read_config
+                0x0000000000001e80       0x2a bin/obj/qspi.o
+                0x0000000000001e80                qspi_flash_read_config
  .text.qspi_flash_write_enable
-                0x0000000000001e4e       0x30 bin/obj/qspi.o
-                0x0000000000001e4e                qspi_flash_write_enable
+                0x0000000000001eaa       0x30 bin/obj/qspi.o
+                0x0000000000001eaa                qspi_flash_write_enable
  .text.qspi_flash_write_status_config
-                0x0000000000001e7e       0x30 bin/obj/qspi.o
-                0x0000000000001e7e                qspi_flash_write_status_config
+                0x0000000000001eda       0x30 bin/obj/qspi.o
+                0x0000000000001eda                qspi_flash_write_status_config
  .text.qspi_flash_read_jedec_id
-                0x0000000000001eae       0x40 bin/obj/qspi.o
-                0x0000000000001eae                qspi_flash_read_jedec_id
+                0x0000000000001f0a       0x40 bin/obj/qspi.o
+                0x0000000000001f0a                qspi_flash_read_jedec_id
  .text.qspi_flash_read_security
-                0x0000000000001eee       0x20 bin/obj/qspi.o
-                0x0000000000001eee                qspi_flash_read_security
+                0x0000000000001f4a       0x20 bin/obj/qspi.o
+                0x0000000000001f4a                qspi_flash_read_security
  .text.qspi_flash_unprotect_all_blocks
-                0x0000000000001f0e       0x22 bin/obj/qspi.o
-                0x0000000000001f0e                qspi_flash_unprotect_all_blocks
+                0x0000000000001f6a       0x22 bin/obj/qspi.o
+                0x0000000000001f6a                qspi_flash_unprotect_all_blocks
  .text.qspi_flash_init
-                0x0000000000001f30       0x34 bin/obj/qspi.o
-                0x0000000000001f30                qspi_flash_init
+                0x0000000000001f8c       0x34 bin/obj/qspi.o
+                0x0000000000001f8c                qspi_flash_init
  .text.qspi_init
-                0x0000000000001f64       0x98 bin/obj/qspi.o
-                0x0000000000001f64                qspi_init
+                0x0000000000001fc0       0x98 bin/obj/qspi.o
+                0x0000000000001fc0                qspi_init
  .text.emu_vmon_thresh_get
-                0x0000000000001ffc       0x5c bin/obj/emu.o
+                0x0000000000002058       0x5c bin/obj/emu.o
  .text.emu_vmon_thresh_calc
-                0x0000000000002058       0x90 bin/obj/emu.o
+                0x00000000000020b4       0x90 bin/obj/emu.o
  .text._emu_isr
-                0x00000000000020e8       0x6c bin/obj/emu.o
-                0x00000000000020e8                _emu_isr
+                0x0000000000002144       0x6c bin/obj/emu.o
+                0x0000000000002144                _emu_isr
  .text.emu_init
-                0x0000000000002154       0x2c bin/obj/emu.o
-                0x0000000000002154                emu_init
+                0x00000000000021b0       0x2c bin/obj/emu.o
+                0x00000000000021b0                emu_init
  .text.emu_get_temperature
-                0x0000000000002180       0x5c bin/obj/emu.o
-                0x0000000000002180                emu_get_temperature
+                0x00000000000021dc       0x5c bin/obj/emu.o
+                0x00000000000021dc                emu_get_temperature
  .text.emu_vmon_avdd_config
-                0x00000000000021dc       0xa8 bin/obj/emu.o
-                0x00000000000021dc                emu_vmon_avdd_config
+                0x0000000000002238       0xa8 bin/obj/emu.o
+                0x0000000000002238                emu_vmon_avdd_config
  .text.emu_vmon_dvdd_config
-                0x0000000000002284       0x6c bin/obj/emu.o
-                0x0000000000002284                emu_vmon_dvdd_config
+                0x00000000000022e0       0x6c bin/obj/emu.o
+                0x00000000000022e0                emu_vmon_dvdd_config
  .text.emu_vmon_iovdd_config
-                0x00000000000022f0       0x6c bin/obj/emu.o
-                0x00000000000022f0                emu_vmon_iovdd_config
+                0x000000000000234c       0x6c bin/obj/emu.o
+                0x000000000000234c                emu_vmon_iovdd_config
  .text.get_device_name
-                0x000000000000235c      0x374 bin/obj/main.o
-                0x000000000000235c                get_device_name
- .text.init     0x00000000000026d0      0x98c bin/obj/main.o
-                0x00000000000026d0                init
+                0x00000000000023b8      0x374 bin/obj/main.o
+                0x00000000000023b8                get_device_name
+ *fill*         0x000000000000272c        0x4 
+ .text.init     0x0000000000002730      0xa08 bin/obj/main.o
+                0x0000000000002730                init
  .text.startup.main
-                0x000000000000305c      0x1f4 bin/obj/main.o
-                0x000000000000305c                main
+                0x0000000000003138      0x260 bin/obj/main.o
+                0x0000000000003138                main
  .text.rtcc_init
-                0x0000000000003250       0x64 bin/obj/rtcc.o
-                0x0000000000003250                rtcc_init
+                0x0000000000003398       0x64 bin/obj/rtcc.o
+                0x0000000000003398                rtcc_init
  .text.rtcc_get_time
-                0x00000000000032b4        0xc bin/obj/rtcc.o
-                0x00000000000032b4                rtcc_get_time
+                0x00000000000033fc        0xc bin/obj/rtcc.o
+                0x00000000000033fc                rtcc_get_time
  .text._systick_isr
-                0x00000000000032c0       0x18 bin/obj/systick.o
-                0x00000000000032c0                _systick_isr
+                0x0000000000003408       0x18 bin/obj/systick.o
+                0x0000000000003408                _systick_isr
  .text.systick_init
-                0x00000000000032d8       0x30 bin/obj/systick.o
-                0x00000000000032d8                systick_init
+                0x0000000000003420       0x30 bin/obj/systick.o
+                0x0000000000003420                systick_init
  .text.delay_ms
-                0x0000000000003308       0x28 bin/obj/systick.o
-                0x0000000000003308                delay_ms
+                0x0000000000003450       0x28 bin/obj/systick.o
+                0x0000000000003450                delay_ms
  .text.i2c1_init
-                0x0000000000003330       0x7c bin/obj/i2c.o
-                0x0000000000003330                i2c1_init
+                0x0000000000003478       0x78 bin/obj/i2c.o
+                0x0000000000003478                i2c1_init
+ .text.i2c1_transmit
+                0x00000000000034f0       0xac bin/obj/i2c.o
+                0x00000000000034f0                i2c1_transmit
  .text._default_isr
-                0x00000000000033ac        0x2 bin/obj/startup.o
-                0x00000000000033ac                _timer3_isr
-                0x00000000000033ac                _wtimer2_isr
-                0x00000000000033ac                _ebi_isr
-                0x00000000000033ac                _timer5_isr
-                0x00000000000033ac                _letimer0_isr
-                0x00000000000033ac                _cmu_isr
-                0x00000000000033ac                _acmp2_3_isr
-                0x00000000000033ac                _msc_isr
-                0x00000000000033ac                _pcnt1_isr
-                0x00000000000033ac                _can1_isr
-                0x00000000000033ac                _eth_isr
-                0x00000000000033ac                _usart4_rx_isr
-                0x00000000000033ac                _uart0_tx_isr
-                0x00000000000033ac                _uart0_rx_isr
-                0x00000000000033ac                _wdog1_isr
-                0x00000000000033ac                _usart0_rx_isr
-                0x00000000000033ac                _csen_isr
-                0x00000000000033ac                _wtimer1_isr
-                0x00000000000033ac                _can0_isr
-                0x00000000000033ac                _usart4_tx_isr
-                0x00000000000033ac                _letimer1_isr
-                0x00000000000033ac                _usart2_rx_isr
-                0x00000000000033ac                _usart5_tx_isr
-                0x00000000000033ac                _gpio_even_isr
-                0x00000000000033ac                _lesense_isr
-                0x00000000000033ac                _uart1_tx_isr
-                0x00000000000033ac                _wdog0_isr
-                0x00000000000033ac                _smu_isr
-                0x00000000000033ac                _usart2_tx_isr
-                0x00000000000033ac                _usb_isr
-                0x00000000000033ac                _usart3_tx_isr
-                0x00000000000033ac                _crypto0_isr
-                0x00000000000033ac                _usart3_rx_isr
-                0x00000000000033ac                _pendsv_isr
-                0x00000000000033ac                _leuart1_isr
-                0x00000000000033ac                _usart0_tx_isr
-                0x00000000000033ac                _wtimer0_isr
-                0x00000000000033ac                _idac0_isr
-                0x00000000000033ac                _vdac0_isr
-                0x00000000000033ac                _timer4_isr
-                0x00000000000033ac                _debugmon_isr
-                0x00000000000033ac                _adc1_isr
-                0x00000000000033ac                _trng0_isr
-                0x00000000000033ac                _timer0_isr
-                0x00000000000033ac                _rtc_isr
-                0x00000000000033ac                _lcd_isr
-                0x00000000000033ac                _acmp0_1_isr
-                0x00000000000033ac                _uart1_rx_isr
-                0x00000000000033ac                _i2c0_isr
-                0x00000000000033ac                _timer2_isr
-                0x00000000000033ac                _timer6_isr
-                0x00000000000033ac                _nmi_isr
-                0x00000000000033ac                _i2c2_isr
-                0x00000000000033ac                _svc_isr
-                0x00000000000033ac                _rtcc_isr
-                0x00000000000033ac                _pcnt2_isr
-                0x00000000000033ac                _adc0_isr
-                0x00000000000033ac                _wtimer3_isr
-                0x00000000000033ac                _timer1_isr
-                0x00000000000033ac                _pcnt0_isr
-                0x00000000000033ac                _sdio_isr
-                0x00000000000033ac                _usart1_rx_isr
-                0x00000000000033ac                _ldma_isr
-                0x00000000000033ac                _cryotimer_isr
-                0x00000000000033ac                _usart5_rx_isr
-                0x00000000000033ac                _leuart0_isr
-                0x00000000000033ac                _usart1_tx_isr
-                0x00000000000033ac                _fpueh_isr
-                0x00000000000033ac                _qspi0_isr
-                0x00000000000033ac                _i2c1_isr
-                0x00000000000033ac                _default_isr
-                0x00000000000033ac                _gpio_odd_isr
+                0x000000000000359c        0x2 bin/obj/startup.o
+                0x000000000000359c                _timer3_isr
+                0x000000000000359c                _wtimer2_isr
+                0x000000000000359c                _ebi_isr
+                0x000000000000359c                _timer5_isr
+                0x000000000000359c                _letimer0_isr
+                0x000000000000359c                _cmu_isr
+                0x000000000000359c                _acmp2_3_isr
+                0x000000000000359c                _msc_isr
+                0x000000000000359c                _pcnt1_isr
+                0x000000000000359c                _can1_isr
+                0x000000000000359c                _eth_isr
+                0x000000000000359c                _usart4_rx_isr
+                0x000000000000359c                _uart0_tx_isr
+                0x000000000000359c                _uart0_rx_isr
+                0x000000000000359c                _wdog1_isr
+                0x000000000000359c                _usart0_rx_isr
+                0x000000000000359c                _csen_isr
+                0x000000000000359c                _wtimer1_isr
+                0x000000000000359c                _can0_isr
+                0x000000000000359c                _usart4_tx_isr
+                0x000000000000359c                _letimer1_isr
+                0x000000000000359c                _usart2_rx_isr
+                0x000000000000359c                _usart5_tx_isr
+                0x000000000000359c                _gpio_even_isr
+                0x000000000000359c                _lesense_isr
+                0x000000000000359c                _uart1_tx_isr
+                0x000000000000359c                _wdog0_isr
+                0x000000000000359c                _smu_isr
+                0x000000000000359c                _usart2_tx_isr
+                0x000000000000359c                _usb_isr
+                0x000000000000359c                _usart3_tx_isr
+                0x000000000000359c                _crypto0_isr
+                0x000000000000359c                _usart3_rx_isr
+                0x000000000000359c                _pendsv_isr
+                0x000000000000359c                _leuart1_isr
+                0x000000000000359c                _usart0_tx_isr
+                0x000000000000359c                _wtimer0_isr
+                0x000000000000359c                _idac0_isr
+                0x000000000000359c                _vdac0_isr
+                0x000000000000359c                _timer4_isr
+                0x000000000000359c                _debugmon_isr
+                0x000000000000359c                _adc1_isr
+                0x000000000000359c                _trng0_isr
+                0x000000000000359c                _timer0_isr
+                0x000000000000359c                _rtc_isr
+                0x000000000000359c                _lcd_isr
+                0x000000000000359c                _acmp0_1_isr
+                0x000000000000359c                _uart1_rx_isr
+                0x000000000000359c                _i2c0_isr
+                0x000000000000359c                _timer2_isr
+                0x000000000000359c                _timer6_isr
+                0x000000000000359c                _nmi_isr
+                0x000000000000359c                _i2c2_isr
+                0x000000000000359c                _svc_isr
+                0x000000000000359c                _rtcc_isr
+                0x000000000000359c                _pcnt2_isr
+                0x000000000000359c                _adc0_isr
+                0x000000000000359c                _wtimer3_isr
+                0x000000000000359c                _timer1_isr
+                0x000000000000359c                _pcnt0_isr
+                0x000000000000359c                _sdio_isr
+                0x000000000000359c                _usart1_rx_isr
+                0x000000000000359c                _ldma_isr
+                0x000000000000359c                _cryotimer_isr
+                0x000000000000359c                _usart5_rx_isr
+                0x000000000000359c                _leuart0_isr
+                0x000000000000359c                _usart1_tx_isr
+                0x000000000000359c                _fpueh_isr
+                0x000000000000359c                _qspi0_isr
+                0x000000000000359c                _i2c1_isr
+                0x000000000000359c                _default_isr
+                0x000000000000359c                _gpio_odd_isr
  .text.__libc_init_array
-                0x00000000000033ae        0x2 bin/obj/startup.o
-                0x00000000000033ae                __libc_init_array
+                0x000000000000359e        0x2 bin/obj/startup.o
+                0x000000000000359e                __libc_init_array
  .text._reset_isr
-                0x00000000000033b0       0xa4 bin/obj/startup.o
-                0x00000000000033b0                _reset_isr
+                0x00000000000035a0       0xa4 bin/obj/startup.o
+                0x00000000000035a0                _reset_isr
  .text.adc_init
-                0x0000000000003454       0x38 bin/obj/adc.o
-                0x0000000000003454                adc_init
+                0x0000000000003644       0x40 bin/obj/adc.o
+                0x0000000000003644                adc_init
  .text.adc_get_avdd
-                0x000000000000348c       0x88 bin/obj/adc.o
-                0x000000000000348c                adc_get_avdd
+                0x0000000000003684       0x88 bin/obj/adc.o
+                0x0000000000003684                adc_get_avdd
  .text.adc_get_dvdd
-                0x0000000000003514       0x88 bin/obj/adc.o
-                0x0000000000003514                adc_get_dvdd
+                0x000000000000370c       0x88 bin/obj/adc.o
+                0x000000000000370c                adc_get_dvdd
  .text.adc_get_iovdd
-                0x000000000000359c       0x88 bin/obj/adc.o
-                0x000000000000359c                adc_get_iovdd
+                0x0000000000003794       0x88 bin/obj/adc.o
+                0x0000000000003794                adc_get_iovdd
  .text.adc_get_corevdd
-                0x0000000000003624       0x88 bin/obj/adc.o
-                0x0000000000003624                adc_get_corevdd
+                0x000000000000381c       0x88 bin/obj/adc.o
+                0x000000000000381c                adc_get_corevdd
  .text.adc_get_temperature
-                0x00000000000036ac       0xb8 bin/obj/adc.o
-                0x00000000000036ac                adc_get_temperature
+                0x00000000000038a4       0xb8 bin/obj/adc.o
+                0x00000000000038a4                adc_get_temperature
  .text._out_buffer
-                0x0000000000003764        0x8 bin/obj/printf/printf.o
+                0x000000000000395c        0x8 bin/obj/printf/printf.o
  .text._out_null
-                0x000000000000376c        0x2 bin/obj/printf/printf.o
+                0x0000000000003964        0x2 bin/obj/printf/printf.o
  .text._ntoa_format
-                0x000000000000376e      0x14a bin/obj/printf/printf.o
+                0x0000000000003966      0x14a bin/obj/printf/printf.o
  .text._ntoa_long
-                0x00000000000038b8       0x84 bin/obj/printf/printf.o
+                0x0000000000003ab0       0x84 bin/obj/printf/printf.o
  .text._ntoa_long_long
-                0x000000000000393c       0x98 bin/obj/printf/printf.o
+                0x0000000000003b34       0x98 bin/obj/printf/printf.o
  .text._out_char
-                0x00000000000039d4        0x8 bin/obj/printf/printf.o
- *fill*         0x00000000000039dc        0x4 
+                0x0000000000003bcc        0x8 bin/obj/printf/printf.o
+ *fill*         0x0000000000003bd4        0x4 
  .text._vsnprintf
-                0x00000000000039e0      0x6dc bin/obj/printf/printf.o
- .text.printf   0x00000000000040bc       0x28 bin/obj/printf/printf.o
-                0x00000000000040bc                printf
+                0x0000000000003bd8      0x6dc bin/obj/printf/printf.o
+ .text.printf   0x00000000000042b4       0x28 bin/obj/printf/printf.o
+                0x00000000000042b4                printf
  .text.snprintf
-                0x00000000000040e4       0x28 bin/obj/printf/printf.o
-                0x00000000000040e4                snprintf
- .text.roundf   0x000000000000410c       0x60 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-sf_round.o)
-                0x000000000000410c                roundf
- .text.malloc   0x000000000000416c       0x10 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-malloc.o)
-                0x000000000000416c                malloc
- .text.free     0x000000000000417c       0x10 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-malloc.o)
-                0x000000000000417c                free
- .text._free_r  0x000000000000418c       0x9c /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-freer.o)
-                0x000000000000418c                _free_r
+                0x00000000000042dc       0x28 bin/obj/printf/printf.o
+                0x00000000000042dc                snprintf
+ .text.roundf   0x0000000000004304       0x60 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-sf_round.o)
+                0x0000000000004304                roundf
+ .text.malloc   0x0000000000004364       0x10 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-malloc.o)
+                0x0000000000004364                malloc
+ .text.free     0x0000000000004374       0x10 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-malloc.o)
+                0x0000000000004374                free
+ .text._free_r  0x0000000000004384       0x9c /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-freer.o)
+                0x0000000000004384                _free_r
  .text._malloc_r
-                0x0000000000004228       0xb4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-mallocr.o)
-                0x0000000000004228                _malloc_r
- .text._sbrk_r  0x00000000000042dc       0x20 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-sbrkr.o)
-                0x00000000000042dc                _sbrk_r
+                0x0000000000004420       0xb4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-mallocr.o)
+                0x0000000000004420                _malloc_r
+ .text._sbrk_r  0x00000000000044d4       0x20 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-sbrkr.o)
+                0x00000000000044d4                _sbrk_r
  .text.__malloc_lock
-                0x00000000000042fc        0xc /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-mlock.o)
-                0x00000000000042fc                __malloc_lock
+                0x00000000000044f4        0xc /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-mlock.o)
+                0x00000000000044f4                __malloc_lock
  .text.__malloc_unlock
-                0x0000000000004308        0xc /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-mlock.o)
-                0x0000000000004308                __malloc_unlock
+                0x0000000000004500        0xc /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-mlock.o)
+                0x0000000000004500                __malloc_unlock
  .text.__retarget_lock_acquire_recursive
-                0x0000000000004314        0x2 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
-                0x0000000000004314                __retarget_lock_acquire_recursive
+                0x000000000000450c        0x2 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
+                0x000000000000450c                __retarget_lock_acquire_recursive
  .text.__retarget_lock_release_recursive
-                0x0000000000004316        0x2 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
-                0x0000000000004316                __retarget_lock_release_recursive
- .text._sbrk    0x0000000000004318       0x1c /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(sbrk.o)
-                0x0000000000004318                _sbrk
+                0x000000000000450e        0x2 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
+                0x000000000000450e                __retarget_lock_release_recursive
+ .text._sbrk    0x0000000000004510       0x1c /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(sbrk.o)
+                0x0000000000004510                _sbrk
  *(.rodata)
  *(.rodata*)
  .rodata.__FUNCTION__.7587
-                0x0000000000004334       0x16 bin/obj/exc_handler.o
+                0x000000000000452c       0x16 bin/obj/exc_handler.o
  .rodata.__FUNCTION__.7600
-                0x000000000000434a       0x16 bin/obj/exc_handler.o
+                0x0000000000004542       0x16 bin/obj/exc_handler.o
  .rodata.__FUNCTION__.7613
-                0x0000000000004360       0x15 bin/obj/exc_handler.o
+                0x0000000000004558       0x15 bin/obj/exc_handler.o
  .rodata.__FUNCTION__.7626
-                0x0000000000004375       0x17 bin/obj/exc_handler.o
+                0x000000000000456d       0x17 bin/obj/exc_handler.o
  .rodata.busfault_trace_stack.str1.1
-                0x000000000000438c       0x4f bin/obj/exc_handler.o
+                0x0000000000004584       0x4f bin/obj/exc_handler.o
  .rodata.hardfault_trace_stack.str1.1
-                0x00000000000043db      0x178 bin/obj/exc_handler.o
+                0x00000000000045d3      0x178 bin/obj/exc_handler.o
  .rodata.memmanage_trace_stack.str1.1
-                0x0000000000004553       0x5f bin/obj/exc_handler.o
+                0x000000000000474b       0x5f bin/obj/exc_handler.o
  .rodata.usagefault_trace_stack.str1.1
-                0x00000000000045b2       0x3a bin/obj/exc_handler.o
- .rodata.__FUNCTION__.9048
-                0x00000000000045ec        0x5 bin/obj/main.o
- .rodata.__FUNCTION__.9055
-                0x00000000000045f1        0x5 bin/obj/main.o
+                0x00000000000047aa       0x3a bin/obj/exc_handler.o
+ .rodata.__FUNCTION__.9057
+                0x00000000000047e4        0x5 bin/obj/main.o
+ .rodata.__FUNCTION__.9064
+                0x00000000000047e9        0x5 bin/obj/main.o
  .rodata.get_device_name.str1.1
-                0x00000000000045f6      0x235 bin/obj/main.o
+                0x00000000000047ee      0x235 bin/obj/main.o
                                         0x238 (size before relaxing)
  .rodata.init.str1.1
-                0x000000000000482b      0x86b bin/obj/main.o
+                0x0000000000004a23      0x88c bin/obj/main.o
  .rodata.main.str1.1
-                0x0000000000005096      0x1cf bin/obj/main.o
- *fill*         0x0000000000005265        0x3 
+                0x00000000000052af      0x223 bin/obj/main.o
+ *fill*         0x00000000000054d2        0x6 
  .rodata.pow10.5152
-                0x0000000000005268       0x50 bin/obj/printf/printf.o
+                0x00000000000054d8       0x50 bin/obj/printf/printf.o
  *(.glue_7)
- .glue_7        0x00000000000052b8        0x0 linker stubs
+ .glue_7        0x0000000000005528        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x00000000000052b8        0x0 linker stubs
+ .glue_7t       0x0000000000005528        0x0 linker stubs
  *(.init)
  *(.fini)
-                0x00000000000052b8                . = ALIGN (0x4)
-                0x00000000000052b8                _etext = .
+                0x0000000000005528                . = ALIGN (0x4)
+                0x0000000000005528                _etext = .
 
-.vfp11_veneer   0x00000000000052b8        0x0
- .vfp11_veneer  0x00000000000052b8        0x0 linker stubs
+.vfp11_veneer   0x0000000000005528        0x0
+ .vfp11_veneer  0x0000000000005528        0x0 linker stubs
 
-.v4_bx          0x00000000000052b8        0x0
- .v4_bx         0x00000000000052b8        0x0 linker stubs
+.v4_bx          0x0000000000005528        0x0
+ .v4_bx         0x0000000000005528        0x0 linker stubs
 
-.iplt           0x00000000000052b8        0x0
- .iplt          0x00000000000052b8        0x0 bin/obj/cmu.o
+.iplt           0x0000000000005528        0x0
+ .iplt          0x0000000000005528        0x0 bin/obj/cmu.o
 
 .ARM.extab
  *(.ARM.extab* .gnu.linkonce.armextab.*)
 
-.ARM            0x00000000000052b8        0x8
-                0x00000000000052b8                __exidx_start = .
+.ARM            0x0000000000005528        0x8
+                0x0000000000005528                __exidx_start = .
  *(.ARM.exidx*)
- .ARM.exidx     0x00000000000052b8        0x8 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_udivmoddi4.o)
-                0x00000000000052c0                __exidx_end = .
+ .ARM.exidx     0x0000000000005528        0x8 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_udivmoddi4.o)
+                0x0000000000005530                __exidx_end = .
 
-.rel.dyn        0x00000000000052c0        0x0
- .rel.iplt      0x00000000000052c0        0x0 bin/obj/cmu.o
+.rel.dyn        0x0000000000005530        0x0
+ .rel.iplt      0x0000000000005530        0x0 bin/obj/cmu.o
 
 .ARM.attributes
-                0x00000000000052c0       0x34
+                0x0000000000005530       0x34
  *(.ARM.attributes)
  .ARM.attributes
-                0x00000000000052c0       0x34 bin/obj/cmu.o
+                0x0000000000005530       0x34 bin/obj/cmu.o
  .ARM.attributes
-                0x00000000000052f4       0x34 bin/obj/crc.o
+                0x0000000000005564       0x34 bin/obj/crc.o
  .ARM.attributes
-                0x0000000000005328       0x34 bin/obj/dbg.o
+                0x0000000000005598       0x34 bin/obj/dbg.o
  .ARM.attributes
-                0x000000000000535c       0x34 bin/obj/crypto.o
+                0x00000000000055cc       0x34 bin/obj/crypto.o
  .ARM.attributes
-                0x0000000000005390       0x34 bin/obj/exc_handler.o
+                0x0000000000005600       0x34 bin/obj/exc_handler.o
  .ARM.attributes
-                0x00000000000053c4       0x34 bin/obj/msc.o
+                0x0000000000005634       0x34 bin/obj/msc.o
  .ARM.attributes
-                0x00000000000053f8       0x34 bin/obj/qspi.o
+                0x0000000000005668       0x34 bin/obj/qspi.o
  .ARM.attributes
-                0x000000000000542c       0x34 bin/obj/emu.o
+                0x000000000000569c       0x34 bin/obj/emu.o
  .ARM.attributes
-                0x0000000000005460       0x34 bin/obj/main.o
+                0x00000000000056d0       0x34 bin/obj/main.o
  .ARM.attributes
-                0x0000000000005494       0x34 bin/obj/rtcc.o
+                0x0000000000005704       0x34 bin/obj/rtcc.o
  .ARM.attributes
-                0x00000000000054c8       0x34 bin/obj/systick.o
+                0x0000000000005738       0x34 bin/obj/systick.o
  .ARM.attributes
-                0x00000000000054fc       0x34 bin/obj/i2c.o
+                0x000000000000576c       0x34 bin/obj/i2c.o
  .ARM.attributes
-                0x0000000000005530       0x34 bin/obj/startup.o
+                0x00000000000057a0       0x34 bin/obj/startup.o
  .ARM.attributes
-                0x0000000000005564       0x34 bin/obj/adc.o
+                0x00000000000057d4       0x34 bin/obj/adc.o
  .ARM.attributes
-                0x0000000000005598       0x34 bin/obj/printf/printf.o
+                0x0000000000005808       0x34 bin/obj/printf/printf.o
  .ARM.attributes
-                0x00000000000055cc       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-sf_round.o)
+                0x000000000000583c       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-sf_round.o)
  .ARM.attributes
-                0x0000000000005600       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-malloc.o)
+                0x0000000000005870       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-malloc.o)
  .ARM.attributes
-                0x0000000000005634       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-freer.o)
+                0x00000000000058a4       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-freer.o)
  .ARM.attributes
-                0x0000000000005668       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-mallocr.o)
+                0x00000000000058d8       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-mallocr.o)
  .ARM.attributes
-                0x000000000000569c       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-sbrkr.o)
+                0x000000000000590c       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-sbrkr.o)
  .ARM.attributes
-                0x00000000000056d0       0x32 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-impure.o)
+                0x0000000000005940       0x32 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-impure.o)
  .ARM.attributes
-                0x0000000000005702       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-mlock.o)
+                0x0000000000005972       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-mlock.o)
  .ARM.attributes
-                0x0000000000005736       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-reent.o)
+                0x00000000000059a6       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-reent.o)
  .ARM.attributes
-                0x000000000000576a       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
+                0x00000000000059da       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
  .ARM.attributes
-                0x000000000000579e       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_addsubdf3.o)
+                0x0000000000005a0e       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_addsubdf3.o)
  .ARM.attributes
-                0x00000000000057bc       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_muldivdf3.o)
+                0x0000000000005a2c       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_muldivdf3.o)
  .ARM.attributes
-                0x00000000000057da       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_cmpdf2.o)
+                0x0000000000005a4a       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_cmpdf2.o)
  .ARM.attributes
-                0x00000000000057f8       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_fixdfsi.o)
+                0x0000000000005a68       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_fixdfsi.o)
  .ARM.attributes
-                0x0000000000005816       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_fixunsdfsi.o)
+                0x0000000000005a86       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_fixunsdfsi.o)
  .ARM.attributes
-                0x0000000000005834       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_aeabi_uldivmod.o)
+                0x0000000000005aa4       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_aeabi_uldivmod.o)
  .ARM.attributes
-                0x0000000000005852       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_udivmoddi4.o)
+                0x0000000000005ac2       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_udivmoddi4.o)
  .ARM.attributes
-                0x0000000000005886       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_dvmd_tls.o)
+                0x0000000000005af6       0x1e /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_dvmd_tls.o)
  .ARM.attributes
-                0x00000000000058a4       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(sbrk.o)
+                0x0000000000005b14       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(sbrk.o)
 
-.preinit_array  0x00000000000052c0        0x0
+.preinit_array  0x0000000000005530        0x0
                 [!provide]                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
                 [!provide]                        PROVIDE (__preinit_array_end = .)
 
-.init_array     0x00000000000052c0        0x0
+.init_array     0x0000000000005530        0x0
                 [!provide]                        PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
                 [!provide]                        PROVIDE (__init_array_end = .)
 
-.fini_array     0x00000000000052c0        0x0
+.fini_array     0x0000000000005530        0x0
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(.fini_array*)
  *(SORT_BY_NAME(.fini_array.*))
                 [!provide]                        PROVIDE (__fini_array_end = .)
-                0x00000000000052c0                _siiram0 = LOADADDR (.iram0.text)
+                0x0000000000005530                _siiram0 = LOADADDR (.iram0.text)
 
-.iram0.text     0x0000000010000000        0x0 load address 0x00000000000052c0
+.iram0.text     0x0000000010000000        0x0 load address 0x0000000000005530
                 0x0000000010000000                . = ALIGN (0x4)
                 0x0000000010000000                _siram0 = .
  *(.iram0.text)
@@ -929,9 +937,9 @@ LOAD /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/.
  *(.irom2.text*)
                 0x0000000004000000                . = ALIGN (0x4)
                 0x0000000004000000                _eirom2 = .
-                0x00000000000052c0                _sidata = LOADADDR (.data)
+                0x0000000000005530                _sidata = LOADADDR (.data)
 
-.data           0x0000000020000000       0x78 load address 0x00000000000052c0
+.data           0x0000000020000000       0x7c load address 0x0000000000005530
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                _sdata = .
  *(.data)
@@ -951,16 +959,19 @@ LOAD /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/.
  .data.USHFRCO_VALUE
                 0x0000000020000010        0x4 bin/obj/cmu.o
                 0x0000000020000010                USHFRCO_VALUE
+ .data.g_psInitCalibrationTable
+                0x0000000020000014        0x4 bin/obj/msc.o
+                0x0000000020000014                g_psInitCalibrationTable
  .data._impure_ptr
-                0x0000000020000014        0x4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-impure.o)
-                0x0000000020000014                _impure_ptr
+                0x0000000020000018        0x4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-impure.o)
+                0x0000000020000018                _impure_ptr
  .data.impure_data
-                0x0000000020000018       0x60 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-impure.o)
-                0x0000000020000078                . = ALIGN (0x4)
-                0x0000000020000078                _edata = .
+                0x000000002000001c       0x60 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-impure.o)
+                0x000000002000007c                . = ALIGN (0x4)
+                0x000000002000007c                _edata = .
 
-.igot.plt       0x0000000020000078        0x0 load address 0x0000000000005338
- .igot.plt      0x0000000020000078        0x0 bin/obj/cmu.o
+.igot.plt       0x000000002000007c        0x0 load address 0x00000000000055ac
+ .igot.plt      0x000000002000007c        0x0 bin/obj/cmu.o
 
 .drom0.data     0x000000000fe00000        0x0
                 0x000000000fe00000                . = ALIGN (0x4)
@@ -978,95 +989,95 @@ LOAD /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/.
                 0x00000000c0000000                . = ALIGN (0x4)
                 0x00000000c0000000                _edrom1 = .
 
-.bss            0x0000000020000078       0xa4
-                0x0000000020000078                . = ALIGN (0x4)
-                0x0000000020000078                _sbss = .
-                0x0000000020000078                __bss_start__ = _sbss
+.bss            0x0000000020000080       0xa4
+                0x0000000020000080                . = ALIGN (0x4)
+                0x0000000020000080                _sbss = .
+                0x0000000020000080                __bss_start__ = _sbss
  *(.bss)
  *(.bss*)
  .bss.g_ubAVDDLow
-                0x0000000020000078        0x1 bin/obj/emu.o
-                0x0000000020000078                g_ubAVDDLow
+                0x0000000020000080        0x1 bin/obj/emu.o
+                0x0000000020000080                g_ubAVDDLow
  .bss.g_ubAltAVDDLow
-                0x0000000020000079        0x1 bin/obj/emu.o
-                0x0000000020000079                g_ubAltAVDDLow
+                0x0000000020000081        0x1 bin/obj/emu.o
+                0x0000000020000081                g_ubAltAVDDLow
  .bss.g_ubDVDDLow
-                0x000000002000007a        0x1 bin/obj/emu.o
-                0x000000002000007a                g_ubDVDDLow
+                0x0000000020000082        0x1 bin/obj/emu.o
+                0x0000000020000082                g_ubDVDDLow
  .bss.g_ubIOVDDLow
-                0x000000002000007b        0x1 bin/obj/emu.o
-                0x000000002000007b                g_ubIOVDDLow
- *fill*         0x000000002000007c        0x4 
+                0x0000000020000083        0x1 bin/obj/emu.o
+                0x0000000020000083                g_ubIOVDDLow
+ *fill*         0x0000000020000084        0x4 
  .bss.g_ullSystemTick
-                0x0000000020000080        0x8 bin/obj/systick.o
-                0x0000000020000080                g_ullSystemTick
+                0x0000000020000088        0x8 bin/obj/systick.o
+                0x0000000020000088                g_ullSystemTick
  .bss.__malloc_free_list
-                0x0000000020000088        0x4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-mallocr.o)
-                0x0000000020000088                __malloc_free_list
+                0x0000000020000090        0x4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-mallocr.o)
+                0x0000000020000090                __malloc_free_list
  .bss.__malloc_sbrk_start
-                0x000000002000008c        0x4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-mallocr.o)
-                0x000000002000008c                __malloc_sbrk_start
+                0x0000000020000094        0x4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-mallocr.o)
+                0x0000000020000094                __malloc_sbrk_start
  .bss.heap_end.5501
-                0x0000000020000090        0x4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(sbrk.o)
+                0x0000000020000098        0x4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(sbrk.o)
  *(COMMON)
- COMMON         0x0000000020000094       0x78 bin/obj/cmu.o
-                0x0000000020000094                LETIMER0_CLOCK_FREQ
-                0x0000000020000098                USB_CLOCK_FREQ
-                0x000000002000009c                CSEN_CLOCK_FREQ
-                0x00000000200000a0                LFA_CLOCK_FREQ
-                0x00000000200000a4                HFLE_CLOCK_FREQ
-                0x00000000200000a8                SYSTICK_CLOCK_FREQ
-                0x00000000200000ac                LETIMER1_CLOCK_FREQ
-                0x00000000200000b0                ADC0_CLOCK_FREQ
-                0x00000000200000b4                LFB_CLOCK_FREQ
-                0x00000000200000b8                HFCORE_CLOCK_FREQ
-                0x00000000200000bc                ADC1_CLOCK_FREQ
-                0x00000000200000c0                RTCC_CLOCK_FREQ
-                0x00000000200000c4                LEUART1_CLOCK_FREQ
-                0x00000000200000c8                LFE_CLOCK_FREQ
-                0x00000000200000cc                HFSRC_CLOCK_FREQ
-                0x00000000200000d0                HFBUS_CLOCK_FREQ
-                0x00000000200000d4                QSPI_CLOCK_FREQ
-                0x00000000200000d8                HFPERC_CLOCK_FREQ
-                0x00000000200000dc                HFEXP_CLOCK_FREQ
-                0x00000000200000e0                HFPERB_CLOCK_FREQ
-                0x00000000200000e4                LFC_CLOCK_FREQ
-                0x00000000200000e8                AUX_CLOCK_FREQ
-                0x00000000200000ec                HFPER_CLOCK_FREQ
-                0x00000000200000f0                SDIO_CLOCK_FREQ
-                0x00000000200000f4                HF_CLOCK_FREQ
-                0x00000000200000f8                LESENSE_CLOCK_FREQ
-                0x00000000200000fc                RTC_CLOCK_FREQ
-                0x0000000020000100                LCD_CLOCK_FREQ
-                0x0000000020000104                LEUART0_CLOCK_FREQ
-                0x0000000020000108                DBG_CLOCK_FREQ
- COMMON         0x000000002000010c        0x4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-reent.o)
-                0x000000002000010c                errno
- COMMON         0x0000000020000110        0x9 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
-                0x0000000020000110                __lock___atexit_recursive_mutex
-                0x0000000020000111                __lock___arc4random_mutex
-                0x0000000020000112                __lock___env_recursive_mutex
-                0x0000000020000113                __lock___sinit_recursive_mutex
-                0x0000000020000114                __lock___malloc_recursive_mutex
-                0x0000000020000115                __lock___at_quick_exit_mutex
-                0x0000000020000116                __lock___dd_hash_mutex
-                0x0000000020000117                __lock___tz_mutex
-                0x0000000020000118                __lock___sfp_recursive_mutex
-                0x000000002000011c                . = ALIGN (0x4)
- *fill*         0x0000000020000119        0x3 
-                0x000000002000011c                _ebss = .
-                0x000000002000011c                __bss_end__ = _ebss
-                0x000000002000011c                PROVIDE (end = _ebss)
+ COMMON         0x000000002000009c       0x78 bin/obj/cmu.o
+                0x000000002000009c                LETIMER0_CLOCK_FREQ
+                0x00000000200000a0                USB_CLOCK_FREQ
+                0x00000000200000a4                CSEN_CLOCK_FREQ
+                0x00000000200000a8                LFA_CLOCK_FREQ
+                0x00000000200000ac                HFLE_CLOCK_FREQ
+                0x00000000200000b0                SYSTICK_CLOCK_FREQ
+                0x00000000200000b4                LETIMER1_CLOCK_FREQ
+                0x00000000200000b8                ADC0_CLOCK_FREQ
+                0x00000000200000bc                LFB_CLOCK_FREQ
+                0x00000000200000c0                HFCORE_CLOCK_FREQ
+                0x00000000200000c4                ADC1_CLOCK_FREQ
+                0x00000000200000c8                RTCC_CLOCK_FREQ
+                0x00000000200000cc                LEUART1_CLOCK_FREQ
+                0x00000000200000d0                LFE_CLOCK_FREQ
+                0x00000000200000d4                HFSRC_CLOCK_FREQ
+                0x00000000200000d8                HFBUS_CLOCK_FREQ
+                0x00000000200000dc                QSPI_CLOCK_FREQ
+                0x00000000200000e0                HFPERC_CLOCK_FREQ
+                0x00000000200000e4                HFEXP_CLOCK_FREQ
+                0x00000000200000e8                HFPERB_CLOCK_FREQ
+                0x00000000200000ec                LFC_CLOCK_FREQ
+                0x00000000200000f0                AUX_CLOCK_FREQ
+                0x00000000200000f4                HFPER_CLOCK_FREQ
+                0x00000000200000f8                SDIO_CLOCK_FREQ
+                0x00000000200000fc                HF_CLOCK_FREQ
+                0x0000000020000100                LESENSE_CLOCK_FREQ
+                0x0000000020000104                RTC_CLOCK_FREQ
+                0x0000000020000108                LCD_CLOCK_FREQ
+                0x000000002000010c                LEUART0_CLOCK_FREQ
+                0x0000000020000110                DBG_CLOCK_FREQ
+ COMMON         0x0000000020000114        0x4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-reent.o)
+                0x0000000020000114                errno
+ COMMON         0x0000000020000118        0x9 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
+                0x0000000020000118                __lock___atexit_recursive_mutex
+                0x0000000020000119                __lock___arc4random_mutex
+                0x000000002000011a                __lock___env_recursive_mutex
+                0x000000002000011b                __lock___sinit_recursive_mutex
+                0x000000002000011c                __lock___malloc_recursive_mutex
+                0x000000002000011d                __lock___at_quick_exit_mutex
+                0x000000002000011e                __lock___dd_hash_mutex
+                0x000000002000011f                __lock___tz_mutex
+                0x0000000020000120                __lock___sfp_recursive_mutex
+                0x0000000020000124                . = ALIGN (0x4)
+ *fill*         0x0000000020000121        0x3 
+                0x0000000020000124                _ebss = .
+                0x0000000020000124                __bss_end__ = _ebss
+                0x0000000020000124                PROVIDE (end = _ebss)
                 [!provide]                        PROVIDE (_end = _ebss)
 
 .min_heap_stack
-                0x000000002000011c      0xc00
-                0x000000002000011c                . = ALIGN (0x4)
-                0x000000002000091c                . = (. + _min_heap_size)
- *fill*         0x000000002000011c      0x800 
-                0x0000000020000d1c                . = (. + _min_stack_size)
- *fill*         0x000000002000091c      0x400 
-                0x0000000020000d1c                . = ALIGN (0x4)
+                0x0000000020000124      0xc00
+                0x0000000020000124                . = ALIGN (0x4)
+                0x0000000020000924                . = (. + _min_heap_size)
+ *fill*         0x0000000020000124      0x800 
+                0x0000000020000d24                . = (. + _min_stack_size)
+ *fill*         0x0000000020000924      0x400 
+                0x0000000020000d24                . = ALIGN (0x4)
 
 /DISCARD/
  libc.a(*)
@@ -1074,56 +1085,57 @@ LOAD /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/.
  libgcc.a(*)
 OUTPUT(bin/v1.test.elf elf32-littlearm)
 
-.debug_info     0x0000000000000000     0xf41e
- .debug_info    0x0000000000000000     0x1425 bin/obj/cmu.o
- .debug_info    0x0000000000001425      0x6b8 bin/obj/crc.o
- .debug_info    0x0000000000001add      0xee4 bin/obj/dbg.o
- .debug_info    0x00000000000029c1      0xc2b bin/obj/crypto.o
- .debug_info    0x00000000000035ec      0xf6a bin/obj/exc_handler.o
- .debug_info    0x0000000000004556      0x38e bin/obj/msc.o
- .debug_info    0x00000000000048e4     0x23a3 bin/obj/qspi.o
- .debug_info    0x0000000000006c87     0x1cb3 bin/obj/emu.o
- .debug_info    0x000000000000893a     0x2ac4 bin/obj/main.o
- .debug_info    0x000000000000b3fe      0x94f bin/obj/rtcc.o
- .debug_info    0x000000000000bd4d      0x4fb bin/obj/systick.o
- .debug_info    0x000000000000c248      0xa55 bin/obj/i2c.o
- .debug_info    0x000000000000cc9d      0x409 bin/obj/startup.o
- .debug_info    0x000000000000d0a6     0x1106 bin/obj/adc.o
- .debug_info    0x000000000000e1ac     0x1272 bin/obj/printf/printf.o
+.debug_info     0x0000000000000000    0x10152
+ .debug_info    0x0000000000000000     0x1530 bin/obj/cmu.o
+ .debug_info    0x0000000000001530      0x6b8 bin/obj/crc.o
+ .debug_info    0x0000000000001be8      0xfef bin/obj/dbg.o
+ .debug_info    0x0000000000002bd7      0xc2b bin/obj/crypto.o
+ .debug_info    0x0000000000003802      0xf6a bin/obj/exc_handler.o
+ .debug_info    0x000000000000476c      0x587 bin/obj/msc.o
+ .debug_info    0x0000000000004cf3     0x24ae bin/obj/qspi.o
+ .debug_info    0x00000000000071a1     0x1cb3 bin/obj/emu.o
+ .debug_info    0x0000000000008e54     0x2e6a bin/obj/main.o
+ .debug_info    0x000000000000bcbe      0xa5a bin/obj/rtcc.o
+ .debug_info    0x000000000000c718      0x606 bin/obj/systick.o
+ .debug_info    0x000000000000cd1e      0xba8 bin/obj/i2c.o
+ .debug_info    0x000000000000d8c6      0x409 bin/obj/startup.o
+ .debug_info    0x000000000000dccf     0x1211 bin/obj/adc.o
+ .debug_info    0x000000000000eee0     0x1272 bin/obj/printf/printf.o
 
-.debug_abbrev   0x0000000000000000     0x2132
- .debug_abbrev  0x0000000000000000      0x2a9 bin/obj/cmu.o
- .debug_abbrev  0x00000000000002a9      0x154 bin/obj/crc.o
- .debug_abbrev  0x00000000000003fd      0x268 bin/obj/dbg.o
- .debug_abbrev  0x0000000000000665      0x1cf bin/obj/crypto.o
- .debug_abbrev  0x0000000000000834      0x1f8 bin/obj/exc_handler.o
- .debug_abbrev  0x0000000000000a2c      0x13f bin/obj/msc.o
- .debug_abbrev  0x0000000000000b6b      0x44b bin/obj/qspi.o
- .debug_abbrev  0x0000000000000fb6      0x33e bin/obj/emu.o
- .debug_abbrev  0x00000000000012f4      0x3ba bin/obj/main.o
- .debug_abbrev  0x00000000000016ae      0x160 bin/obj/rtcc.o
- .debug_abbrev  0x000000000000180e      0x127 bin/obj/systick.o
- .debug_abbrev  0x0000000000001935      0x152 bin/obj/i2c.o
- .debug_abbrev  0x0000000000001a87      0x172 bin/obj/startup.o
- .debug_abbrev  0x0000000000001bf9      0x13b bin/obj/adc.o
- .debug_abbrev  0x0000000000001d34      0x3fe bin/obj/printf/printf.o
+.debug_abbrev   0x0000000000000000     0x22c5
+ .debug_abbrev  0x0000000000000000      0x2d2 bin/obj/cmu.o
+ .debug_abbrev  0x00000000000002d2      0x154 bin/obj/crc.o
+ .debug_abbrev  0x0000000000000426      0x291 bin/obj/dbg.o
+ .debug_abbrev  0x00000000000006b7      0x1cf bin/obj/crypto.o
+ .debug_abbrev  0x0000000000000886      0x1f8 bin/obj/exc_handler.o
+ .debug_abbrev  0x0000000000000a7e      0x1a0 bin/obj/msc.o
+ .debug_abbrev  0x0000000000000c1e      0x45c bin/obj/qspi.o
+ .debug_abbrev  0x000000000000107a      0x33e bin/obj/emu.o
+ .debug_abbrev  0x00000000000013b8      0x3fa bin/obj/main.o
+ .debug_abbrev  0x00000000000017b2      0x169 bin/obj/rtcc.o
+ .debug_abbrev  0x000000000000191b      0x181 bin/obj/systick.o
+ .debug_abbrev  0x0000000000001a9c      0x167 bin/obj/i2c.o
+ .debug_abbrev  0x0000000000001c03      0x172 bin/obj/startup.o
+ .debug_abbrev  0x0000000000001d75      0x152 bin/obj/adc.o
+ .debug_abbrev  0x0000000000001ec7      0x3fe bin/obj/printf/printf.o
 
-.debug_loc      0x0000000000000000     0x4219
+.debug_loc      0x0000000000000000     0x4356
  .debug_loc     0x0000000000000000      0x333 bin/obj/cmu.o
  .debug_loc     0x0000000000000333       0xd7 bin/obj/crc.o
  .debug_loc     0x000000000000040a       0x64 bin/obj/dbg.o
  .debug_loc     0x000000000000046e      0x500 bin/obj/crypto.o
  .debug_loc     0x000000000000096e       0xe8 bin/obj/exc_handler.o
- .debug_loc     0x0000000000000a56      0x970 bin/obj/qspi.o
- .debug_loc     0x00000000000013c6      0x72c bin/obj/emu.o
- .debug_loc     0x0000000000001af2      0x25c bin/obj/main.o
- .debug_loc     0x0000000000001d4e       0x1a bin/obj/systick.o
- .debug_loc     0x0000000000001d68      0x4eb bin/obj/i2c.o
- .debug_loc     0x0000000000002253       0xdd bin/obj/startup.o
- .debug_loc     0x0000000000002330      0x25f bin/obj/adc.o
- .debug_loc     0x000000000000258f     0x1c8a bin/obj/printf/printf.o
+ .debug_loc     0x0000000000000a56       0xfb bin/obj/msc.o
+ .debug_loc     0x0000000000000b51      0x970 bin/obj/qspi.o
+ .debug_loc     0x00000000000014c1      0x72c bin/obj/emu.o
+ .debug_loc     0x0000000000001bed      0x37c bin/obj/main.o
+ .debug_loc     0x0000000000001f69       0x1a bin/obj/systick.o
+ .debug_loc     0x0000000000001f83      0x40d bin/obj/i2c.o
+ .debug_loc     0x0000000000002390       0xdd bin/obj/startup.o
+ .debug_loc     0x000000000000246d      0x25f bin/obj/adc.o
+ .debug_loc     0x00000000000026cc     0x1c8a bin/obj/printf/printf.o
 
-.debug_aranges  0x0000000000000000      0x4d8
+.debug_aranges  0x0000000000000000      0x4e8
  .debug_aranges
                 0x0000000000000000       0xa8 bin/obj/cmu.o
  .debug_aranges
@@ -1135,90 +1147,90 @@ OUTPUT(bin/v1.test.elf elf32-littlearm)
  .debug_aranges
                 0x0000000000000150       0x58 bin/obj/exc_handler.o
  .debug_aranges
-                0x00000000000001a8       0x40 bin/obj/msc.o
+                0x00000000000001a8       0x50 bin/obj/msc.o
  .debug_aranges
-                0x00000000000001e8       0xb8 bin/obj/qspi.o
+                0x00000000000001f8       0xb8 bin/obj/qspi.o
  .debug_aranges
-                0x00000000000002a0       0x60 bin/obj/emu.o
+                0x00000000000002b0       0x60 bin/obj/emu.o
  .debug_aranges
-                0x0000000000000300       0x30 bin/obj/main.o
+                0x0000000000000310       0x30 bin/obj/main.o
  .debug_aranges
-                0x0000000000000330       0x38 bin/obj/rtcc.o
+                0x0000000000000340       0x38 bin/obj/rtcc.o
  .debug_aranges
-                0x0000000000000368       0x30 bin/obj/systick.o
+                0x0000000000000378       0x30 bin/obj/systick.o
  .debug_aranges
-                0x0000000000000398       0x48 bin/obj/i2c.o
+                0x00000000000003a8       0x48 bin/obj/i2c.o
  .debug_aranges
-                0x00000000000003e0       0x30 bin/obj/startup.o
+                0x00000000000003f0       0x30 bin/obj/startup.o
  .debug_aranges
-                0x0000000000000410       0x48 bin/obj/adc.o
+                0x0000000000000420       0x48 bin/obj/adc.o
  .debug_aranges
-                0x0000000000000458       0x80 bin/obj/printf/printf.o
+                0x0000000000000468       0x80 bin/obj/printf/printf.o
 
-.debug_ranges   0x0000000000000000      0x7c0
+.debug_ranges   0x0000000000000000      0x848
  .debug_ranges  0x0000000000000000       0xb0 bin/obj/cmu.o
  .debug_ranges  0x00000000000000b0       0x18 bin/obj/crc.o
  .debug_ranges  0x00000000000000c8       0x40 bin/obj/dbg.o
  .debug_ranges  0x0000000000000108      0x120 bin/obj/crypto.o
  .debug_ranges  0x0000000000000228       0x48 bin/obj/exc_handler.o
- .debug_ranges  0x0000000000000270       0x30 bin/obj/msc.o
- .debug_ranges  0x00000000000002a0      0x188 bin/obj/qspi.o
- .debug_ranges  0x0000000000000428       0x50 bin/obj/emu.o
- .debug_ranges  0x0000000000000478       0x38 bin/obj/main.o
- .debug_ranges  0x00000000000004b0       0x28 bin/obj/rtcc.o
- .debug_ranges  0x00000000000004d8       0x20 bin/obj/systick.o
- .debug_ranges  0x00000000000004f8       0x38 bin/obj/i2c.o
- .debug_ranges  0x0000000000000530       0x20 bin/obj/startup.o
- .debug_ranges  0x0000000000000550       0x38 bin/obj/adc.o
- .debug_ranges  0x0000000000000588      0x238 bin/obj/printf/printf.o
+ .debug_ranges  0x0000000000000270       0x58 bin/obj/msc.o
+ .debug_ranges  0x00000000000002c8      0x188 bin/obj/qspi.o
+ .debug_ranges  0x0000000000000450       0x50 bin/obj/emu.o
+ .debug_ranges  0x00000000000004a0       0x98 bin/obj/main.o
+ .debug_ranges  0x0000000000000538       0x28 bin/obj/rtcc.o
+ .debug_ranges  0x0000000000000560       0x20 bin/obj/systick.o
+ .debug_ranges  0x0000000000000580       0x38 bin/obj/i2c.o
+ .debug_ranges  0x00000000000005b8       0x20 bin/obj/startup.o
+ .debug_ranges  0x00000000000005d8       0x38 bin/obj/adc.o
+ .debug_ranges  0x0000000000000610      0x238 bin/obj/printf/printf.o
 
-.debug_line     0x0000000000000000     0x58bb
- .debug_line    0x0000000000000000      0xde4 bin/obj/cmu.o
- .debug_line    0x0000000000000de4      0x246 bin/obj/crc.o
- .debug_line    0x000000000000102a      0x30f bin/obj/dbg.o
- .debug_line    0x0000000000001339      0x5f3 bin/obj/crypto.o
- .debug_line    0x000000000000192c      0x471 bin/obj/exc_handler.o
- .debug_line    0x0000000000001d9d      0x282 bin/obj/msc.o
- .debug_line    0x000000000000201f      0x9a1 bin/obj/qspi.o
- .debug_line    0x00000000000029c0      0x6d2 bin/obj/emu.o
- .debug_line    0x0000000000003092      0x825 bin/obj/main.o
- .debug_line    0x00000000000038b7      0x291 bin/obj/rtcc.o
- .debug_line    0x0000000000003b48      0x20c bin/obj/systick.o
- .debug_line    0x0000000000003d54      0x731 bin/obj/i2c.o
- .debug_line    0x0000000000004485      0x241 bin/obj/startup.o
- .debug_line    0x00000000000046c6      0x5b8 bin/obj/adc.o
- .debug_line    0x0000000000004c7e      0xc3d bin/obj/printf/printf.o
+.debug_line     0x0000000000000000     0x5d7b
+ .debug_line    0x0000000000000000      0xde9 bin/obj/cmu.o
+ .debug_line    0x0000000000000de9      0x246 bin/obj/crc.o
+ .debug_line    0x000000000000102f      0x318 bin/obj/dbg.o
+ .debug_line    0x0000000000001347      0x5f3 bin/obj/crypto.o
+ .debug_line    0x000000000000193a      0x471 bin/obj/exc_handler.o
+ .debug_line    0x0000000000001dab      0x53c bin/obj/msc.o
+ .debug_line    0x00000000000022e7      0x9aa bin/obj/qspi.o
+ .debug_line    0x0000000000002c91      0x6d2 bin/obj/emu.o
+ .debug_line    0x0000000000003363      0x985 bin/obj/main.o
+ .debug_line    0x0000000000003ce8      0x29a bin/obj/rtcc.o
+ .debug_line    0x0000000000003f82      0x215 bin/obj/systick.o
+ .debug_line    0x0000000000004197      0x7a2 bin/obj/i2c.o
+ .debug_line    0x0000000000004939      0x241 bin/obj/startup.o
+ .debug_line    0x0000000000004b7a      0x5c4 bin/obj/adc.o
+ .debug_line    0x000000000000513e      0xc3d bin/obj/printf/printf.o
 
-.debug_str      0x0000000000000000     0x2b77
- .debug_str     0x0000000000000000      0xc85 bin/obj/cmu.o
-                                        0xd65 (size before relaxing)
- .debug_str     0x0000000000000c85       0x7e bin/obj/crc.o
+.debug_str      0x0000000000000000     0x2c21
+ .debug_str     0x0000000000000000      0xce5 bin/obj/cmu.o
+                                        0xdc5 (size before relaxing)
+ .debug_str     0x0000000000000ce5       0x7e bin/obj/crc.o
                                         0x58c (size before relaxing)
- .debug_str     0x0000000000000d03      0x217 bin/obj/dbg.o
-                                        0x98b (size before relaxing)
- .debug_str     0x0000000000000f1a      0x1b3 bin/obj/crypto.o
+ .debug_str     0x0000000000000d63      0x217 bin/obj/dbg.o
+                                        0x9eb (size before relaxing)
+ .debug_str     0x0000000000000f7a      0x1b3 bin/obj/crypto.o
                                         0x6e9 (size before relaxing)
- .debug_str     0x00000000000010cd      0x1e9 bin/obj/exc_handler.o
+ .debug_str     0x000000000000112d      0x1e9 bin/obj/exc_handler.o
                                         0x428 (size before relaxing)
- .debug_str     0x00000000000012b6       0x67 bin/obj/msc.o
-                                        0x387 (size before relaxing)
- .debug_str     0x000000000000131d      0x8f3 bin/obj/qspi.o
-                                       0x1099 (size before relaxing)
- .debug_str     0x0000000000001c10      0x7dc bin/obj/emu.o
+ .debug_str     0x0000000000001316       0x7c bin/obj/msc.o
+                                        0x40c (size before relaxing)
+ .debug_str     0x0000000000001392      0x8f3 bin/obj/qspi.o
+                                       0x10f9 (size before relaxing)
+ .debug_str     0x0000000000001c85      0x7dc bin/obj/emu.o
                                        0x12a8 (size before relaxing)
- .debug_str     0x00000000000023ec      0x281 bin/obj/main.o
-                                       0x14d1 (size before relaxing)
- .debug_str     0x000000000000266d       0x88 bin/obj/rtcc.o
-                                        0x7eb (size before relaxing)
- .debug_str     0x00000000000026f5       0x49 bin/obj/systick.o
-                                        0x4e5 (size before relaxing)
- .debug_str     0x000000000000273e       0xdf bin/obj/i2c.o
-                                        0x829 (size before relaxing)
- .debug_str     0x000000000000281d       0xaf bin/obj/startup.o
+ .debug_str     0x0000000000002461      0x2dd bin/obj/main.o
+                                       0x159b (size before relaxing)
+ .debug_str     0x000000000000273e       0x88 bin/obj/rtcc.o
+                                        0x84b (size before relaxing)
+ .debug_str     0x00000000000027c6       0x49 bin/obj/systick.o
+                                        0x545 (size before relaxing)
+ .debug_str     0x000000000000280f       0xb8 bin/obj/i2c.o
+                                        0x8ab (size before relaxing)
+ .debug_str     0x00000000000028c7       0xaf bin/obj/startup.o
                                         0x2ec (size before relaxing)
- .debug_str     0x00000000000028cc      0x155 bin/obj/adc.o
-                                        0xced (size before relaxing)
- .debug_str     0x0000000000002a21      0x156 bin/obj/printf/printf.o
+ .debug_str     0x0000000000002976      0x155 bin/obj/adc.o
+                                        0xd4d (size before relaxing)
+ .debug_str     0x0000000000002acb      0x156 bin/obj/printf/printf.o
                                         0x347 (size before relaxing)
 
 .comment        0x0000000000000000       0x75
@@ -1239,35 +1251,35 @@ OUTPUT(bin/v1.test.elf elf32-littlearm)
  .comment       0x0000000000000075       0x76 bin/obj/adc.o
  .comment       0x0000000000000075       0x76 bin/obj/printf/printf.o
 
-.debug_frame    0x0000000000000000     0x106c
+.debug_frame    0x0000000000000000     0x10ec
  .debug_frame   0x0000000000000000      0x160 bin/obj/cmu.o
  .debug_frame   0x0000000000000160       0x3c bin/obj/crc.o
  .debug_frame   0x000000000000019c       0x98 bin/obj/dbg.o
  .debug_frame   0x0000000000000234       0x78 bin/obj/crypto.o
  .debug_frame   0x00000000000002ac       0xb0 bin/obj/exc_handler.o
- .debug_frame   0x000000000000035c       0x70 bin/obj/msc.o
- .debug_frame   0x00000000000003cc      0x254 bin/obj/qspi.o
- .debug_frame   0x0000000000000620      0x10c bin/obj/emu.o
- .debug_frame   0x000000000000072c       0x94 bin/obj/main.o
- .debug_frame   0x00000000000007c0       0x58 bin/obj/rtcc.o
- .debug_frame   0x0000000000000818       0x60 bin/obj/systick.o
- .debug_frame   0x0000000000000878       0xac bin/obj/i2c.o
- .debug_frame   0x0000000000000924       0x48 bin/obj/startup.o
- .debug_frame   0x000000000000096c       0x78 bin/obj/adc.o
- .debug_frame   0x00000000000009e4      0x1cc bin/obj/printf/printf.o
- .debug_frame   0x0000000000000bb0       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-sf_round.o)
- .debug_frame   0x0000000000000be4       0x30 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-malloc.o)
- .debug_frame   0x0000000000000c14       0x38 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-freer.o)
- .debug_frame   0x0000000000000c4c       0x30 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-mallocr.o)
- .debug_frame   0x0000000000000c7c       0x2c /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-sbrkr.o)
- .debug_frame   0x0000000000000ca8       0x30 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-mlock.o)
- .debug_frame   0x0000000000000cd8       0x5c /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-reent.o)
- .debug_frame   0x0000000000000d34       0xb0 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
- .debug_frame   0x0000000000000de4       0xac /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_addsubdf3.o)
- .debug_frame   0x0000000000000e90       0x50 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_muldivdf3.o)
- .debug_frame   0x0000000000000ee0       0xc4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_cmpdf2.o)
- .debug_frame   0x0000000000000fa4       0x24 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_fixdfsi.o)
- .debug_frame   0x0000000000000fc8       0x24 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_fixunsdfsi.o)
- .debug_frame   0x0000000000000fec       0x2c /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_aeabi_uldivmod.o)
- .debug_frame   0x0000000000001018       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_udivmoddi4.o)
- .debug_frame   0x000000000000104c       0x20 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(sbrk.o)
+ .debug_frame   0x000000000000035c       0xcc bin/obj/msc.o
+ .debug_frame   0x0000000000000428      0x254 bin/obj/qspi.o
+ .debug_frame   0x000000000000067c      0x10c bin/obj/emu.o
+ .debug_frame   0x0000000000000788       0x98 bin/obj/main.o
+ .debug_frame   0x0000000000000820       0x58 bin/obj/rtcc.o
+ .debug_frame   0x0000000000000878       0x60 bin/obj/systick.o
+ .debug_frame   0x00000000000008d8       0xc4 bin/obj/i2c.o
+ .debug_frame   0x000000000000099c       0x48 bin/obj/startup.o
+ .debug_frame   0x00000000000009e4       0x80 bin/obj/adc.o
+ .debug_frame   0x0000000000000a64      0x1cc bin/obj/printf/printf.o
+ .debug_frame   0x0000000000000c30       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-sf_round.o)
+ .debug_frame   0x0000000000000c64       0x30 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-malloc.o)
+ .debug_frame   0x0000000000000c94       0x38 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-freer.o)
+ .debug_frame   0x0000000000000ccc       0x30 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-mallocr.o)
+ .debug_frame   0x0000000000000cfc       0x2c /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-sbrkr.o)
+ .debug_frame   0x0000000000000d28       0x30 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-mlock.o)
+ .debug_frame   0x0000000000000d58       0x5c /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-reent.o)
+ .debug_frame   0x0000000000000db4       0xb0 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
+ .debug_frame   0x0000000000000e64       0xac /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_addsubdf3.o)
+ .debug_frame   0x0000000000000f10       0x50 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_muldivdf3.o)
+ .debug_frame   0x0000000000000f60       0xc4 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_cmpdf2.o)
+ .debug_frame   0x0000000000001024       0x24 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_fixdfsi.o)
+ .debug_frame   0x0000000000001048       0x24 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_arm_fixunsdfsi.o)
+ .debug_frame   0x000000000000106c       0x2c /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_aeabi_uldivmod.o)
+ .debug_frame   0x0000000000001098       0x34 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/thumb/v7e-m+fp/hard/libgcc.a(_udivmoddi4.o)
+ .debug_frame   0x00000000000010cc       0x20 /etc/gcc-arm-none-eabi-8-2018-q4-major/bin/../lib/gcc/arm-none-eabi/8.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(sbrk.o)

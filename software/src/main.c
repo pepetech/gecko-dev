@@ -18,16 +18,6 @@
 #include "i2c.h"
 
 // Structs
-typedef struct
-{
-    volatile uint32_t   PLW[16]; // Page Lock Word (one page per bit from 0 to 32)
-    uint32_t            RESERVED0[107];
-    volatile uint32_t   CLW[2]; // Configuration Lock Word (CLW[0].1 enables the bootloader, CLW[0].2 makes RESETn soft reset, CLW[1].0 disables flash bank switching)
-    volatile uint32_t   ALW; // AAP Lock Word
-    volatile uint32_t   MLW; // Mass Erase Lock Word
-    volatile uint32_t   ULW; // User Page Lock Word
-    volatile uint32_t   DLW; // Debug Lock Word
-} lock_bits_t;
 
 // Forward declarations
 static void reset() __attribute__((noreturn));
@@ -263,112 +253,136 @@ void gpio_init()
     CMU->HFBUSCLKEN0 |= CMU_HFBUSCLKEN0_GPIO;
 
     // Port A
-    GPIO->P[0].MODEL = GPIO_P_MODEL_MODE0_PUSHPULL  // GPIO - LED
-                     | GPIO_P_MODEL_MODE1_DISABLED
-                     | GPIO_P_MODEL_MODE2_DISABLED
-                     | GPIO_P_MODEL_MODE3_DISABLED
-                     | GPIO_P_MODEL_MODE4_DISABLED
-                     | GPIO_P_MODEL_MODE5_DISABLED
-                     | GPIO_P_MODEL_MODE6_DISABLED
-                     | GPIO_P_MODEL_MODE7_DISABLED;
-    GPIO->P[0].MODEH = GPIO_P_MODEH_MODE8_DISABLED
-                     | GPIO_P_MODEH_MODE9_DISABLED
-                     | GPIO_P_MODEH_MODE10_DISABLED
-                     | GPIO_P_MODEH_MODE11_DISABLED
-                     | GPIO_P_MODEH_MODE12_DISABLED
-                     | GPIO_P_MODEH_MODE13_DISABLED
-                     | GPIO_P_MODEH_MODE14_DISABLED
-                     | GPIO_P_MODEH_MODE15_DISABLED;
+    GPIO->P[0].CTRL   = GPIO_P_CTRL_DRIVESTRENGTHALT_STRONG | (5 << _GPIO_P_CTRL_SLEWRATEALT_SHIFT)
+                      | GPIO_P_CTRL_DRIVESTRENGTH_STRONG | (5 << _GPIO_P_CTRL_SLEWRATE_SHIFT);
+    GPIO->P[0].MODEL  = GPIO_P_MODEL_MODE0_PUSHPULL  // GPIO - LED
+                      | GPIO_P_MODEL_MODE1_DISABLED
+                      | GPIO_P_MODEL_MODE2_DISABLED
+                      | GPIO_P_MODEL_MODE3_DISABLED
+                      | GPIO_P_MODEL_MODE4_DISABLED
+                      | GPIO_P_MODEL_MODE5_DISABLED
+                      | GPIO_P_MODEL_MODE6_DISABLED
+                      | GPIO_P_MODEL_MODE7_DISABLED;
+    GPIO->P[0].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
+                      | GPIO_P_MODEH_MODE9_DISABLED
+                      | GPIO_P_MODEH_MODE10_DISABLED
+                      | GPIO_P_MODEH_MODE11_DISABLED
+                      | GPIO_P_MODEH_MODE12_DISABLED
+                      | GPIO_P_MODEH_MODE13_DISABLED
+                      | GPIO_P_MODEH_MODE14_DISABLED
+                      | GPIO_P_MODEH_MODE15_DISABLED;
+    GPIO->P[0].DOUT   = 0;
+    GPIO->P[0].OVTDIS = 0;
 
     // Port B
-    GPIO->P[1].MODEL = GPIO_P_MODEL_MODE0_DISABLED
-                     | GPIO_P_MODEL_MODE1_DISABLED
-                     | GPIO_P_MODEL_MODE2_DISABLED
-                     | GPIO_P_MODEL_MODE3_DISABLED
-                     | GPIO_P_MODEL_MODE4_DISABLED
-                     | GPIO_P_MODEL_MODE5_DISABLED
-                     | GPIO_P_MODEL_MODE6_DISABLED
-                     | GPIO_P_MODEL_MODE7_DISABLED;
-    GPIO->P[1].MODEH = GPIO_P_MODEH_MODE8_DISABLED
-                     | GPIO_P_MODEH_MODE9_DISABLED
-                     | GPIO_P_MODEH_MODE10_DISABLED
-                     | GPIO_P_MODEH_MODE11_DISABLED
-                     | GPIO_P_MODEH_MODE12_DISABLED
-                     | GPIO_P_MODEH_MODE13_DISABLED
-                     | GPIO_P_MODEH_MODE14_DISABLED
-                     | GPIO_P_MODEH_MODE15_DISABLED;
+    GPIO->P[1].CTRL   = GPIO_P_CTRL_DRIVESTRENGTHALT_STRONG | (7 << _GPIO_P_CTRL_SLEWRATEALT_SHIFT)
+                      | GPIO_P_CTRL_DRIVESTRENGTH_STRONG | (7 << _GPIO_P_CTRL_SLEWRATE_SHIFT);
+    GPIO->P[1].MODEL  = GPIO_P_MODEL_MODE0_DISABLED
+                      | GPIO_P_MODEL_MODE1_DISABLED
+                      | GPIO_P_MODEL_MODE2_DISABLED
+                      | GPIO_P_MODEL_MODE3_DISABLED
+                      | GPIO_P_MODEL_MODE4_DISABLED
+                      | GPIO_P_MODEL_MODE5_DISABLED
+                      | GPIO_P_MODEL_MODE6_DISABLED
+                      | GPIO_P_MODEL_MODE7_DISABLED;
+    GPIO->P[1].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
+                      | GPIO_P_MODEH_MODE9_DISABLED
+                      | GPIO_P_MODEH_MODE10_DISABLED
+                      | GPIO_P_MODEH_MODE11_WIREDANDPULLUPFILTER // I2C1_SDA - Location 1
+                      | GPIO_P_MODEH_MODE12_WIREDANDPULLUPFILTER // I2C1_SCL - Location 1
+                      | GPIO_P_MODEH_MODE13_DISABLED
+                      | GPIO_P_MODEH_MODE14_DISABLED
+                      | GPIO_P_MODEH_MODE15_DISABLED;
+    GPIO->P[1].DOUT   = BIT(11) | BIT(12);
+    GPIO->P[1].OVTDIS = 0;
 
     // Port C
-    GPIO->P[2].MODEL = GPIO_P_MODEL_MODE0_DISABLED
-                     | GPIO_P_MODEL_MODE1_DISABLED
-                     | GPIO_P_MODEL_MODE2_DISABLED
-                     | GPIO_P_MODEL_MODE3_DISABLED
-                     | GPIO_P_MODEL_MODE4_WIREDANDALTPULLUPFILTER   // I2C1_SDA - Location 0
-                     | GPIO_P_MODEL_MODE5_WIREDANDALTPULLUPFILTER   // I2C1_SCL - Location 0
-                     | GPIO_P_MODEL_MODE6_DISABLED
-                     | GPIO_P_MODEL_MODE7_DISABLED;
-    GPIO->P[2].MODEH = GPIO_P_MODEH_MODE8_DISABLED
-                     | GPIO_P_MODEH_MODE9_DISABLED
-                     | GPIO_P_MODEH_MODE10_DISABLED
-                     | GPIO_P_MODEH_MODE11_DISABLED
-                     | GPIO_P_MODEH_MODE12_DISABLED
-                     | GPIO_P_MODEH_MODE13_DISABLED
-                     | GPIO_P_MODEH_MODE14_DISABLED
-                     | GPIO_P_MODEH_MODE15_DISABLED;
+    GPIO->P[2].CTRL   = GPIO_P_CTRL_DRIVESTRENGTHALT_STRONG | (5 << _GPIO_P_CTRL_SLEWRATEALT_SHIFT)
+                      | GPIO_P_CTRL_DRIVESTRENGTH_STRONG | (5 << _GPIO_P_CTRL_SLEWRATE_SHIFT);
+    GPIO->P[2].MODEL  = GPIO_P_MODEL_MODE0_DISABLED
+                      | GPIO_P_MODEL_MODE1_DISABLED
+                      | GPIO_P_MODEL_MODE2_DISABLED
+                      | GPIO_P_MODEL_MODE3_DISABLED
+                      | GPIO_P_MODEL_MODE4_DISABLED
+                      | GPIO_P_MODEL_MODE5_DISABLED
+                      | GPIO_P_MODEL_MODE6_DISABLED
+                      | GPIO_P_MODEL_MODE7_DISABLED;
+    GPIO->P[2].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
+                      | GPIO_P_MODEH_MODE9_DISABLED
+                      | GPIO_P_MODEH_MODE10_DISABLED
+                      | GPIO_P_MODEH_MODE11_DISABLED
+                      | GPIO_P_MODEH_MODE12_DISABLED
+                      | GPIO_P_MODEH_MODE13_DISABLED
+                      | GPIO_P_MODEH_MODE14_DISABLED
+                      | GPIO_P_MODEH_MODE15_DISABLED;
+    GPIO->P[2].DOUT   = 0;
+    GPIO->P[2].OVTDIS = 0;
 
     // Port D
-    GPIO->P[3].MODEL = GPIO_P_MODEL_MODE0_DISABLED
-                     | GPIO_P_MODEL_MODE1_DISABLED
-                     | GPIO_P_MODEL_MODE2_DISABLED
-                     | GPIO_P_MODEL_MODE3_DISABLED
-                     | GPIO_P_MODEL_MODE4_DISABLED
-                     | GPIO_P_MODEL_MODE5_DISABLED
-                     | GPIO_P_MODEL_MODE6_DISABLED
-                     | GPIO_P_MODEL_MODE7_DISABLED;
-    GPIO->P[3].MODEH = GPIO_P_MODEH_MODE8_DISABLED
-                     | GPIO_P_MODEH_MODE9_PUSHPULL  // QSPI0_DQ0 - Location 0
-                     | GPIO_P_MODEH_MODE10_PUSHPULL // QSPI0_DQ1 - Location 0
-                     | GPIO_P_MODEH_MODE11_PUSHPULL // QSPI0_DQ2 - Location 0
-                     | GPIO_P_MODEH_MODE12_PUSHPULL // QSPI0_DQ3 - Location 0
-                     | GPIO_P_MODEH_MODE13_DISABLED
-                     | GPIO_P_MODEH_MODE14_DISABLED
-                     | GPIO_P_MODEH_MODE15_DISABLED;
+    GPIO->P[3].CTRL   = GPIO_P_CTRL_DRIVESTRENGTHALT_STRONG | (5 << _GPIO_P_CTRL_SLEWRATEALT_SHIFT)
+                      | GPIO_P_CTRL_DRIVESTRENGTH_STRONG | (5 << _GPIO_P_CTRL_SLEWRATE_SHIFT);
+    GPIO->P[3].MODEL  = GPIO_P_MODEL_MODE0_DISABLED
+                      | GPIO_P_MODEL_MODE1_DISABLED
+                      | GPIO_P_MODEL_MODE2_DISABLED
+                      | GPIO_P_MODEL_MODE3_DISABLED
+                      | GPIO_P_MODEL_MODE4_DISABLED
+                      | GPIO_P_MODEL_MODE5_DISABLED
+                      | GPIO_P_MODEL_MODE6_DISABLED
+                      | GPIO_P_MODEL_MODE7_DISABLED;
+    GPIO->P[3].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
+                      | GPIO_P_MODEH_MODE9_PUSHPULL  // QSPI0_DQ0 - Location 0
+                      | GPIO_P_MODEH_MODE10_PUSHPULL // QSPI0_DQ1 - Location 0
+                      | GPIO_P_MODEH_MODE11_PUSHPULL // QSPI0_DQ2 - Location 0
+                      | GPIO_P_MODEH_MODE12_PUSHPULL // QSPI0_DQ3 - Location 0
+                      | GPIO_P_MODEH_MODE13_DISABLED
+                      | GPIO_P_MODEH_MODE14_DISABLED
+                      | GPIO_P_MODEH_MODE15_DISABLED;
+    GPIO->P[3].DOUT   = 0;
+    GPIO->P[3].OVTDIS = 0;
 
     // Port E
-    GPIO->P[4].MODEL = GPIO_P_MODEL_MODE0_DISABLED
-                     | GPIO_P_MODEL_MODE1_DISABLED
-                     | GPIO_P_MODEL_MODE2_DISABLED
-                     | GPIO_P_MODEL_MODE3_DISABLED
-                     | GPIO_P_MODEL_MODE4_DISABLED
-                     | GPIO_P_MODEL_MODE5_DISABLED
-                     | GPIO_P_MODEL_MODE6_DISABLED
-                     | GPIO_P_MODEL_MODE7_DISABLED;
-    GPIO->P[4].MODEH = GPIO_P_MODEH_MODE8_DISABLED
-                     | GPIO_P_MODEH_MODE9_DISABLED
-                     | GPIO_P_MODEH_MODE10_DISABLED
-                     | GPIO_P_MODEH_MODE11_DISABLED
-                     | GPIO_P_MODEH_MODE12_DISABLED
-                     | GPIO_P_MODEH_MODE13_DISABLED
-                     | GPIO_P_MODEH_MODE14_DISABLED
-                     | GPIO_P_MODEH_MODE15_DISABLED;
+    GPIO->P[4].CTRL   = GPIO_P_CTRL_DRIVESTRENGTHALT_STRONG | (5 << _GPIO_P_CTRL_SLEWRATEALT_SHIFT)
+                      | GPIO_P_CTRL_DRIVESTRENGTH_STRONG | (5 << _GPIO_P_CTRL_SLEWRATE_SHIFT);
+    GPIO->P[4].MODEL  = GPIO_P_MODEL_MODE0_DISABLED
+                      | GPIO_P_MODEL_MODE1_DISABLED
+                      | GPIO_P_MODEL_MODE2_DISABLED
+                      | GPIO_P_MODEL_MODE3_DISABLED
+                      | GPIO_P_MODEL_MODE4_DISABLED
+                      | GPIO_P_MODEL_MODE5_DISABLED
+                      | GPIO_P_MODEL_MODE6_DISABLED
+                      | GPIO_P_MODEL_MODE7_DISABLED;
+    GPIO->P[4].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
+                      | GPIO_P_MODEH_MODE9_DISABLED
+                      | GPIO_P_MODEH_MODE10_DISABLED
+                      | GPIO_P_MODEH_MODE11_DISABLED
+                      | GPIO_P_MODEH_MODE12_DISABLED
+                      | GPIO_P_MODEH_MODE13_DISABLED
+                      | GPIO_P_MODEH_MODE14_DISABLED
+                      | GPIO_P_MODEH_MODE15_DISABLED;
+    GPIO->P[4].DOUT   = 0;
+    GPIO->P[4].OVTDIS = 0;
 
     // Port F
-    GPIO->P[5].MODEL = GPIO_P_MODEL_MODE0_DISABLED
-                     | GPIO_P_MODEL_MODE1_DISABLED
-                     | GPIO_P_MODEL_MODE2_PUSHPULL  // DBG_SWO - Location 0
-                     | GPIO_P_MODEL_MODE3_DISABLED
-                     | GPIO_P_MODEL_MODE4_DISABLED
-                     | GPIO_P_MODEL_MODE5_DISABLED
-                     | GPIO_P_MODEL_MODE6_PUSHPULL  // QSPI0_SCLK - Location 0
-                     | GPIO_P_MODEL_MODE7_PUSHPULL; // QSPI0_CS0 - Location 0
-    GPIO->P[5].MODEH = GPIO_P_MODEH_MODE8_DISABLED
-                     | GPIO_P_MODEH_MODE9_DISABLED
-                     | GPIO_P_MODEH_MODE10_DISABLED
-                     | GPIO_P_MODEH_MODE11_DISABLED
-                     | GPIO_P_MODEH_MODE12_DISABLED
-                     | GPIO_P_MODEH_MODE13_DISABLED
-                     | GPIO_P_MODEH_MODE14_DISABLED
-                     | GPIO_P_MODEH_MODE15_DISABLED;
+    GPIO->P[5].CTRL   = GPIO_P_CTRL_DRIVESTRENGTHALT_STRONG | (5 << _GPIO_P_CTRL_SLEWRATEALT_SHIFT)
+                      | GPIO_P_CTRL_DRIVESTRENGTH_STRONG | (5 << _GPIO_P_CTRL_SLEWRATE_SHIFT);
+    GPIO->P[5].MODEL  = GPIO_P_MODEL_MODE0_PUSHPULL  // DBG_SWCLK - Location 0
+                      | GPIO_P_MODEL_MODE1_PUSHPULL  // DBG_SWDIO - Location 0
+                      | GPIO_P_MODEL_MODE2_PUSHPULL  // DBG_SWO - Location 0
+                      | GPIO_P_MODEL_MODE3_DISABLED
+                      | GPIO_P_MODEL_MODE4_DISABLED
+                      | GPIO_P_MODEL_MODE5_DISABLED
+                      | GPIO_P_MODEL_MODE6_PUSHPULL  // QSPI0_SCLK - Location 0
+                      | GPIO_P_MODEL_MODE7_PUSHPULL; // QSPI0_CS0 - Location 0
+    GPIO->P[5].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
+                      | GPIO_P_MODEH_MODE9_DISABLED
+                      | GPIO_P_MODEH_MODE10_DISABLED
+                      | GPIO_P_MODEH_MODE11_DISABLED
+                      | GPIO_P_MODEH_MODE12_DISABLED
+                      | GPIO_P_MODEH_MODE13_DISABLED
+                      | GPIO_P_MODEH_MODE14_DISABLED
+                      | GPIO_P_MODEH_MODE15_DISABLED;
+    GPIO->P[5].DOUT   = BIT(7);
+    GPIO->P[5].OVTDIS = 0;
 
     // Debugger Route
     GPIO->ROUTEPEN &= ~(GPIO_ROUTEPEN_TDIPEN | GPIO_ROUTEPEN_TDOPEN); // Disable JTAG
@@ -385,7 +399,7 @@ int init()
 
     cmu_init(); // Inic Clocks
 
-    cmu_ushfrco_calib(1, USHFRCO_CALIB_50M, 50000000); // Enable and calibrate USHFRCO for 50 MHz
+    cmu_ushfrco_calib(1, USHFRCO_CALIB_8M, 8000000); // Enable and calibrate USHFRCO for 8 MHz
     cmu_auxhfrco_calib(1, AUXHFRCO_CALIB_32M, 32000000); // Enable and calibrate AUXHFRCO for 32 MHz
 
     cmu_update_clocks(); // Update Clocks
@@ -415,7 +429,7 @@ int init()
     fDVDDHighThresh = fDVDDLowThresh + 0.026f; // Hysteresis from datasheet
     fIOVDDHighThresh = fIOVDDLowThresh + 0.026f; // Hysteresis from datasheet
 
-    i2c1_init(I2C_FAST, 0, 0); // Init I2C1 at 400 kHz on location 0
+    i2c1_init(I2C_NORMAL, 1, 1); // Init I2C1 at 100 kHz on location 1
 
     char szDeviceName[32];
 
@@ -477,22 +491,53 @@ int init()
     DBGPRINTLN_CTX("EMU - DVDD Status: %s", g_ubDVDDLow ? "LOW" : "OK");
     DBGPRINTLN_CTX("EMU - IOVDD Fall Threshold: %.2f mV!", fIOVDDLowThresh * 1000);
     DBGPRINTLN_CTX("EMU - IOVDD Rise Threshold: %.2f mV!", fIOVDDHighThresh * 1000);
-    DBGPRINTLN_CTX("EMU - IOVDD Status: %s", g_ubIOVDDLow ? "LOW" : "OK");
     DBGPRINTLN_CTX("EMU - IOVDD Voltage: %.2f mV", adc_get_iovdd());
+    DBGPRINTLN_CTX("EMU - IOVDD Status: %s", g_ubIOVDDLow ? "LOW" : "OK");
     DBGPRINTLN_CTX("EMU - Core Voltage: %.2f mV", adc_get_corevdd());
+
+    delay_ms(100);
 
     DBGPRINTLN_CTX("Scanning I2C bus 1...");
 
-    for(uint8_t a = 0x01; a < 0x80; a++)
+    for(uint8_t a = 0x08; a < 0x78; a++)
     {
-        //if(i2c1_write(a, 0, 0, I2C_STOP))
-            //DBGPRINTLN_CTX("  Address 0x%02X ACKed!", a);
+        if(i2c1_write(a, 0, 0, I2C_STOP))
+            DBGPRINTLN_CTX("  Address 0x%02X ACKed!", a);
     }
-    
+
     return 0;
 }
 int main()
 {
+    i2c1_write_byte(0x76, 0xD0, I2C_RESTART);
+    DBGPRINTLN_CTX("BME ID %02X", i2c1_read_byte(0x76, I2C_STOP));
+
+    // Internal flash test
+    DBGPRINTLN_CTX("Initial calibration dump:");
+    
+    for(init_calib_t *psCalibTbl = g_psInitCalibrationTable; psCalibTbl->pulRegister; psCalibTbl++)
+        DBGPRINTLN_CTX("  0x%08X -> 0x%08X", psCalibTbl->ulInitialCalibration, psCalibTbl->pulRegister);
+
+    /*
+    DBGPRINTLN_CTX("Boot lock word: %08X", g_psLockBits->CLW[0]);
+    DBGPRINTLN_CTX("User lock word: %08X", g_psLockBits->ULW);
+    DBGPRINTLN_CTX("Mass lock word: %08X", g_psLockBits->MLW);
+    msc_flash_word_write((uint32_t)&(g_psLockBits->MLW), 0xFFFFFFFD);
+    DBGPRINTLN_CTX("Mass lock word: %08X", g_psLockBits->MLW);
+
+    DBGPRINTLN_CTX("0x000FFFFC: %08X", *(volatile uint32_t *)0x000FFFFC);
+    DBGPRINTLN_CTX("0x00100000: %08X", *(volatile uint32_t *)0x00100000);
+    msc_flash_word_write(0x000FFFFC, 0x12344321);
+    msc_flash_word_write(0x00100000, 0xABCDDCBA);
+    DBGPRINTLN_CTX("0x000FFFFC: %08X", *(volatile uint32_t *)0x000FFFFC);
+    DBGPRINTLN_CTX("0x00100000: %08X", *(volatile uint32_t *)0x00100000);
+    msc_flash_unlock();
+    MSC->WRITECMD = MSC_WRITECMD_ERASEMAIN1;
+    msc_flash_lock();
+    DBGPRINTLN_CTX("0x000FFFFC: %08X", *(volatile uint32_t *)0x000FFFFC);
+    DBGPRINTLN_CTX("0x00100000: %08X", *(volatile uint32_t *)0x00100000);
+    */
+
     // QSPI
     DBGPRINTLN_CTX("Flash Part ID: %06X", qspi_flash_read_jedec_id());
 
@@ -528,7 +573,7 @@ int main()
 
     //////// Test for page wrapping (write beyond page boundary)
     
-/*
+    /*
     for(uint8_t i = 0; i <= 64; i++)
         *(volatile uint32_t *)(0xC0000000 + i * 4) = 0x0123ABCD;
 
@@ -543,11 +588,11 @@ int main()
     DBGPRINTLN_CTX("Flash RD: %02X", *(volatile uint8_t *)0xC00000FE); // 23
     DBGPRINTLN_CTX("Flash RD: %02X", *(volatile uint8_t *)0xC00000FF); // 01
     DBGPRINTLN_CTX("Flash RD: %08X", *(volatile uint32_t *)0xC0000100); // 0123ABCD
-*/
+    */
 
     //////// Test for code copy to QSPI flash
     
-/*
+    /*
     for(uint32_t i = 0; i < bin_v1_test_bin_qspi_len / 4; i++)
         *(volatile uint32_t *)(0x04000000 + i * 4) = *(uint32_t *)(bin_v1_test_bin_qspi + i * 4);
     
@@ -558,7 +603,7 @@ int main()
 
     DBGPRINTLN_CTX("QSPI Dest %08X", get_family_name);
     DBGPRINTLN_CTX("Device: %s%hu", get_family_name((DEVINFO->PART & _DEVINFO_PART_DEVICE_FAMILY_MASK) >> _DEVINFO_PART_DEVICE_FAMILY_SHIFT), (DEVINFO->PART & _DEVINFO_PART_DEVICE_NUMBER_MASK) >> _DEVINFO_PART_DEVICE_NUMBER_SHIFT);
-*/
+    */
 
     DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000000);
     DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000001);
@@ -575,7 +620,7 @@ int main()
 
     while(1)
     {
-        GPIO->P[0].DOUT ^= (1 << 0);
+        GPIO->P[0].DOUT ^= BIT(0);
         
         delay_ms(500);
         

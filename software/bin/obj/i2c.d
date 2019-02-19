@@ -69,4 +69,5 @@ bin/obj/i2c.o: src/i2c.c src/include/i2c.h \
  /mnt/e/Projetos/ARM/ARMdev/lib//SiliconLabs.EFM32GG11B_DFP.5.7.0/Device/SiliconLabs/EFM32GG11B/Include/efm32gg11b_uart.h \
  /mnt/e/Projetos/ARM/ARMdev/lib//SiliconLabs.EFM32GG11B_DFP.5.7.0/Device/SiliconLabs/EFM32GG11B/Include/efm32gg11b_af_ports.h \
  /mnt/e/Projetos/ARM/ARMdev/lib//SiliconLabs.EFM32GG11B_DFP.5.7.0/Device/SiliconLabs/EFM32GG11B/Include/efm32gg11b_af_pins.h \
- src/include/utils.h src/include/cmu.h src/include/msc.h
+ src/include/utils.h src/include/cmu.h src/include/msc.h \
+ src/include/systick.h

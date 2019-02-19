@@ -1,6 +1,8 @@
 #ifndef __ATOMIC_H__
 #define __ATOMIC_H__
 
+#include <em_device.h>
+
 static inline uint32_t __iEnableIRQRetVal()
 {
     __asm__ volatile ("cpsie i" ::: "memory");

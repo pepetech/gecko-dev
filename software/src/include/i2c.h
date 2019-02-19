@@ -4,6 +4,7 @@
 #include <em_device.h>
 #include "utils.h"
 #include "cmu.h"
+#include "systick.h"
 
 #define I2C_NORMAL 0
 #define I2C_FAST 1
