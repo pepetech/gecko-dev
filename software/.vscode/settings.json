@@ -15,7 +15,12 @@
         "rtcc.h": "c",
         "adc.h": "c",
         "qspi.h": "c",
-        "i2c.h": "c"
+        "i2c.h": "c",
+        "emu.h": "c",
+        "efm32gg11b820f2048gq100.h": "c",
+        "core_cm4.h": "c",
+        "atomic.h": "c",
+        "utils.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

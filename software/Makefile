@@ -1,4 +1,4 @@
-LIBROOT = /mnt/e/Projetos/ARM/ARMdev/lib/
+LIBROOT = /opt/arm-cmsis/
 DEVICEDIR = $(LIBROOT)/SiliconLabs.EFM32GG11B_DFP.5.7.0/Device/SiliconLabs/EFM32GG11B/Include
 COREDIR = $(LIBROOT)/ARM.CMSIS.5.4.0/CMSIS/Include
 MCU_TYPE = EFM32GG11B820F2048GQ100

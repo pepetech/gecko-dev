@@ -4,6 +4,7 @@
 #include <em_device.h>
 #include <math.h>
 #include "utils.h"
+#include "nvic.h"
 
 extern uint8_t g_ubAVDDLow;
 extern uint8_t g_ubAltAVDDLow;
