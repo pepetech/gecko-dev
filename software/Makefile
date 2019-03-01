@@ -1,7 +1,7 @@
-LIBROOT = /home/rafael/arm-cmsis
-DEVICEDIR = $(LIBROOT)/EFM32GG12B/Device/SiliconLabs/EFM32GG12B/Include
+LIBROOT = /opt/arm-cmsis/
+DEVICEDIR = $(LIBROOT)/SiliconLabs.EFM32GG11B_DFP.5.7.0/Device/SiliconLabs/EFM32GG11B/Include
 COREDIR = $(LIBROOT)/ARM.CMSIS.5.4.0/CMSIS/Include
-MCU_TYPE = EFM32GG12B110F1024GQ64
+MCU_TYPE = EFM32GG11B820F2048GQ100
 HFXO_VALUE = 8000000UL
 LFXO_VALUE = 32768UL
 APP_ADDRESS = 0x00000000
@@ -147,7 +147,7 @@ inc-version:
 	@if test -f .vscode/launch.json; then sed -i 's/v$(BUILD_VERSION).$(APP_NAME)/v$(shell echo $$(($(BUILD_VERSION) + 1))).$(APP_NAME)/g' .vscode/launch.json; fi
 
 dec-version:
-	@echo $$(($(BUILD_VERSARM.ION) - 1)) > $(TARGETDIR)/.version
+	@echo $$(($(BUILD_VERSION) - 1)) > $(TARGETDIR)/.version
 	@if test -f .vscode/launch.json; then sed -i 's/v$(BUILD_VERSION).$(APP_NAME)/v$(shell echo $$(($(BUILD_VERSION) - 1))).$(APP_NAME)/g' .vscode/launch.json; fi
 
 version:
