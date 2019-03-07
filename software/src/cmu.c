@@ -122,7 +122,7 @@ void cmu_init()
         CMU->SDIOCTRL &= ~CMU_SDIOCTRL_SDIOCLKDIS;
         while(!(CMU->STATUS & CMU_STATUS_SDIOCLKENS) && ubSDIOClockEnabled);
     }
-    
+
     // Re-enable QSPI clock if HFXO selected
     if((CMU->QSPICTRL & _CMU_QSPICTRL_QSPI0CLKSEL_MASK) == CMU_QSPICTRL_QSPI0CLKSEL_HFXO)
     {
@@ -137,21 +137,21 @@ void cmu_update_clocks()
 {
     if((CMU->STATUS & CMU_STATUS_DPLLRDY) == CMU_STATUS_DPLLRDY)
     {
-        uint32_t ulPLLMul = (((CMU->DPLLCTRL1 & _CMU_DPLLCTRL1_N_MASK) >> _CMU_DPLLCTRL1_N_SHIFT) + 1) / (((CMU->DPLLCTRL1 & _CMU_DPLLCTRL1_M_MASK) >> _CMU_DPLLCTRL1_M_SHIFT) + 1);
-    
+        float fPLLMul = (float)(((CMU->DPLLCTRL1 & _CMU_DPLLCTRL1_N_MASK) >> _CMU_DPLLCTRL1_N_SHIFT) + 1) / (((CMU->DPLLCTRL1 & _CMU_DPLLCTRL1_M_MASK) >> _CMU_DPLLCTRL1_M_SHIFT) + 1);
+
         switch(CMU->DPLLCTRL & _CMU_DPLLCTRL_REFSEL_MASK)
         {
             case CMU_DPLLCTRL_REFSEL_HFXO:
-                HFRCO_VALUE = HFXO_VALUE * ulPLLMul;
+                HFRCO_VALUE = HFXO_VALUE * fPLLMul;
             break;
             case CMU_DPLLCTRL_REFSEL_LFXO:
-                HFRCO_VALUE = LFXO_VALUE * ulPLLMul;
+                HFRCO_VALUE = LFXO_VALUE * fPLLMul;
             break;
             case CMU_DPLLCTRL_REFSEL_USHFRCO:
-                HFRCO_VALUE = USHFRCO_VALUE * ulPLLMul;
+                HFRCO_VALUE = USHFRCO_VALUE * fPLLMul;
             break;
             case CMU_DPLLCTRL_REFSEL_CLKIN0:
-                HFRCO_VALUE = 0 * ulPLLMul; // TODO: Support external clock
+                HFRCO_VALUE = 0 * fPLLMul; // TODO: Support external clock
             break;
         }
     }
