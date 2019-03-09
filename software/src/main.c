@@ -80,134 +80,68 @@ void get_device_name(char *pszDeviceName, uint32_t ulDeviceNameSize)
     uint8_t ubFamily = (DEVINFO->PART & _DEVINFO_PART_DEVICE_FAMILY_MASK) >> _DEVINFO_PART_DEVICE_FAMILY_SHIFT;
     const char* szFamily = "?";
 
-    if(ubFamily == 0x10)
-        szFamily = "EFR32MG1P";
-    else if(ubFamily == 0x11)
-        szFamily = "EFR32MG1B";
-    else if(ubFamily == 0x12)
-        szFamily = "EFR32MG1V";
-    else if(ubFamily == 0x13)
-        szFamily = "EFR32BG1P";
-    else if(ubFamily == 0x14)
-        szFamily = "EFR32BG1B";
-    else if(ubFamily == 0x15)
-        szFamily = "EFR32BG1V";
-    else if(ubFamily == 0x19)
-        szFamily = "EFR32FG1P";
-    else if(ubFamily == 0x1A)
-        szFamily = "EFR32FG1B";
-    else if(ubFamily == 0x1B)
-        szFamily = "EFR32FG1V";
-    else if(ubFamily == 0x1C)
-        szFamily = "EFR32MG12P";
-    else if(ubFamily == 0x1D)
-        szFamily = "EFR32MG12B";
-    else if(ubFamily == 0x1E)
-        szFamily = "EFR32MG12V";
-    else if(ubFamily == 0x1F)
-        szFamily = "EFR32BG12P";
-    else if(ubFamily == 0x20)
-        szFamily = "EFR32BG12B";
-    else if(ubFamily == 0x21)
-        szFamily = "EFR32BG12V";
-    else if(ubFamily == 0x25)
-        szFamily = "EFR32FG12P";
-    else if(ubFamily == 0x26)
-        szFamily = "EFR32FG12B";
-    else if(ubFamily == 0x27)
-        szFamily = "EFR32FG12V";
-    else if(ubFamily == 0x28)
-        szFamily = "EFR32MG13P";
-    else if(ubFamily == 0x29)
-        szFamily = "EFR32MG13B";
-    else if(ubFamily == 0x2A)
-        szFamily = "EFR32MG13V";
-    else if(ubFamily == 0x2B)
-        szFamily = "EFR32BG13P";
-    else if(ubFamily == 0x2C)
-        szFamily = "EFR32BG13B";
-    else if(ubFamily == 0x2D)
-        szFamily = "EFR32BG13V";
-    else if(ubFamily == 0x2E)
-        szFamily = "EFR32ZG13P";
-    else if(ubFamily == 0x31)
-        szFamily = "EFR32FG13P";
-    else if(ubFamily == 0x32)
-        szFamily = "EFR32FG13B";
-    else if(ubFamily == 0x33)
-        szFamily = "EFR32FG13V";
-    else if(ubFamily == 0x34)
-        szFamily = "EFR32MG14P";
-    else if(ubFamily == 0x35)
-        szFamily = "EFR32MG14B";
-    else if(ubFamily == 0x36)
-        szFamily = "EFR32MG14V";
-    else if(ubFamily == 0x37)
-        szFamily = "EFR32BG14P";
-    else if(ubFamily == 0x38)
-        szFamily = "EFR32BG14B";
-    else if(ubFamily == 0x39)
-        szFamily = "EFR32BG14V";
-    else if(ubFamily == 0x3A)
-        szFamily = "EFR32ZG14P";
-    else if(ubFamily == 0x3D)
-        szFamily = "EFR32FG14P";
-    else if(ubFamily == 0x3E)
-        szFamily = "EFR32FG14B";
-    else if(ubFamily == 0x3F)
-        szFamily = "EFR32FG14V";
-    else if(ubFamily == 0x47)
-        szFamily = "EFM32G";
-    else if(ubFamily == 0x47)
-        szFamily = "G";
-    else if(ubFamily == 0x48)
-        szFamily = "EFM32GG";
-    else if(ubFamily == 0x48)
-        szFamily = "GG";
-    else if(ubFamily == 0x49)
-        szFamily = "TG";
-    else if(ubFamily == 0x49)
-        szFamily = "EFM32TG";
-    else if(ubFamily == 0x4A)
-        szFamily = "EFM32LG";
-    else if(ubFamily == 0x4A)
-        szFamily = "LG";
-    else if(ubFamily == 0x4B)
-        szFamily = "EFM32WG";
-    else if(ubFamily == 0x4B)
-        szFamily = "WG";
-    else if(ubFamily == 0x4C)
-        szFamily = "ZG";
-    else if(ubFamily == 0x4C)
-        szFamily = "EFM32ZG";
-    else if(ubFamily == 0x4D)
-        szFamily = "HG";
-    else if(ubFamily == 0x4D)
-        szFamily = "EFM32HG";
-    else if(ubFamily == 0x51)
-        szFamily = "EFM32PG1B";
-    else if(ubFamily == 0x53)
-        szFamily = "EFM32JG1B";
-    else if(ubFamily == 0x55)
-        szFamily = "EFM32PG12B";
-    else if(ubFamily == 0x57)
-        szFamily = "EFM32JG12B";
-    else if(ubFamily == 0x64)
-        szFamily = "EFM32GG11B";
-    else if(ubFamily == 0x67)
-        szFamily = "EFM32TG11B";
-    else if(ubFamily == 0x6A)
-        szFamily = "EFM32GG12B";
-    else if(ubFamily == 0x78)
-        szFamily = "EZR32LG";
-    else if(ubFamily == 0x79)
-        szFamily = "EZR32WG";
-    else if(ubFamily == 0x7A)
-        szFamily = "EZR32HG";
-    
+    switch(ubFamily)
+    {
+        case 0x10: szFamily = "EFR32MG1P";  break;
+        case 0x11: szFamily = "EFR32MG1B";  break;
+        case 0x12: szFamily = "EFR32MG1V";  break;
+        case 0x13: szFamily = "EFR32BG1P";  break;
+        case 0x14: szFamily = "EFR32BG1B";  break;
+        case 0x15: szFamily = "EFR32BG1V";  break;
+        case 0x19: szFamily = "EFR32FG1P";  break;
+        case 0x1A: szFamily = "EFR32FG1B";  break;
+        case 0x1B: szFamily = "EFR32FG1V";  break;
+        case 0x1C: szFamily = "EFR32MG12P"; break;
+        case 0x1D: szFamily = "EFR32MG12B"; break;
+        case 0x1E: szFamily = "EFR32MG12V"; break;
+        case 0x1F: szFamily = "EFR32BG12P"; break;
+        case 0x20: szFamily = "EFR32BG12B"; break;
+        case 0x21: szFamily = "EFR32BG12V"; break;
+        case 0x25: szFamily = "EFR32FG12P"; break;
+        case 0x26: szFamily = "EFR32FG12B"; break;
+        case 0x27: szFamily = "EFR32FG12V"; break;
+        case 0x28: szFamily = "EFR32MG13P"; break;
+        case 0x29: szFamily = "EFR32MG13B"; break;
+        case 0x2A: szFamily = "EFR32MG13V"; break;
+        case 0x2B: szFamily = "EFR32BG13P"; break;
+        case 0x2C: szFamily = "EFR32BG13B"; break;
+        case 0x2D: szFamily = "EFR32BG13V"; break;
+        case 0x2E: szFamily = "EFR32ZG13P"; break;
+        case 0x31: szFamily = "EFR32FG13P"; break;
+        case 0x32: szFamily = "EFR32FG13B"; break;
+        case 0x33: szFamily = "EFR32FG13V"; break;
+        case 0x34: szFamily = "EFR32MG14P"; break;
+        case 0x35: szFamily = "EFR32MG14B"; break;
+        case 0x36: szFamily = "EFR32MG14V"; break;
+        case 0x37: szFamily = "EFR32BG14P"; break;
+        case 0x38: szFamily = "EFR32BG14B"; break;
+        case 0x39: szFamily = "EFR32BG14V"; break;
+        case 0x3A: szFamily = "EFR32ZG14P"; break;
+        case 0x3D: szFamily = "EFR32FG14P"; break;
+        case 0x3E: szFamily = "EFR32FG14B"; break;
+        case 0x3F: szFamily = "EFR32FG14V"; break;
+        case 0x47: szFamily = "EFM32G";     break;
+        case 0x48: szFamily = "EFM32GG";    break;
+        case 0x49: szFamily = "EFM32TG";    break;
+        case 0x4A: szFamily = "EFM32LG";    break;
+        case 0x4B: szFamily = "EFM32WG";    break;
+        case 0x4C: szFamily = "EFM32ZG";    break;
+        case 0x4D: szFamily = "EFM32HG";    break;
+        case 0x51: szFamily = "EFM32PG1B";  break;
+        case 0x53: szFamily = "EFM32JG1B";  break;
+        case 0x55: szFamily = "EFM32PG12B"; break;
+        case 0x57: szFamily = "EFM32JG12B"; break;
+        case 0x64: szFamily = "EFM32GG11B"; break;
+        case 0x67: szFamily = "EFM32TG11B"; break;
+        case 0x6A: szFamily = "EFM32GG12B"; break;
+        case 0x78: szFamily = "EZR32LG";    break;
+        case 0x79: szFamily = "EZR32WG";    break;
+        case 0x7A: szFamily = "EZR32HG";    break;
+    }
+
     uint8_t ubPackage = (DEVINFO->MEMINFO & _DEVINFO_MEMINFO_PKGTYPE_MASK) >> _DEVINFO_MEMINFO_PKGTYPE_SHIFT;
     char cPackage = '?';
-    
+
     if(ubPackage == 74)
         cPackage = '?';
     else if(ubPackage == 76)
@@ -255,7 +189,7 @@ int init()
     cmu_hfxo_startup_calib(0x200, 0x087); // Config HFXO Startup for 1280 uA, 20.04 pF
     cmu_hfxo_steady_calib(0x006, 0x087); // Config HFXO Steady state for 12 uA, 20.04 pF
 
-    cmu_init(); // Inic Clocks
+    cmu_init(); // Init Clocks
 
     cmu_ushfrco_calib(1, USHFRCO_CALIB_8M, 8000000); // Enable and calibrate USHFRCO for 8 MHz
     cmu_auxhfrco_calib(1, AUXHFRCO_CALIB_32M, 32000000); // Enable and calibrate AUXHFRCO for 32 MHz
@@ -275,7 +209,7 @@ int init()
     crc_init(); // Init CRC calculation unit
     adc_init(); // Init ADCs
     qspi_init(); // Init QSPI memory
-    
+
     float fAVDDHighThresh, fAVDDLowThresh;
     float fDVDDHighThresh, fDVDDLowThresh;
     float fIOVDDHighThresh, fIOVDDLowThresh;
@@ -372,7 +306,7 @@ int main()
 
     // Internal flash test
     DBGPRINTLN_CTX("Initial calibration dump:");
-    
+
     for(init_calib_t *psCalibTbl = g_psInitCalibrationTable; psCalibTbl->pulRegister; psCalibTbl++)
         DBGPRINTLN_CTX("  0x%08X -> 0x%08X", psCalibTbl->ulInitialCalibration, psCalibTbl->pulRegister);
 
@@ -411,7 +345,7 @@ int main()
 
     //qspi_flash_cmd(QSPI_FLASH_CMD_READ_FAST, 0x00008000, 3, 0, 8, NULL, 0, rd, 10);
     //DBGPRINTLN_CTX("Flash RD C: %02X%02X%02X%02X%02X%02X%02X%02X %02X%02X%02X%02X%02X%02X%02X%02X", rd[0], rd[1], rd[2], rd[3], rd[4], rd[5], rd[6], rd[7], rd[8], rd[9], rd[10], rd[11], rd[12], rd[13], rd[14], rd[15]);
-    
+
     //DBGPRINTLN_CTX("Flash RD: %08X", *(volatile uint32_t *)0xC0000000);
     //*(volatile uint32_t *)0xC0000000 = 0xABCDEF12;
 
@@ -430,7 +364,7 @@ int main()
     //*(volatile uint32_t *)0xC0000000 = 0x12AB34CD;
 
     //////// Test for page wrapping (write beyond page boundary)
-    
+
     /*
     for(uint8_t i = 0; i <= 64; i++)
         *(volatile uint32_t *)(0xC0000000 + i * 4) = 0x0123ABCD;
@@ -449,11 +383,11 @@ int main()
     */
 
     //////// Test for code copy to QSPI flash
-    
+
     /*
     for(uint32_t i = 0; i < bin_v1_test_bin_qspi_len / 4; i++)
         *(volatile uint32_t *)(0x04000000 + i * 4) = *(uint32_t *)(bin_v1_test_bin_qspi + i * 4);
-    
+
     DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000000);
     DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000001);
     DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000002);
@@ -479,9 +413,9 @@ int main()
     while(1)
     {
         GPIO->P[0].DOUT ^= BIT(0);
-        
+
         delay_ms(500);
-        
+
         DBGPRINTLN_CTX("ADC Temp: %.2f", adc_get_temperature());
         DBGPRINTLN_CTX("EMU Temp: %.2f", emu_get_temperature());
 
@@ -491,7 +425,7 @@ int main()
         DBGPRINTLN_CTX("HFXO Steady: %.2f uA", cmu_hfxo_get_steady_current());
         DBGPRINTLN_CTX("HFXO PMA [%03X]: %.2f uA", cmu_hfxo_get_pma_ibtrim(), cmu_hfxo_get_pma_current());
         DBGPRINTLN_CTX("HFXO PDA [%03X]: %.2f uA", cmu_hfxo_get_pda_ibtrim(1), cmu_hfxo_get_pda_current(0));
-       
+
         //sleep();
 
         DBGPRINTLN_CTX("RTCC Time: %lu", rtcc_get_time());
