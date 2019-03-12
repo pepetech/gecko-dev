@@ -25,9 +25,9 @@
 #define PERI_REG_BIT_ADDR(reg, bit)         (BITBAND_PER_BASE + ((reg) - PER_MEM_BASE) * 32 + (bit) * 4)
 #define PERI_REG_BIT(reg, bit)              *(volatile uint32_t *)PERI_REG_BIT_ADDR(reg, bit)
 #define PERI_REG_BIT_SET_ADDR(reg)          (PER_BITSET_MEM_BASE + ((reg) - PER_MEM_BASE))
-#define PERI_REG_BIT_SET(reg)               *(volatile uint32_t *)PERI_REG_BIT_MASK_SET_ADDR(reg)
+#define PERI_REG_BIT_SET(reg)               *(volatile uint32_t *)PERI_REG_BIT_SET_ADDR(reg)
 #define PERI_REG_BIT_CLEAR_ADDR(reg)        (PER_BITCLR_MEM_BASE + ((reg) - PER_MEM_BASE))
-#define PERI_REG_BIT_CLEAR(reg)             *(volatile uint32_t *)PERI_REG_BIT_MASK_CLEAR_ADDR(reg)
+#define PERI_REG_BIT_CLEAR(reg)             *(volatile uint32_t *)PERI_REG_BIT_CLEAR_ADDR(reg)
 
 // Macro to check if the address has a valid app
 #define IS_VALID_APP(addr) ((*(volatile uint32_t *)(addr) & 0xFFF80000) == SRAM_BASE)

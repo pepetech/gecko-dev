@@ -42,15 +42,15 @@ void usart0_spi_transfer(const uint8_t* pubSrc, uint32_t ulSize, uint8_t* pubDst
 		while(ulSize--)
 		{
 			if(pubDst)
-				*(pubDst++) = spi1_transfer_byte(*(pubSrc++));
+				*(pubDst++) = usart0_spi_transfer_byte(*(pubSrc++));
 			else
-				spi1_transfer_byte(*(pubSrc++));
+				usart0_spi_transfer_byte(*(pubSrc++));
 		}
 	}
 	else if(pubDst)
 	{
 		while(ulSize--)
-			*(pubDst++) = spi1_transfer_byte(0x00);
+			*(pubDst++) = usart0_spi_transfer_byte(0x00);
 	}
 }
 #else
