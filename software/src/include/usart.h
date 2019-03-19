@@ -31,7 +31,7 @@ static inline void usart0_spi_read(uint8_t* pubDst, uint32_t ulSize)
 {
     usart0_spi_transfer(NULL, ulSize, pubDst);
 }
-#else
+#else   // USART0_MODE
 void usart0_init(uint32_t ulBaud, uint32_t ulFrameSettings, int8_t bRXLocation, int8_t bTXLocation, int8_t bCTSLocation, int8_t bRTSLocation);
 void usart0_write_byte(const uint8_t ubData);
 uint8_t usart0_read_byte();

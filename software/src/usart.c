@@ -53,7 +53,7 @@ void usart0_spi_transfer(const uint8_t* pubSrc, uint32_t ulSize, uint8_t* pubDst
 			*(pubDst++) = usart0_spi_transfer_byte(0x00);
 	}
 }
-#else
+#else   // USART0_MODE
 static volatile uint8_t *pubUSART0DMABuffer = NULL;
 static volatile uint8_t *pubUSART0FIFO = NULL;
 static volatile uint16_t usUSART0FIFOWritePos, usUART2FIFOReadPos;
@@ -78,4 +78,4 @@ void usart0_flush()
 {
 
 }
-#endif
+#endif  // USART0_MODE
