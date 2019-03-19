@@ -2,8 +2,9 @@
 #define __PN532_H__
 
 #include <em_device.h>
-#include "debug_macros.h"
 #include "usart.h"
+#include "systick.h"
+#include "debug_macros.h"
 
 #define PN532_DEBUG
 
@@ -76,12 +77,23 @@
 // An over-current event has been detected 0x2D 
 // NAD missing in DEP frame 0x2E
 
+// pn532 interface funcions
+uint8_t pn532_init();
 
+void pn532_wakeUp();
+
+uint8_t pn532_writeCommand(uint8_t ubCommand, uint8_t* ubParameters, uint8_t ubNParameters);
+uint8_t pn532_readResponse(uint8_t ubCommand, uint8_t* ubBuf, uint8_t ubLength);
 
 uint8_t pn532_writeFrame(uint8_t* ubPayload, uint8_t ubLength);
 uint8_t pn532_readFrame(uint8_t* ubPayload, uint8_t ubLength);
 
 uint8_t pn532_readAck();
 uint8_t pn532_writeAck(uint8_t ubNack);
+
+uint8_t pn532_ready();
+
+// pn532 funcions
+uint32_t pn532_getVersion();
 
 #endif  // __PN532_H__
