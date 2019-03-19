@@ -17,6 +17,7 @@
 #include "rtcc.h"
 #include "adc.h"
 #include "qspi.h"
+#include "usart.h"
 #include "i2c.h"
 
 // Structs
@@ -221,6 +222,7 @@ int init()
     fDVDDHighThresh = fDVDDLowThresh + 0.026f; // Hysteresis from datasheet
     fIOVDDHighThresh = fIOVDDLowThresh + 0.026f; // Hysteresis from datasheet
 
+    usart0_init(115200, UART_FRAME_STOPBITS_ONE | UART_FRAME_PARITY_NONE | USART_FRAME_DATABITS_EIGHT, 4, 4, -1, -1);
     i2c1_init(I2C_NORMAL, 1, 1); // Init I2C1 at 100 kHz on location 1
 
     char szDeviceName[32];
@@ -303,6 +305,14 @@ int main()
 {
     i2c1_write_byte(0x76, 0xD0, I2C_RESTART);
     DBGPRINTLN_CTX("BME ID %02X", i2c1_read_byte(0x76, I2C_STOP));
+
+    usart0_write_byte('a');
+    usart0_write_byte('b');
+    usart0_write_byte('c');
+    usart0_write_byte('d');
+    usart0_write_byte('1');
+    usart0_write_byte('2');
+    usart0_write_byte('3');
 
     // Internal flash test
     DBGPRINTLN_CTX("Initial calibration dump:");
