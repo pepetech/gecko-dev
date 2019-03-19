@@ -3,10 +3,10 @@
 #if defined(USART0_MODE_SPI)
 void usart0_init(uint32_t ulBaud, uint8_t ubMode, uint8_t ubBitMode, int8_t bMISOLocation, int8_t bMOSILocation, uint8_t ubCLKLocation)
 {
-    if(bMISOLocation > AFCHANLOC_MAX)
+    if(bMISOLocation > -1 && bMISOLocation > AFCHANLOC_MAX)
         return;
 
-    if(bMOSILocation > AFCHANLOC_MAX)
+    if(bMOSILocation > -1 && bMOSILocation > AFCHANLOC_MAX)
         return;
 
     if(ubCLKLocation > AFCHANLOC_MAX)
@@ -57,19 +57,81 @@ void usart0_spi_transfer(const uint8_t* pubSrc, uint32_t ulSize, uint8_t* pubDst
 static volatile uint8_t *pubUSART0DMABuffer = NULL;
 static volatile uint8_t *pubUSART0FIFO = NULL;
 static volatile uint16_t usUSART0FIFOWritePos, usUART2FIFOReadPos;
+static ldma_descriptor_t __attribute__ ((aligned (4))) pUSART0DMADescriptor[2];
+
+void _usart0_rx_isr()
+{
+ /*   if(USART1->SR & USART_SR_IDLE)
+	{
+        REG_DISCARD(&USART1->SR); // Read SR & DR to clear interrupt flag
+	    REG_DISCARD(&USART1->DR);
+
+        uint32_t ulSize = (UART1_DMA_RX_BUFFER_SIZE >> 1) - ((DMA1_Channel5->CNDTR - 1) % (UART1_DMA_RX_BUFFER_SIZE >> 1)) - 1;
+
+        if(ulSize)
+        {
+            DMA1_Channel5->CCR &= ~DMA_CCR5_EN; // Disable DMA channel
+
+            volatile uint8_t *pubDMABufferReadPos = (DMA1_Channel5->CNDTR > (UART1_DMA_RX_BUFFER_SIZE >> 1)) ? pubUART1DMABuffer : pubUART1DMABuffer + (UART1_DMA_RX_BUFFER_SIZE >> 1);
+
+    		while(ulSize--)
+    		{
+    			pubUART1FIFO[usUART1FIFOWritePos++] = *pubDMABufferReadPos++;
+
+    			if(usUART1FIFOWritePos >= UART1_FIFO_SIZE)
+    				usUART1FIFOWritePos = 0;
+    		}
+
+            DMA1->IFCR = DMA_IFCR_CGIF5 | DMA_IFCR_CTCIF5 | DMA_IFCR_CHTIF5 | DMA_IFCR_CTEIF5; // Clear all interrupt flags otherwise DMA won't start again
+            DMA1_Channel5->CNDTR = UART1_DMA_RX_BUFFER_SIZE;
+            DMA1_Channel5->CMAR = (uint32_t)pubUART1DMABuffer;
+            DMA1_Channel5->CCR |= DMA_CCR5_EN; // Enable DMA channel
+        }
+    }*/
+}
+static void usart0_dma_isr(uint8_t ubError)
+{
+/*    volatile uint8_t *pubDMABufferReadPos = 0;
+
+    if(DMA1->ISR & DMA_ISR_HTIF5)
+    {
+        DMA1->IFCR = DMA_IFCR_CHTIF5; // Clear Half-transfer flag
+
+        pubDMABufferReadPos = pubUART1DMABuffer;
+    }
+    else if(DMA1->ISR & DMA_ISR_TCIF5)
+	{
+        DMA1->IFCR = DMA_IFCR_CTCIF5; // Clear Transfer complete flag
+
+        pubDMABufferReadPos = pubUART1DMABuffer + (UART1_DMA_RX_BUFFER_SIZE >> 1);
+    }
+
+    if(pubDMABufferReadPos)
+    {
+        uint32_t ulSize = (UART1_DMA_RX_BUFFER_SIZE >> 1);
+
+		while(ulSize--)
+		{
+			pubUART1FIFO[usUART1FIFOWritePos++] = *pubDMABufferReadPos++;
+
+			if(usUART1FIFOWritePos >= UART1_FIFO_SIZE)
+				usUART1FIFOWritePos = 0;
+		}
+    }*/
+}
 
 void usart0_init(uint32_t ulBaud, uint32_t ulFrameSettings, int8_t bRXLocation, int8_t bTXLocation, int8_t bCTSLocation, int8_t bRTSLocation)
 {
-    if(bRXLocation > AFCHANLOC_MAX)
+    if(bRXLocation > -1 && bRXLocation > AFCHANLOC_MAX)
         return;
 
-    if(bTXLocation > AFCHANLOC_MAX)
+    if(bTXLocation > -1 && bTXLocation > AFCHANLOC_MAX)
         return;
 
-    if(bCTSLocation > AFCHANLOC_MAX)
+    if(bCTSLocation > -1 && bCTSLocation > AFCHANLOC_MAX)
         return;
 
-    if(bRTSLocation > AFCHANLOC_MAX)
+    if(bRTSLocation > -1 && bRTSLocation > AFCHANLOC_MAX)
         return;
 
     CMU->HFPERCLKEN0 |= CMU_HFPERCLKEN0_USART0;
@@ -110,6 +172,18 @@ void usart0_init(uint32_t ulBaud, uint32_t ulFrameSettings, int8_t bRXLocation, 
     USART0->ROUTEPEN = (bRXLocation >= 0 ? USART_ROUTEPEN_RXPEN : 0) | (bTXLocation >= 0 ? USART_ROUTEPEN_TXPEN : 0) | (bCTSLocation >= 0 ? USART_ROUTEPEN_CTSPEN : 0) | (bRTSLocation >= 0 ? USART_ROUTEPEN_RTSPEN : 0);
     USART0->ROUTELOC0 = ((uint32_t)(bRXLocation >= 0 ? bRXLocation : 0) << _USART_ROUTELOC0_RXLOC_SHIFT) | ((uint32_t)(bTXLocation >= 0 ? bTXLocation : 0) << _USART_ROUTELOC0_TXLOC_SHIFT);
     USART0->ROUTELOC1 = ((uint32_t)(bCTSLocation >= 0 ? bCTSLocation : 0) << _USART_ROUTELOC1_CTSLOC_SHIFT) | ((uint32_t)(bRTSLocation >= 0 ? bRTSLocation : 0) << _USART_ROUTELOC1_RTSLOC_SHIFT);
+
+    USART0->IFC = _USART_IFC_MASK; // Clear all flags
+    IRQ_CLEAR(USART0_RX_IRQn); // Clear pending vector
+    IRQ_SET_PRIO(USART0_RX_IRQn, 2, 1); // Set priority 2,1
+    IRQ_ENABLE(USART0_RX_IRQn); // Enable vector
+    USART0->IEN = USART_IEN_TCMP0; // Enable TCMP0 flag
+
+    ldma_ch_config(USART0_DMA_CHANNEL, LDMA_CH_REQSEL_SOURCESEL_USART0 | LDMA_CH_REQSEL_SIGSEL_USART0RXDATAV, LDMA_CH_CFG_SRCINCSIGN_DEFAULT, LDMA_CH_CFG_DSTINCSIGN_POSITIVE, LDMA_CH_CFG_ARBSLOTS_DEFAULT, 0);
+    ldma_ch_set_isr(USART0_DMA_CHANNEL, usart0_dma_isr);
+
+    //pUSART0DMADescriptor[0].CTRL
+
 
     USART0->CMD = (bTXLocation >= 0 ? USART_CMD_TXEN : 0) | (bRXLocation >= 0 ? USART_CMD_RXEN : 0);
 }

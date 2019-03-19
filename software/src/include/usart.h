@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "atomic.h"
 #include "cmu.h"
+#include "ldma.h"
 
 #define USART_LOCATION_DISABLED -1
 
@@ -15,9 +16,10 @@
 #define USART_SPI_MSB_FIRST 1
 
 
-#define USART0_MODE_SPI                 // Define for SPI, comment out for UART
-#define USART0_DMA_RX_BUFFER_SIZE 128   // Only relevant when in UART mode
-#define USART0_FIFO_SIZE 256            // Only relevant when in UART mode
+#define USART0_MODE_SPI                 	// Define for SPI, comment out for UART
+#define USART0_DMA_CHANNEL			0   	// Only relevant when in UART mode
+#define USART0_DMA_RX_BUFFER_SIZE	128		// Only relevant when in UART mode
+#define USART0_FIFO_SIZE			256     // Only relevant when in UART mode
 
 #if defined(USART0_MODE_SPI)
 void usart0_init(uint32_t ulBaud, uint8_t ubMode, uint8_t ubBitMode, int8_t bMISOLocation, int8_t bMOSILocation, uint8_t ubCLKLocation);

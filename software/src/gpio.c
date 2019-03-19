@@ -36,8 +36,8 @@ void gpio_init()
                       | GPIO_P_MODEL_MODE4_DISABLED
                       | GPIO_P_MODEL_MODE5_DISABLED
                       | GPIO_P_MODEL_MODE6_DISABLED
-                      | GPIO_P_MODEL_MODE7_DISABLED;
-    GPIO->P[1].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
+                      | GPIO_P_MODEL_MODE7_PUSHPULL;
+    GPIO->P[1].MODEH  = GPIO_P_MODEH_MODE8_INPUTPULLFILTER
                       | GPIO_P_MODEH_MODE9_DISABLED
                       | GPIO_P_MODEH_MODE10_DISABLED
                       | GPIO_P_MODEH_MODE11_WIREDANDPULLUPFILTER // I2C1_SDA - Location 1
