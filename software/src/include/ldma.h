@@ -28,4 +28,4 @@ void ldma_ch_req(uint8_t ubChannel);
 void ldma_ch_enable(uint8_t ubChannel);
 void ldma_ch_disable(uint8_t ubChannel);
 
-#endif
+#endif  // __LDMA_H__

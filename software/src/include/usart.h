@@ -47,6 +47,6 @@ static inline void usart0_read(uint8_t *pubDst, uint32_t ulSize)
 	while(ulSize--)
 		*pubDst++ = usart0_read_byte();
 }
-#endif
+#endif  // USART0_MODE
 
-#endif
+#endif  // __USART_H__
