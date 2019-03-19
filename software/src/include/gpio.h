@@ -5,13 +5,8 @@
 #include "utils.h"
 
 // LED MACROS
-<<<<<<< HEAD
-#define LED_ON()        PERI_REG_BIT_SET(&GPIO->P[0].DOUT) = BIT(0)
-#define LED_OFF()       PERI_REG_BIT_CLEAR(&GPIO->P[0].DOUT) = BIT(0)
-=======
 #define LED_ON()        PERI_REG_BIT_SET(&(GPIO->P[0].DOUT)) = BIT(0)
 #define LED_OFF()       PERI_REG_BIT_CLEAR(&(GPIO->P[0].DOUT)) = BIT(0)
->>>>>>> 2f93903a83f498c20bf0b128cfc13380078af011
 #define LED_TOGGLE()    GPIO->P[0].DOUTTGL = BIT(0);
 
 // PN532 MACROS

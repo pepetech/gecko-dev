@@ -3,7 +3,7 @@
 #define PN532_SPI_STATUS_READ     2
 #define PN532_SPI_DATA_WRITE      1
 #define PN532_SPI_DATA_READ       3
-
+/*
 // pn532 interface funcions
 uint8_t pn532_init()
 {
@@ -56,7 +56,7 @@ uint8_t pn532_writeFrame(uint8_t* ubPayload, uint8_t ubLength)
     ubBuf[8+ubLength] = PN532_POSTAMBLE;    // Postamble
 
     PN532_SELECT(); // wake up PN532
-    delay(1);               
+    delay_ms(1);               
     usart0_spi_write(ubBuf, 9 + ubLength);
     PN532_UNSELECT();
 }
@@ -65,10 +65,10 @@ uint8_t pn532_readFrame(uint8_t* ubPayload, uint8_t ubLength)
     uint64_t ullTimeoutStart = g_ullSystemTick;
     while(!pn532_ready()) 
     {
-        if (g_ullSystemTick > (g_ullSystemTick + )) {
-            /* code */
+        if (g_ullSystemTick > (g_ullSystemTick + )) 
+        {
+            return 0;
         }
-        
     }
 
     digitalWrite(_ss, LOW);
@@ -190,4 +190,4 @@ uint8_t pn532_ready()
 uint32_t pn532_getVersion()
 {
 
-}
+}*/

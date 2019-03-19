@@ -3,6 +3,7 @@
 
 #include <em_device.h>
 #include "usart.h"
+#include "gpio.h"
 #include "systick.h"
 #include "debug_macros.h"
 
