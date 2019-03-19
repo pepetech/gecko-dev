@@ -7,6 +7,15 @@
 #include "debug_macros.h"
 
 #define PN532_DEBUG
+//#define PN532_READY_HW
+
+// PN532 frame
+#define PN532_PREAMBLE      0x00
+#define PN532_STARTCODE1    0x00
+#define PN532_STARTCODE2    0xFF
+#define PN532_HOSTPN532     0xD4
+#define PN532_PN532HOST     0xD5
+#define PN532_POSTAMBLE     0x00
 
 // PN532 Commands
 // Miscellaneous
