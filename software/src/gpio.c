@@ -104,7 +104,7 @@ void gpio_init()
                       | GPIO_P_MODEL_MODE6_DISABLED
                       | GPIO_P_MODEL_MODE7_DISABLED;
     GPIO->P[4].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
-                      | GPIO_P_MODEH_MODE9_DISABLED
+                      | GPIO_P_MODEH_MODE9_PUSHPULL
                       | GPIO_P_MODEH_MODE10_DISABLED
                       | GPIO_P_MODEH_MODE11_DISABLED
                       | GPIO_P_MODEH_MODE12_DISABLED
