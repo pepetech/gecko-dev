@@ -3,7 +3,7 @@
 #define PN532_SPI_STATUS_READ     2
 #define PN532_SPI_DATA_WRITE      1
 #define PN532_SPI_DATA_READ       3
-/*
+
 // pn532 interface funcions
 uint8_t pn532_init()
 {
@@ -23,14 +23,65 @@ void pn532_wakeUp()
 
 uint8_t pn532_writeCommand(uint8_t ubCommand, uint8_t* ubParameters, uint8_t ubNParameters)
 {
+    uint8_t ubCommandBuf[1 + ubNParameters];
 
+    ubCommandBuf[0] = ubCommand;
+    for(uint8_t i = 0; i < ubNParameters; i++)
+    {
+        ubCommandBuf[1 + i] = ubParameters[i];
+    }
+    
+    pn532_writeFrame(ubCommandBuf, 1 + ubNParameters);
+
+    uint64_t ullTimeoutStart = g_ullSystemTick;
+    while(!pn532_ready()) 
+    {
+        if (g_ullSystemTick > (g_ullSystemTick + PN532_ACKTIMEOUT)) 
+        {
+            return PN532_TIMEOUT;
+        }
+    }
+
+    if(pn532_readAck() == PN532_INVALID_ACK) 
+    {
+        return  PN532_INVALID_ACK;
+    }
+
+    return 1;
 }
 uint8_t pn532_readResponse(uint8_t ubCommand, uint8_t* ubBuf, uint8_t ubLength)
 {
+    uint64_t ullTimeoutStart = g_ullSystemTick;
+    while(!pn532_ready()) 
+    {
+        if (g_ullSystemTick > (g_ullSystemTick + PN532_RESPONSETIMEOUT)) 
+        {
+            return PN532_TIMEOUT;
+        }
+    }
 
+    uint8_t ubFrameBuf[ubLength + 2];
+
+    pn532_readFrame(ubFrameBuf, ubLength + 2);
+
+    if(ubFrameBuf[0] != PN532_PN532HOST) 
+    {
+        return PN532_INVALID_FRAME;
+    }
+    if (ubFrameBuf[1] != (ubCommand + 1)) 
+    {
+        return PN532_INVALID_FRAME;
+    }
+    
+    for(uint8_t i = 0; i < ubLength; i++)
+    {
+        ubBuf[i] = ubFrameBuf[2 + i];
+    }
+    
+    return 1;
 }
 
-uint8_t pn532_writeFrame(uint8_t* ubPayload, uint8_t ubLength)
+void pn532_writeFrame(uint8_t* ubPayload, uint8_t ubLength)
 {
     uint8_t ubBuf[9+ubLength];
 
@@ -60,83 +111,55 @@ uint8_t pn532_writeFrame(uint8_t* ubPayload, uint8_t ubLength)
     usart0_spi_write(ubBuf, 9 + ubLength);
     PN532_UNSELECT();
 }
-uint8_t pn532_readFrame(uint8_t* ubPayload, uint8_t ubLength)
+uint8_t pn532_readFrame(uint8_t* ubPayload, uint8_t ubMaxLength)
 {
-    uint64_t ullTimeoutStart = g_ullSystemTick;
-    while(!pn532_ready()) 
+    uint8_t ubPreamble[4];
+
+    ubPreamble[0] = PN532_SPI_DATA_READ;        // data writing (this byte is used for spi frames only)
+    ubPreamble[1] = PN532_PREAMBLE;              // Preamble
+    ubPreamble[2] = PN532_STARTCODE1;            // Start of Packet Code
+    ubPreamble[3] = PN532_STARTCODE2;            // Start of Packet Code byte 2
+
+    uint8_t ubPostamble[2];
+
+    PN532_SELECT(); // Wake up PN532
+
+    usart0_spi_write(ubPreamble, 4);    // write "header"
+    
+    uint8_t ubLength = usart0_spi_transfer_byte(0x00);  // read length byte
+    
+    if((usart0_spi_transfer_byte(0x00) + ubLength) != 0)    // read length byte checksum and verify ubLength
     {
-        if (g_ullSystemTick > (g_ullSystemTick + )) 
-        {
-            return 0;
-        }
+        PN532_UNSELECT();
+
+        return PN532_INVALID_FRAME;
+    }
+    if(ubLength > ubMaxLength)  // verify that payload does not exceed buffer size
+    {
+        PN532_UNSELECT();
+
+        return PN532_NO_SPACE;
     }
 
-    digitalWrite(_ss, LOW);
-    delay(1);
+    usart0_spi_read(ubPayload, ubLength);   // read payload
+    usart0_spi_read(ubPostamble, 2);    // read payload checksum and postamble
 
-    int16_t result;
-    do {
-        write(DATA_READ);
+    PN532_UNSELECT();
 
-        if (0x00 != read()      ||       // PREAMBLE
-                0x00 != read()  ||       // STARTCODE1
-                0xFF != read()           // STARTCODE2
-           ) {
+    uint8_t ubChecksum = 0;
 
-            result = PN532_INVALID_FRAME;
-            break;
-        }
+    for(uint8_t i = 0; i < ubLength; i++)   // calculate checksum
+    {
+        ubChecksum += ubPayload[i];    
+    }
+    ubChecksum = ~ubChecksum + 1;
 
-        uint8_t length = read();
-        if (0 != (uint8_t)(length + read())) {   // checksum of length
-            result = PN532_INVALID_FRAME;
-            break;
-        }
-
-        uint8_t cmd = command + 1;               // response command
-        if (PN532_PN532TOHOST != read() || (cmd) != read()) {
-            result = PN532_INVALID_FRAME;
-            break;
-        }
-
-        DMSG("read:  ");
-        DMSG_HEX(cmd);
-
-        length -= 2;
-        if (length > len) {
-            for (uint8_t i = 0; i < length; i++) {
-                DMSG_HEX(read());                 // dump message
-            }
-            DMSG("\nNot enough space\n");
-            read();
-            read();
-            result = PN532_NO_SPACE;  // not enough space
-            break;
-        }
-
-        uint8_t sum = PN532_PN532TOHOST + cmd;
-        for (uint8_t i = 0; i < length; i++) {
-            buf[i] = read();
-            sum += buf[i];
-
-            DMSG_HEX(buf[i]);
-        }
-        DMSG('\n');
-
-        uint8_t checksum = read();
-        if (0 != (uint8_t)(sum + checksum)) {
-            DMSG("checksum is not ok\n");
-            result = PN532_INVALID_FRAME;
-            break;
-        }
-        read();         // POSTAMBLE
-
-        result = length;
-    } while (0);
-
-    digitalWrite(_ss, HIGH);
-
-    return result;
+    if (ubPostamble[0] != ubChecksum)   // verify checksum \ data integrity
+    {
+        return PN532_INVALID_FRAME;
+    }
+    
+    return ubLength;
 }
 
 uint8_t pn532_readAck()
@@ -152,7 +175,7 @@ uint8_t pn532_readAck()
     {
         if(ubAckBuf[i] != ubAck[i])
         {
-            return 0;
+            return PN532_INVALID_ACK;
         }
     }
 
@@ -189,5 +212,16 @@ uint8_t pn532_ready()
 // pn532 funcions
 uint32_t pn532_getVersion()
 {
+    uint8_t ubBuf[4];
 
-}*/
+    if(pn532_writeCommand(PN532_COMMAND_GETFIRMWAREVERSION, NULL, 0) != 1)
+    {
+        return 0;
+    }
+    if(pn532_readResponse(PN532_COMMAND_GETFIRMWAREVERSION, ubBuf, 4) != 1)
+    {
+        return 0;
+    }
+
+    return (uint32_t)(ubBuf[0] << 24) | (uint32_t)(ubBuf[1] << 16) | (uint32_t)(ubBuf[2] << 8) | (uint32_t)ubBuf[3];
+}

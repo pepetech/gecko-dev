@@ -18,6 +18,16 @@
 #define PN532_PN532HOST     0xD5
 #define PN532_POSTAMBLE     0x00
 
+// return errors
+#define PN532_INVALID_FRAME 0x00
+#define PN532_NO_SPACE      0x00
+#define PN532_INVALID_ACK   0x00
+#define PN532_TIMEOUT       0x00
+
+// PN532 timeouts
+#define PN532_ACKTIMEOUT        10
+#define PN532_RESPONSETIMEOUT   500
+
 // PN532 Commands
 // Miscellaneous
 #define PN532_COMMAND_DIAGNOSE              0x00
@@ -95,11 +105,11 @@ void pn532_wakeUp();
 uint8_t pn532_writeCommand(uint8_t ubCommand, uint8_t* ubParameters, uint8_t ubNParameters);
 uint8_t pn532_readResponse(uint8_t ubCommand, uint8_t* ubBuf, uint8_t ubLength);
 
-uint8_t pn532_writeFrame(uint8_t* ubPayload, uint8_t ubLength);
+void pn532_writeFrame(uint8_t* ubPayload, uint8_t ubLength);
 uint8_t pn532_readFrame(uint8_t* ubPayload, uint8_t ubLength);
 
 uint8_t pn532_readAck();
-uint8_t pn532_writeAck(uint8_t ubNack);
+void pn532_writeAck(uint8_t ubNack);
 
 uint8_t pn532_ready();
 
