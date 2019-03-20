@@ -23,16 +23,18 @@
 #define PN532_NO_SPACE      0x00
 #define PN532_INVALID_ACK   0x00
 #define PN532_TIMEOUT       0x00
+#define PN532_ERROR_FRAME   0x00
 
 // PN532 timeouts
 #define PN532_ACKTIMEOUT        10
 #define PN532_RESPONSETIMEOUT   500
+#define PN532_WAKETIMEOUT       100
 
 // PN532 Commands
 // Miscellaneous
 #define PN532_COMMAND_DIAGNOSE              0x00
 #define PN532_COMMAND_GETFIRMWAREVERSION    0x02
-#define PN532_COMMAND_GETGENERALSTATUS      0x04  
+#define PN532_COMMAND_GETGENERALSTATUS      0x04
 #define PN532_COMMAND_READREGISTER          0x06
 #define PN532_COMMAND_WRITEREGISTER         0x08
 #define PN532_COMMAND_READGPIO              0x0C
@@ -68,52 +70,143 @@
 #define PN532_COMMAND_TGRESPONSETOINITIATOR 0x90
 #define PN532_COMMAND_TGGETTARGETSTATUS     0x8A
 
-// Error code list
-// Time Out, the target has not answered 0x01 
-// A CRC error has been detected by the CIU 0x02 
-// A Parity error has been detected by the CIU 0x03 
-// During an anti-collision/select operation (ISO/IEC14443-3 Type A and ISO/IEC18092 106 kbps passive mode), an erroneous Bit Count has been detected 0x04 
-// Framing error during Mifare operation 0x05 
-// An abnormal bit-collision has been detected during bit wise anti-collision at 106 kbps 0x06
-// Communication buffer size insufficient 0x07 
-// RF Buffer overflow has been detected by the CIU (bit BufferOvfl of the register CIU_Error) 0x09 
-// In active communication mode, the RF field has not been switched on in time by the counterpart (as defined in NFCIP-1 standard) 0x0A 
-// RF Protocol error (cf. Error! Reference source not found.,description of the CIU_Error register) 0x0B 
-// Temperature error: the internal temperature sensor has
-// detected overheating, and therefore has automatically switched off the antenna drivers 0x0D
-// Internal buffer overflow 0x0E 
-// Invalid parameter (range, format, …) 0x10 
-// DEP Protocol: The PN532 configured in target mode does not support the command received from the initiator (the command received is not one of the following: ATR_REQ, WUP_REQ, PSL_REQ, DEP_REQ, DSL_REQ, RLS_REQ Error! Reference source not found.). 0x12 
-// DEP Protocol, Mifare or ISO/IEC14443-4: The data format does not match to the specification. Depending on the RF protocol used, it can be: Bad length of RF received frame; Incorrect value of PCB or PFB; Invalid or unexpected RF received frame; NAD or DID incoherence. 0x13
-// Mifare: Authentication error 0x14
-// ISO/IEC14443-3: UID Check byte is wrong 0x23 
-// DEP Protocol: Invalid device state, the system is in a state which does not allow the operation 0x25 
-// Operation not allowed in this configuration (host controller interface) 0x26
-// This command is not acceptable due to the current context of the PN532 (Initiator vs. Target, unknown target number, Target not in the good state, …) 0x27
-// The PN532 configured as target has been released by its initiator 0x29 
-// PN532 and ISO/IEC14443-3B only: the ID of the card does not match, meaning that the expected card has been exchanged with another one. 0x2A
-// PN532 and ISO/IEC14443-3B only: the card previously activated has disappeared. 0x2B
-// Mismatch between the NFCID3 initiator and the NFCID3 target in DEP 212/424 kbps passive. 0x2C
-// An over-current event has been detected 0x2D 
-// NAD missing in DEP frame 0x2E
+// GPIO
+#define PN532_PORT_P3    0x00
+#define PN532_PORT_P7    0x01
+#define PN532_PORT_I0I1  0x02
+#define PN532_P35   5
+#define PN532_P34   4
+#define PN532_P33   3
+#define PN532_P32   2
+#define PN532_P31   1
+#define PN532_P30   0
+#define PN532_P72   2
+#define PN532_P71   1
+#define PN532_I1    1
+#define PN532_I0    0
+
+// baud rates
+#define PN532_BAUD_9_6K     0x00
+#define PN532_BAUD_19_2K    0x01
+#define PN532_BAUD_38_4K    0x02
+#define PN532_BAUD_57_6K    0x03
+#define PN532_BAUD_115_2K   0x04
+#define PN532_BAUD_230_4K   0x05
+#define PN532_BAUD_460_8K   0x06
+#define PN532_BAUD_921_6K   0x07
+#define PN532_BAUD_1_288M   0x08
+
+// parameter flags (pn532_set_parameters)
+/*
+    table 15. Default values of internal flags
+    Property                Default value
+    fNADUsed                Not used
+    fDIDUsed                Not used
+    fAutomaticATR_RES       Yes, automatic
+    fAutomaticRATS          Yes, automatic
+    fISO14443-4_PICC        Yes, enabled
+    fRemovePrePostAmble     No
+*/
+#define PN532_FLAG_NADUSED          0x01
+#define PN532_FLAG_DIDUSED          0x02
+#define PN532_FLAG_AUTOLATR_RES     0x04
+#define PN532_FLAG_AUTORATS         0x10
+#define PN532_FLAG_ISO14443_4_PICC  0x20
+#define PN532_FLAG_RMPREPOSTAMBLE   0x40
+
+// sam configuration
+#define PN532_SAM_NORMAL_MODE   0x01
+#define PN532_SAM_VIRTUAL_CARD  0x02
+#define PN532_SAM_WIRED_CARD    0x03
+#define PN532_SAM_DUAL_CARD     0x04
+#define PN532_SAM_IRQ           0x01
+#define PN532_SAM_NOT_IRQ       0x00
+#define PN532_SAM_TIMEOUT_MIN   0x00    // timeout LSB = 50ns
+#define PN532_SAM_TIMEOUT_1S    0x14    // 50ns * 20 = 1s
+#define PN532_SAM_TIMEOUT_MAX   0xFF    // timeoput = 12.75 sec
+
+// power down
+#define PN532_WAKE_I2C      0x80
+#define PN532_WAKE_GPIO     0x40
+#define PN532_WAKE_SPI      0x20
+#define PN532_WAKE_HSU      0x10
+#define PN532_WAKE_RF_LVL   0x08
+#define PN532_WAKE_INT1     0x02
+#define PN532_WAKE_INT2     0x01
+#define PN532_WAKE_IRQ      0x01
+#define PN532_WAKE_NO_IRQ   0x00
+
+// RFConfiguration
+#define PN532_RF_ITEM_RF_FIELD      0x01
+#define PN532_RF_FIELD_AUTORFCA     0x02
+#define PN532_RF_FIELD_RFON         0x01
+
+#define PN532_RF_ITEM_TIMINGS       0x02
+#define PN532_RF_ITEM_MAXRTYCOM     0x04
+#define PN532_RF_ITEM_MAXRETRIES    0x05
+#define PN532_RF_ITEM_ANSETTINGBAUD106KTA           0x0A
+#define PN532_RF_ITEM_ANSETTINGBAUD212K424K         0x0B
+#define PN532_RF_ITEM_ANSETTINGTB                   0x0C
+#define PN532_RF_ITEM_ANSETTINGBAUD212K424K848KWISO 0x0D
+
+// RF regulation test
+#define PN532_RFREG_106K    0x00
+#define PN532_RFREG_212K    0x10
+#define PN532_RFREG_424K    0x20
+#define PN532_RFREG_848K    0x30
+#define PN532_RFREG_MIFARE  0x00
+#define PN532_RFREG_FELICA  0x02
+
+// inlist target
+#define PN532_MIFARE_ISO14443A 0x00
 
 // pn532 interface funcions
 uint8_t pn532_init();
 
-void pn532_wakeUp();
+void pn532_wake();
 
-uint8_t pn532_writeCommand(uint8_t ubCommand, uint8_t* ubParameters, uint8_t ubNParameters);
-uint8_t pn532_readResponse(uint8_t ubCommand, uint8_t* ubBuf, uint8_t ubLength);
+uint8_t pn532_write_command(uint8_t ubCommand, uint8_t* ubParameters, uint8_t ubNParameters);
+uint8_t pn532_read_response(uint8_t ubCommand, uint8_t* ubBuf, uint8_t ubLength);
 
-void pn532_writeFrame(uint8_t* ubPayload, uint8_t ubLength);
-uint8_t pn532_readFrame(uint8_t* ubPayload, uint8_t ubLength);
+void pn532_write_frame(uint8_t* ubPayload, uint8_t ubLength);
+uint8_t pn532_read_frame(uint8_t* ubPayload, uint8_t ubLength);
 
-uint8_t pn532_readAck();
-void pn532_writeAck(uint8_t ubNack);
+uint8_t pn532_read_ack();
+void pn532_write_ack(uint8_t ubNack);
 
 uint8_t pn532_ready();
 
-// pn532 funcions
-uint32_t pn532_getVersion();
+// pn532 RF communication commands
+uint32_t pn532_get_version();
+
+void pn532_Get_General_Status();    // TODO
+
+uint8_t pn532_read_register(uint16_t usAddr);
+uint8_t pn532_write_register(uint16_t usAddr, uint8_t ubValue);
+
+uint8_t pn532_read_gpio(uint8_t ubPort);
+uint8_t pn532_write_gpio(uint8_t ubPort, uint8_t ubPins);
+
+uint8_t pn532_set_serial_baud(uint8_t ubBaud);   // useless in SPI
+
+uint8_t pn532_set_parameters(uint8_t ubFlags);
+
+uint8_t pn532_sam_configuration(uint8_t ubMode, uint8_t ubTimeout, uint8_t ubIrq);
+
+uint8_t pn532_power_down(uint8_t ubWakeSrcs, uint8_t ubGenIrq);
+
+// RF communication
+uint8_t pn532_rf_configuration(uint8_t ubCfgItem, uint8_t *pubCfgData, uint8_t ubCfgDataLen);
+
+uint8_t pn532_set_passive_activation_retries(uint8_t ubRetries);
+
+uint8_t pn532_set_rf_field(uint8_t ubRfFieldFlags);
+
+uint8_t pn532_rf_regulation_test(uint8_t ubSpeedAndFramming);
+
+// Initiator
+uint8_t pn532_inlist_passive_target(uint8_t ubMaxTg, uint8_t ubBrTg, uint8_t *pubInitData, uint8_t ubInitDataLen, uint8_t *pubTg, uint8_t ubTgDataLen);
+uint8_t pn532_read_passive_target_id(uint8_t ubCardBaud, uint8_t *pubUid, uint8_t *pubUidLen);
+
 
 #endif  // __PN532_H__

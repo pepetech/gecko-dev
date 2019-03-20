@@ -310,7 +310,16 @@ int init()
 }
 int main()
 {
-    DBGPRINTLN_CTX("PN532 ID 0x%08X", pn532_getVersion());
+    DBGPRINTLN_CTX("PN532 Version 0x%08X", pn532_get_version());
+
+    pn532_sam_configuration(PN532_SAM_NORMAL_MODE, PN532_SAM_TIMEOUT_1S, PN532_SAM_IRQ);
+
+    uint8_t ubUid[7];
+    uint8_t ubUidLen;
+
+    pn532_read_passive_target_id(PN532_MIFARE_ISO14443A, ubUid, &ubUidLen);
+
+    DBGPRINTLN_CTX("PN532 Card Uid Len: %d UID: 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X", ubUidLen, ubUid[0], ubUid[1], ubUid[2], ubUid[3], ubUid[4], ubUid[5], ubUid[6]);
 
     i2c1_write_byte(0x76, 0xD0, I2C_RESTART);
     DBGPRINTLN_CTX("BME ID %02X", i2c1_read_byte(0x76, I2C_STOP));
