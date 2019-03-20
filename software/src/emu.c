@@ -68,15 +68,185 @@ void _emu_isr()
         g_ubIOVDDLow = 0;
 }
 
-void emu_init()
+void emu_init(uint8_t ubImmediateSwitch)
 {
-    EMU->PWRCTRL = EMU_PWRCTRL_IMMEDIATEPWRSWITCH | EMU_PWRCTRL_REGPWRSEL_DVDD | EMU_PWRCTRL_ANASW_AVDD;
+    EMU->PWRCTRL = (ubImmediateSwitch ? EMU_PWRCTRL_IMMEDIATEPWRSWITCH : 0) | EMU_PWRCTRL_REGPWRSEL_DVDD | EMU_PWRCTRL_ANASW_AVDD;
 
     EMU->IFC = _EMU_IFC_MASK; // Clear pending IRQs
     IRQ_CLEAR(EMU_IRQn); // Clear pending vector
     IRQ_SET_PRIO(EMU_IRQn, 3, 1); // Set priority 3,1 (min)
     IRQ_ENABLE(EMU_IRQn); // Enable vector
 }
+void emu_dcdc_init(float fTargetVoltage, float fMaxLNCurrent, float fMaxLPCurrent, float fMaxReverseCurrent)
+{
+    if(fTargetVoltage < 1800.f || fTargetVoltage >= 3000.f)
+        return;
+
+    if(fMaxLNCurrent <= 0.f || fMaxLNCurrent > 200.f)
+        return;
+
+    if(fMaxLPCurrent <= 0.f || fMaxLPCurrent > 10000.f)
+        return;
+
+    if(fMaxReverseCurrent <= 0.f || fMaxReverseCurrent > 160.f)
+        return;
+
+    // Low Power & Low Noise current limit
+    uint8_t ubLPBias = 0;
+
+    if(fMaxLPCurrent < 75.f)
+        ubLPBias = 0;
+    else if(fMaxLPCurrent < 500.f)
+        ubLPBias = 1;
+    else if(fMaxLPCurrent < 2500.f)
+        ubLPBias = 2;
+    else
+        ubLPBias = 3;
+
+    EMU->DCDCMISCCTRL = (EMU->DCDCMISCCTRL & ~_EMU_DCDCMISCCTRL_LPCMPBIASEM234H_MASK) | ((uint32_t)ubLPBias << _EMU_DCDCMISCCTRL_LPCMPBIASEM234H_SHIFT);
+    EMU->DCDCMISCCTRL |= EMU_DCDCMISCCTRL_LNFORCECCM; // Force CCM to prevent reverse current
+    EMU->DCDCLPCTRL |= EMU_DCDCLPCTRL_LPVREFDUTYEN; // Enable duty cycling of the bias for LP mode
+    EMU->DCDCLNFREQCTRL = (EMU->DCDCLNFREQCTRL & ~_EMU_DCDCLNFREQCTRL_RCOBAND_MASK) | 4; // Set RCO Band to 7MHz
+
+    uint8_t ubFETCount = 0;
+
+    if(fMaxLNCurrent < 20.f)
+        ubFETCount = 4;
+    else if(fMaxLNCurrent >= 20.f && fMaxLNCurrent < 40.f)
+        ubFETCount = 8;
+    else
+        ubFETCount = 16;
+
+    EMU->DCDCMISCCTRL = (EMU->DCDCMISCCTRL & ~_EMU_DCDCMISCCTRL_NFETCNT_MASK) | ((uint32_t)(ubFETCount - 1) << _EMU_DCDCMISCCTRL_NFETCNT_SHIFT);
+    EMU->DCDCMISCCTRL = (EMU->DCDCMISCCTRL & ~_EMU_DCDCMISCCTRL_PFETCNT_MASK) | ((uint32_t)(ubFETCount - 1) << _EMU_DCDCMISCCTRL_PFETCNT_SHIFT);
+
+    uint8_t ubLNCurrentLimit = (((fMaxLNCurrent + 40.f) * 1.5f) / (5.f * ubFETCount)) - 1;
+    uint8_t ubLPCurrentLimit = (fMaxLPCurrent / 40.f) - 1;
+
+    EMU->DCDCMISCCTRL = (EMU->DCDCMISCCTRL & ~(_EMU_DCDCMISCCTRL_LNCLIMILIMSEL_MASK | _EMU_DCDCMISCCTRL_LPCLIMILIMSEL_MASK)) | ((uint32_t)ubLNCurrentLimit << _EMU_DCDCMISCCTRL_LNCLIMILIMSEL_SHIFT) | ((uint32_t)ubLPCurrentLimit << _EMU_DCDCMISCCTRL_LPCLIMILIMSEL_SHIFT);
+
+    uint8_t ubZDetLimit = ((fMaxReverseCurrent + 40.f) * 1.5f) / (2.5f * ubFETCount);
+
+    EMU->DCDCZDETCTRL = (EMU->DCDCZDETCTRL & ~_EMU_DCDCZDETCTRL_ZDETILIMSEL_MASK) | ((uint32_t)ubZDetLimit << _EMU_DCDCZDETCTRL_ZDETILIMSEL_SHIFT);
+
+    EMU->DCDCCLIMCTRL |= EMU_DCDCCLIMCTRL_BYPLIMEN; // Enable bypass current limiter to prevent overcurrent when switching modes
+
+    // Output Voltage
+    if(fTargetVoltage > 1800.f)
+    {
+        float fMaxVOut = 3000.f;
+        float fMinVOut = 1800.f;
+        float fDiffVOut = fMaxVOut - fMinVOut;
+
+        uint8_t ubLNVRefHigh = (DEVINFO->DCDCLNVCTRL0 & _DEVINFO_DCDCLNVCTRL0_3V0LNATT1_MASK) >> _DEVINFO_DCDCLNVCTRL0_3V0LNATT1_SHIFT;
+        uint8_t ubLNVRefLow = (DEVINFO->DCDCLNVCTRL0 & _DEVINFO_DCDCLNVCTRL0_1V8LNATT1_MASK) >> _DEVINFO_DCDCLNVCTRL0_1V8LNATT1_SHIFT;
+
+        uint8_t ubLNVRef = ((fTargetVoltage - fMinVOut) * (float)(ubLNVRefHigh - ubLNVRefLow)) / fDiffVOut;
+        ubLNVRef += ubLNVRefLow;
+
+        EMU->DCDCLNVCTRL = (ubLNVRef << _EMU_DCDCLNVCTRL_LNVREF_SHIFT) | EMU_DCDCLNVCTRL_LNATT;
+
+        uint8_t ubLPVRefLow = 0;
+        uint8_t ubLPVRefHigh = 0;
+
+        switch(ubLPBias)
+        {
+            case 0:
+            {
+                ubLPVRefHigh = (DEVINFO->DCDCLPVCTRL2 & _DEVINFO_DCDCLPVCTRL2_3V0LPATT1LPCMPBIAS0_MASK) >> _DEVINFO_DCDCLPVCTRL2_3V0LPATT1LPCMPBIAS0_SHIFT;
+                ubLPVRefLow = (DEVINFO->DCDCLPVCTRL2 & _DEVINFO_DCDCLPVCTRL2_1V8LPATT1LPCMPBIAS0_MASK) >> _DEVINFO_DCDCLPVCTRL2_1V8LPATT1LPCMPBIAS0_SHIFT;
+            }
+            break;
+            case 1:
+            {
+                ubLPVRefHigh = (DEVINFO->DCDCLPVCTRL2 & _DEVINFO_DCDCLPVCTRL2_3V0LPATT1LPCMPBIAS1_MASK) >> _DEVINFO_DCDCLPVCTRL2_3V0LPATT1LPCMPBIAS1_SHIFT;
+                ubLPVRefLow = (DEVINFO->DCDCLPVCTRL2 & _DEVINFO_DCDCLPVCTRL2_1V8LPATT1LPCMPBIAS1_MASK) >> _DEVINFO_DCDCLPVCTRL2_1V8LPATT1LPCMPBIAS1_SHIFT;
+            }
+            break;
+            case 2:
+            {
+                ubLPVRefHigh = (DEVINFO->DCDCLPVCTRL3 & _DEVINFO_DCDCLPVCTRL3_3V0LPATT1LPCMPBIAS2_MASK) >> _DEVINFO_DCDCLPVCTRL3_3V0LPATT1LPCMPBIAS2_SHIFT;
+                ubLPVRefLow = (DEVINFO->DCDCLPVCTRL3 & _DEVINFO_DCDCLPVCTRL3_1V8LPATT1LPCMPBIAS2_MASK) >> _DEVINFO_DCDCLPVCTRL3_1V8LPATT1LPCMPBIAS2_SHIFT;
+            }
+            break;
+            case 3:
+            {
+                ubLPVRefHigh = (DEVINFO->DCDCLPVCTRL3 & _DEVINFO_DCDCLPVCTRL3_3V0LPATT1LPCMPBIAS3_MASK) >> _DEVINFO_DCDCLPVCTRL3_3V0LPATT1LPCMPBIAS3_SHIFT;
+                ubLPVRefLow = (DEVINFO->DCDCLPVCTRL3 & _DEVINFO_DCDCLPVCTRL3_1V8LPATT1LPCMPBIAS3_MASK) >> _DEVINFO_DCDCLPVCTRL3_1V8LPATT1LPCMPBIAS3_SHIFT;
+            }
+            break;
+        }
+
+        uint8_t ubLPVRef = ((fTargetVoltage - fMinVOut) * (float)(ubLPVRefHigh - ubLPVRefLow)) / fDiffVOut;
+        ubLPVRef += ubLPVRefLow;
+
+        EMU->DCDCLPVCTRL = (ubLPVRef << _EMU_DCDCLPVCTRL_LPVREF_SHIFT) | EMU_DCDCLPVCTRL_LPATT;
+    }
+    else
+    {
+        float fMaxVOut = 1800.f;
+        float fMinVOut = 1200.f;
+        float fDiffVOut = fMaxVOut - fMinVOut;
+
+        uint8_t ubLNVRefHigh = (DEVINFO->DCDCLNVCTRL0 & _DEVINFO_DCDCLNVCTRL0_1V8LNATT0_MASK) >> _DEVINFO_DCDCLNVCTRL0_1V8LNATT0_SHIFT;
+        uint8_t ubLNVRefLow = (DEVINFO->DCDCLNVCTRL0 & _DEVINFO_DCDCLNVCTRL0_1V2LNATT0_MASK) >> _DEVINFO_DCDCLNVCTRL0_1V2LNATT0_SHIFT;
+
+        uint8_t ubLNVRef = ((fTargetVoltage - fMinVOut) * (float)(ubLNVRefHigh - ubLNVRefLow)) / fDiffVOut;
+        ubLNVRef += ubLNVRefLow;
+
+        EMU->DCDCLNVCTRL = ubLNVRef << _EMU_DCDCLNVCTRL_LNVREF_SHIFT;
+
+        uint8_t ubLPVRefLow = 0;
+        uint8_t ubLPVRefHigh = 0;
+
+        switch(ubLPBias)
+        {
+            case 0:
+            {
+                ubLPVRefHigh = (DEVINFO->DCDCLPVCTRL0 & _DEVINFO_DCDCLPVCTRL2_3V0LPATT1LPCMPBIAS0_MASK) >> _DEVINFO_DCDCLPVCTRL2_3V0LPATT1LPCMPBIAS0_SHIFT;
+                ubLPVRefLow = (DEVINFO->DCDCLPVCTRL0 & _DEVINFO_DCDCLPVCTRL2_1V8LPATT1LPCMPBIAS0_MASK) >> _DEVINFO_DCDCLPVCTRL2_1V8LPATT1LPCMPBIAS0_SHIFT;
+            }
+            break;
+            case 1:
+            {
+                ubLPVRefHigh = (DEVINFO->DCDCLPVCTRL0 & _DEVINFO_DCDCLPVCTRL2_3V0LPATT1LPCMPBIAS1_MASK) >> _DEVINFO_DCDCLPVCTRL2_3V0LPATT1LPCMPBIAS1_SHIFT;
+                ubLPVRefLow = (DEVINFO->DCDCLPVCTRL0 & _DEVINFO_DCDCLPVCTRL2_1V8LPATT1LPCMPBIAS1_MASK) >> _DEVINFO_DCDCLPVCTRL2_1V8LPATT1LPCMPBIAS1_SHIFT;
+            }
+            break;
+            case 2:
+            {
+                ubLPVRefHigh = (DEVINFO->DCDCLPVCTRL1 & _DEVINFO_DCDCLPVCTRL3_3V0LPATT1LPCMPBIAS2_MASK) >> _DEVINFO_DCDCLPVCTRL3_3V0LPATT1LPCMPBIAS2_SHIFT;
+                ubLPVRefLow = (DEVINFO->DCDCLPVCTRL1 & _DEVINFO_DCDCLPVCTRL3_1V8LPATT1LPCMPBIAS2_MASK) >> _DEVINFO_DCDCLPVCTRL3_1V8LPATT1LPCMPBIAS2_SHIFT;
+            }
+            break;
+            case 3:
+            {
+                ubLPVRefHigh = (DEVINFO->DCDCLPVCTRL1 & _DEVINFO_DCDCLPVCTRL3_3V0LPATT1LPCMPBIAS3_MASK) >> _DEVINFO_DCDCLPVCTRL3_3V0LPATT1LPCMPBIAS3_SHIFT;
+                ubLPVRefLow = (DEVINFO->DCDCLPVCTRL1 & _DEVINFO_DCDCLPVCTRL3_1V8LPATT1LPCMPBIAS3_MASK) >> _DEVINFO_DCDCLPVCTRL3_1V8LPATT1LPCMPBIAS3_SHIFT;
+            }
+            break;
+        }
+
+        uint8_t ubLPVRef = ((fTargetVoltage - fMinVOut) * (float)(ubLPVRefHigh - ubLPVRefLow)) / fDiffVOut;
+        ubLPVRef += ubLPVRefLow;
+
+        EMU->DCDCLPVCTRL = ubLPVRef << _EMU_DCDCLPVCTRL_LPVREF_SHIFT;
+    }
+
+    EMU->DCDCLPCTRL = (EMU->DCDCLPCTRL & ~_EMU_DCDCLPCTRL_LPCMPHYSSELEM234H_MASK) | (((DEVINFO->DCDCLPCMPHYSSEL1 & (((uint32_t)0xFF) << (ubLPBias * 8))) >> (ubLPBias * 8)) << _EMU_DCDCLPCTRL_LPCMPHYSSELEM234H_SHIFT);
+
+    while(EMU->DCDCSYNC & EMU_DCDCSYNC_DCDCCTRLBUSY); // Wait for configuration to write
+
+    // Calibration
+    EMU->DCDCLNCOMPCTRL = 0xB7102137; // Compensation for 4.7uF DCDC capacitor
+
+    // Enable DCDC converter
+    EMU->DCDCCTRL = EMU_DCDCCTRL_DCDCMODEEM4_EM4LOWPOWER | EMU_DCDCCTRL_DCDCMODEEM23_EM23LOWPOWER | EMU_DCDCCTRL_DCDCMODE_LOWNOISE;
+
+    // Switch digital domain to DVDD
+    EMU->PWRCTRL = EMU_PWRCTRL_REGPWRSEL_DVDD | EMU_PWRCTRL_ANASW_AVDD;
+}
+
 float emu_get_temperature()
 {
     EMU->IFC = EMU_IFC_TEMP;
@@ -90,6 +260,7 @@ float emu_get_temperature()
 
     return fEMUTemp;
 }
+
 void emu_vmon_avdd_config(uint8_t ubEnable, float fLowThresh, float *pfLowThresh, float fHighThresh, float *pfHighThresh)
 {
     if(!ubEnable)

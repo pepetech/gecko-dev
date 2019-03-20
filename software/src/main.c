@@ -186,7 +186,8 @@ uint16_t get_device_revision()
 
 int init()
 {
-    emu_init(); // Init EMU
+    emu_init(0); // Init EMU
+    emu_dcdc_init(1800.f, 200.f, 500.f, 160.f); // Init DC-DC converter (1.8 V, 200 mA active, 500 uA sleep, 160 mA reverse limit)
 
     cmu_hfxo_startup_calib(0x200, 0x087); // Config HFXO Startup for 1280 uA, 20.04 pF
     cmu_hfxo_steady_calib(0x006, 0x087); // Config HFXO Steady state for 12 uA, 20.04 pF
@@ -272,7 +273,7 @@ int init()
     DBGPRINTLN_CTX("CMU - LEUART0 Clock: %.3f kHz!", (float)LEUART0_CLOCK_FREQ / 1000);
     DBGPRINTLN_CTX("CMU - LEUART1 Clock: %.3f kHz!", (float)LEUART1_CLOCK_FREQ / 1000);
     DBGPRINTLN_CTX("CMU - SYSTICK Clock: %.3f kHz!", (float)SYSTICK_CLOCK_FREQ / 1000);
-    DBGPRINTLN_CTX("    CMU - CSEN Clock: %.3f kHz!", (float)CSEN_CLOCK_FREQ / 1000);
+    DBGPRINTLN_CTX("CMU - CSEN Clock: %.3f kHz!", (float)CSEN_CLOCK_FREQ / 1000);
     DBGPRINTLN_CTX("CMU - LFC Clock: %.3f kHz!", (float)LFC_CLOCK_FREQ / 1000);
     DBGPRINTLN_CTX("CMU - LFE Clock: %.3f kHz!", (float)LFE_CLOCK_FREQ / 1000);
     DBGPRINTLN_CTX("CMU - RTCC Clock: %.3f kHz!", (float)RTCC_CLOCK_FREQ / 1000);
@@ -291,6 +292,9 @@ int init()
     DBGPRINTLN_CTX("EMU - IOVDD Status: %s", g_ubIOVDDLow ? "LOW" : "OK");
     DBGPRINTLN_CTX("EMU - Core Voltage: %.2f mV", adc_get_corevdd());
 
+                GPIO->P[0].DOUT |= BIT(0);
+                delay_ms(50);
+                GPIO->P[0].DOUT &= ~BIT(0);
     delay_ms(100);
 
     DBGPRINTLN_CTX("Scanning I2C bus 1...");
@@ -456,7 +460,7 @@ int main()
                     DBGPRINTLN_CTX("Probably Mifare Ultraligth");
                     DBGPRINTLN_CTX("UID: 0x%02X %02X %02X %02X", ubUid[0], ubUid[1], ubUid[2], ubUid[3], ubUid[4], ubUid[5], ubUid[6]);
                 }
-                
+
                 GPIO->P[0].DOUT |= BIT(0);
                 delay_ms(50);
                 GPIO->P[0].DOUT &= ~BIT(0);
