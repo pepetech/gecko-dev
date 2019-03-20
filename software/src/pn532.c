@@ -25,7 +25,7 @@ void pn532_wake()
 
     uint64_t ullTimeoutStart = g_ullSystemTick;
 
-    while(PN532_READY() && (g_ullSystemTick < (ullTimeoutStart + PN532_WAKETIMEOUT));
+    while(PN532_READY() && (g_ullSystemTick < (ullTimeoutStart + PN532_WAKETIMEOUT)));
 }
 
 uint8_t pn532_write_command(uint8_t ubCommand, uint8_t *pubParameters, uint8_t ubNParameters)
@@ -72,6 +72,7 @@ uint8_t pn532_read_response(uint8_t ubCommand, uint8_t *pubBuf, uint8_t ubLength
     {
         if (g_ullSystemTick > (ullTimeoutStart + PN532_RESPONSETIMEOUT))
         {
+            DBGPRINTLN_CTX("Timeout");
             return PN532_TIMEOUT;
         }
     }
@@ -81,6 +82,7 @@ uint8_t pn532_read_response(uint8_t ubCommand, uint8_t *pubBuf, uint8_t ubLength
 
     if(!pubFrameBuf)
     {
+        DBGPRINTLN_CTX("Memory allocation failure");
         return 0;
     }
 
@@ -88,12 +90,15 @@ uint8_t pn532_read_response(uint8_t ubCommand, uint8_t *pubBuf, uint8_t ubLength
 
     if(pubFrameBuf[0] != PN532_PN532HOST)
     {
+        DBGPRINTLN_CTX("Invalid frame, not PN532_PN532HOST");
         free(pubFrameBuf);
         // pubBuf[0] = pubFrameBuf[0]; contains error code
         return PN532_INVALID_FRAME;
     }
     if (pubFrameBuf[1] != (ubCommand + 1))
     {
+        DBGPRINTLN_CTX("Invalid frame, not the correct command");
+
         free(pubFrameBuf);
         return PN532_INVALID_FRAME;
     }
@@ -160,6 +165,8 @@ uint8_t pn532_read_frame(uint8_t *pubPayload, uint8_t ubMaxLength)
 
     uint8_t ubPostamble[2];
 
+    uint8_t ubLength;
+
     delay_ms(1);
 
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
@@ -168,7 +175,7 @@ uint8_t pn532_read_frame(uint8_t *pubPayload, uint8_t ubMaxLength)
 
         usart0_spi_write(ubPreamble, 4);    // write "header"
 
-        uint8_t ubLength = usart0_spi_transfer_byte(0x00);  // read length byte
+        ubLength = usart0_spi_transfer_byte(0x00);  // read length byte
 
         if(((usart0_spi_transfer_byte(0x00) + ubLength) & 0xFF) != 0)    // read length byte checksum and verify ubLength
         {
@@ -304,7 +311,7 @@ uint32_t pn532_get_version()
 
 void pn532_Get_General_Status()
 {
-    return 0;
+    return;
 }
 
 uint8_t pn532_read_register(uint16_t usAddr)
@@ -468,61 +475,114 @@ uint8_t pn532_set_rf_field(uint8_t ubRfFieldFlags)
 
 uint8_t pn532_rf_regulation_test(uint8_t ubSpeedAndFramming)
 {
-    if(pn532_write_command(PN532_COMMAND_SETPARAMETERS, &ubFlags, 1) != 1)
+    if(pn532_write_command(PN532_COMMAND_RFREGULATIONTEST, &ubSpeedAndFramming, 1) != 1)
         return 0;
 
     return 1;
 }
 
 // Initiator
-uint8_t pn532_inlist_passive_target(uint8_t ubMaxTg, uint8_t ubBrTg, uint8_t *pubInitData, uint8_t ubInitDataLen, uint8_t *pubTg, uint8_t ubTgDataLen)
+uint8_t pn532_inlist_passive_target(uint8_t ubMaxTg, uint8_t ubBrTg, uint8_t *pubInitData, uint8_t ubInitDataLen, uint8_t *pubTg1, uint8_t *pubTg2, uint8_t ubTgDataLen)
 {
-    uint8_t *pubTgBuf = malloc(2 + ubInitDataLen);
+    uint8_t *pubTgTBuf = (uint8_t *)malloc(2 + ubInitDataLen);
+    uint8_t *pubTgRBuf = (uint8_t *)malloc(ubMaxTg * ubTgDataLen);
 
-    pubTgBuf[0] = ubMaxTg;
-    pubTgBuf[1] = ubBrTg;
+    pubTgTBuf[0] = ubMaxTg;
+    pubTgTBuf[1] = ubBrTg;
 
     for(uint8_t i = 0; i < ubInitDataLen; i++)
     {
-        pubTgBuf[2 + i] = pubInitData[i];
+        pubTgTBuf[2 + i] = pubInitData[i];
     }
 
-    if(pn532_write_command(PN532_COMMAND_INLISTPASSIVETARGET, pubTgBuf, 2 + ubInitDataLen) != 1)
+    if(pn532_write_command(PN532_COMMAND_INLISTPASSIVETARGET, pubTgTBuf, 2 + ubInitDataLen) != 1)
     {
-        free(pubTgBuf);
+        DBGPRINTLN_CTX("INVALID COMMAND");
+
+        free(pubTgTBuf);
+        free(pubTgRBuf);
 
         return 0;
     }
-    if(pn532_read_response(PN532_COMMAND_INLISTPASSIVETARGET, pubTg, (ubTgDataLen * ubMaxTg) + 1) != 1)
+    if(pn532_read_response(PN532_COMMAND_INLISTPASSIVETARGET, pubTgRBuf, (ubMaxTg * ubTgDataLen) + 1) != 1)
     {
-        free(pubTgBuf);
+        DBGPRINTLN_CTX("INVALID RESPONSE");
+
+        free(pubTgTBuf);
+        free(pubTgRBuf);
 
         return 0;
     }
+    
 
-    free(pubTgBuf);
+    memset(pubTg1, 0x00, ubTgDataLen);
+    memset(pubTg2, 0x00, ubTgDataLen);
 
-    return 1;
+    uint8_t ubNTg = 0;
+
+    switch(ubBrTg)
+    {
+        case PN532_MIFARE_ISO14443A:
+
+            ubNTg = pubTgRBuf[0];
+            uint8_t ubBufPtr = 1;
+            uint8_t ubNTg1Len = 0;
+            uint8_t ubNTg2Len = 0;
+
+            //DBGPRINTLN_CTX("N tags: %d", ubNTg);
+
+            if (ubNTg > 0) 
+            {
+                ubNTg1Len += 6 + pubTgRBuf[ubBufPtr + 4] + pubTgRBuf[ubBufPtr + 4 + 1 + pubTgRBuf[ubBufPtr + 4]];
+
+                //DBGPRINTLN_CTX("tag1 Len: %d", ubNTg1Len);
+
+                for(uint8_t i = 0; i < ubNTg1Len; i++)
+                {
+                    //DBGPRINTLN_CTX("tag1: 0x%02X", pubTgRBuf[ubBufPtr + i]);
+                    pubTg1[i] = pubTgRBuf[ubBufPtr + i];
+                }
+
+                if (ubNTg > 1) 
+                {
+                    ubBufPtr += ubNTg1Len;
+                    ubNTg2Len += 6 + pubTgRBuf[ubBufPtr + 4] + pubTgRBuf[ubBufPtr + 4 + 1 + pubTgRBuf[ubBufPtr + 4]];
+
+                    for(uint8_t i = 0; i < ubNTg1Len; i++)
+                    {
+                        pubTg2[i] = pubTgRBuf[ubBufPtr + i];
+                    }
+                }
+            }
+                
+            break;
+    }
+
+    free(pubTgTBuf);
+    free(pubTgRBuf);
+
+    return ubNTg;
 }
-uint8_t pn532_read_passive_target_id(uint8_t ubCardBaud, uint8_t *pubUid, uint8_t *pubUidLen)
+uint8_t pn532_read_passive_target_id(uint8_t *pubUid, uint8_t *pubUidLen)
 {
-    uint8_t ubTgBuf[16];
+    memset(pubUid, 0x00, 7);
+   *pubUidLen = 0;
 
-    if(pn532_inlist_passive_target(1, ubCardBaud, NULL, 0, ubTgBuf, 16) != 1)
-        return 0;
+    uint8_t ubTgBuf[24];
 
-    if(ubTgBuf[0] == 0)
+    memset(ubTgBuf, 0x00, 24);
+
+    if(pn532_inlist_passive_target(1, PN532_MIFARE_ISO14443A, NULL, 0, ubTgBuf, NULL, 24) != 1)
         return 0;
 
     *pubUidLen = ubTgBuf[4];
 
-    for (uint8_t i = 0; i < ubTgBuf[4]; i++) 
+    for (uint8_t i = 0; i < *pubUidLen; i++) 
     {
         pubUid[i] = ubTgBuf[5 + i];
     }
 
     return 1;
-
 }
 
 // Target

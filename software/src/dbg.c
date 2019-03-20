@@ -18,8 +18,8 @@ void dbg_swo_config(uint32_t ulChannelMask, uint32_t ulFrequency)
     TPI->ACPR = (DBG_CLOCK_FREQ / ulFrequency) - 1;
     TPI->FFCR = 0x00000100;
     DWT->CTRL = 0x400003FE;
-    ITM->TCR = (1 << ITM_TCR_TraceBusID_Pos) | ITM_TCR_ITMENA_Msk;
     ITM->LAR = 0xC5ACCE55;
+    ITM->TCR = (1 << ITM_TCR_TraceBusID_Pos) | ITM_TCR_ITMENA_Msk;
     ITM->TPR = ulChannelMask;
     ITM->TER = ulChannelMask;
 }

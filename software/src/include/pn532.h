@@ -27,7 +27,7 @@
 
 // PN532 timeouts
 #define PN532_ACKTIMEOUT        10
-#define PN532_RESPONSETIMEOUT   500
+#define PN532_RESPONSETIMEOUT   1000
 #define PN532_WAKETIMEOUT       100
 
 // PN532 Commands
@@ -117,7 +117,7 @@
 // sam configuration
 #define PN532_SAM_NORMAL_MODE   0x01
 #define PN532_SAM_VIRTUAL_CARD  0x02
-#define PN532_SAM_WIRED_CARD    0x03
+#define PN532_SAM_WIRPN532_PN532HOSTED_CARD    0x03
 #define PN532_SAM_DUAL_CARD     0x04
 #define PN532_SAM_IRQ           0x01
 #define PN532_SAM_NOT_IRQ       0x00
@@ -205,8 +205,8 @@ uint8_t pn532_set_rf_field(uint8_t ubRfFieldFlags);
 uint8_t pn532_rf_regulation_test(uint8_t ubSpeedAndFramming);
 
 // Initiator
-uint8_t pn532_inlist_passive_target(uint8_t ubMaxTg, uint8_t ubBrTg, uint8_t *pubInitData, uint8_t ubInitDataLen, uint8_t *pubTg, uint8_t ubTgDataLen);
-uint8_t pn532_read_passive_target_id(uint8_t ubCardBaud, uint8_t *pubUid, uint8_t *pubUidLen);
+uint8_t pn532_inlist_passive_target(uint8_t ubMaxTg, uint8_t ubBrTg, uint8_t *pubInitData, uint8_t ubInitDataLen, uint8_t *pubTg1, uint8_t *pubTg2, uint8_t ubTgDataLen);
+uint8_t pn532_read_passive_target_id(uint8_t *pubUid, uint8_t *pubUidLen);
 
 
 #endif  // __PN532_H__

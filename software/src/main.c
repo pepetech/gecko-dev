@@ -312,14 +312,9 @@ int main()
 {
     DBGPRINTLN_CTX("PN532 Version 0x%08X", pn532_get_version());
 
+    pn532_set_passive_activation_retries(0x00);
+
     pn532_sam_configuration(PN532_SAM_NORMAL_MODE, PN532_SAM_TIMEOUT_1S, PN532_SAM_IRQ);
-
-    uint8_t ubUid[7];
-    uint8_t ubUidLen;
-
-    pn532_read_passive_target_id(PN532_MIFARE_ISO14443A, ubUid, &ubUidLen);
-
-    DBGPRINTLN_CTX("PN532 Card Uid Len: %d UID: 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X", ubUidLen, ubUid[0], ubUid[1], ubUid[2], ubUid[3], ubUid[4], ubUid[5], ubUid[6]);
 
     i2c1_write_byte(0x76, 0xD0, I2C_RESTART);
     DBGPRINTLN_CTX("BME ID %02X", i2c1_read_byte(0x76, I2C_STOP));
@@ -440,10 +435,37 @@ int main()
 
     while(1)
     {
-        GPIO->P[0].DOUT ^= BIT(0);
+        static uint64_t ullLastRfidCheck = 0;
 
-        delay_ms(500);
+        if (g_ullSystemTick > (ullLastRfidCheck + 100)) 
+        {
+            uint8_t ubUid[7] = {0, 0, 0, 0, 0, 0, 0};
+            uint8_t ubUidLen = 0;
 
+            if(pn532_read_passive_target_id(ubUid, &ubUidLen)) 
+            {
+                DBGPRINTLN_CTX("Found Rfid Card");
+                DBGPRINTLN_CTX("UID Length: %hhu bytes", ubUidLen);
+                if(ubUidLen == 4) 
+                {
+                    DBGPRINTLN_CTX("Probably Mifare classic");
+                    DBGPRINTLN_CTX("UID: 0x%02X %02X %02X %02X", ubUid[0], ubUid[1], ubUid[2], ubUid[3]);
+                }
+                else
+                {
+                    DBGPRINTLN_CTX("Probably Mifare Ultraligth");
+                    DBGPRINTLN_CTX("UID: 0x%02X %02X %02X %02X", ubUid[0], ubUid[1], ubUid[2], ubUid[3], ubUid[4], ubUid[5], ubUid[6]);
+                }
+                
+                GPIO->P[0].DOUT |= BIT(0);
+                delay_ms(50);
+                GPIO->P[0].DOUT &= ~BIT(0);
+            }
+            /* code */
+            ullLastRfidCheck = g_ullSystemTick;
+        }
+
+/*
         DBGPRINTLN_CTX("ADC Temp: %.2f", adc_get_temperature());
         DBGPRINTLN_CTX("EMU Temp: %.2f", emu_get_temperature());
 
@@ -459,6 +481,7 @@ int main()
         DBGPRINTLN_CTX("RTCC Time: %lu", rtcc_get_time());
 
         DBGPRINTLN_CTX("Big fag does not need debug uart anymore.");
+*/
     }
 
     return 0;
