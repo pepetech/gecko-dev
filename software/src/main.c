@@ -225,7 +225,8 @@ int init()
     fIOVDDHighThresh = fIOVDDLowThresh + 0.026f; // Hysteresis from datasheet
 
     //usart0_init(115200, UART_FRAME_STOPBITS_ONE | UART_FRAME_PARITY_NONE | USART_FRAME_DATABITS_EIGHT, 4, 4, -1, -1);
-    usart0_init(1000000, 0, USART_SPI_LSB_FIRST, 0, 0, 0);
+    //usart0_init(1000000, 0, USART_SPI_LSB_FIRST, 0, 0, 0);
+    usart0_init(800000, 1, USART_SPI_MSB_FIRST, -1, 4, 5);
     i2c1_init(I2C_NORMAL, 1, 1); // Init I2C1 at 100 kHz on location 1
 
     char szDeviceName[32];
@@ -292,9 +293,6 @@ int init()
     DBGPRINTLN_CTX("EMU - IOVDD Status: %s", g_ubIOVDDLow ? "LOW" : "OK");
     DBGPRINTLN_CTX("EMU - Core Voltage: %.2f mV", adc_get_corevdd());
 
-                GPIO->P[0].DOUT |= BIT(0);
-                delay_ms(50);
-                GPIO->P[0].DOUT &= ~BIT(0);
     delay_ms(100);
 
     DBGPRINTLN_CTX("Scanning I2C bus 1...");
@@ -305,10 +303,10 @@ int init()
             DBGPRINTLN_CTX("  Address 0x%02X ACKed!", a);
     }
 
-    if(pn532_init())
-        DBGPRINTLN_CTX("PN532 init OK!");
-    else
-        DBGPRINTLN_CTX("PN532 init NOK!");
+    //if(pn532_init())
+    //    DBGPRINTLN_CTX("PN532 init OK!");
+    //else
+    //    DBGPRINTLN_CTX("PN532 init NOK!");
 
     return 0;
 }
@@ -316,9 +314,9 @@ int main()
 {
     DBGPRINTLN_CTX("PN532 Version 0x%08X", pn532_get_version());
 
-    pn532_set_passive_activation_retries(0x00);
+    //pn532_set_passive_activation_retries(0x00);
 
-    pn532_sam_configuration(PN532_SAM_NORMAL_MODE, PN532_SAM_TIMEOUT_1S, PN532_SAM_IRQ);
+    //pn532_sam_configuration(PN532_SAM_NORMAL_MODE, PN532_SAM_TIMEOUT_1S, PN532_SAM_IRQ);
 
     i2c1_write_byte(0x76, 0xD0, I2C_RESTART);
     DBGPRINTLN_CTX("BME ID %02X", i2c1_read_byte(0x76, I2C_STOP));
@@ -441,11 +439,29 @@ int main()
     {
         static uint64_t ullLastRfidCheck = 0;
 
-        if (g_ullSystemTick > (ullLastRfidCheck + 100)) 
+        if (g_ullSystemTick > (ullLastRfidCheck + 500))
         {
             uint8_t ubUid[7] = {0, 0, 0, 0, 0, 0, 0};
             uint8_t ubUidLen = 0;
 
+            static uint8_t ubState = 1;
+
+            if(ubState)
+            {
+                usart0_spi_transfer_byte(0xFF); // G
+                usart0_spi_transfer_byte(0xCC); // R
+                usart0_spi_transfer_byte(0x11); // B
+                ubState = 0;
+            }
+            else
+            {
+                usart0_spi_transfer_byte(0x00); // G
+                usart0_spi_transfer_byte(0xFF); // R
+                usart0_spi_transfer_byte(0xAA); // B
+                ubState = 1;
+            }
+
+            /*
             if(pn532_read_passive_target_id(ubUid, &ubUidLen)) 
             {
                 DBGPRINTLN_CTX("Found Rfid Card");
@@ -465,7 +481,7 @@ int main()
                 delay_ms(50);
                 GPIO->P[0].DOUT &= ~BIT(0);
             }
-            /* code */
+            */
             ullLastRfidCheck = g_ullSystemTick;
         }
 
