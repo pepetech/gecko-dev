@@ -238,6 +238,7 @@ void emu_dcdc_init(float fTargetVoltage, float fMaxLNCurrent, float fMaxLPCurren
     while(EMU->DCDCSYNC & EMU_DCDCSYNC_DCDCCTRLBUSY); // Wait for configuration to write
 
     // Calibration
+    //EMU->DCDCLNCOMPCTRL = 0x57204077; // Compensation for 1uF DCDC capacitor
     EMU->DCDCLNCOMPCTRL = 0xB7102137; // Compensation for 4.7uF DCDC capacitor
 
     // Enable DCDC converter
