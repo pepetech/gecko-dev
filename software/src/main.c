@@ -208,6 +208,7 @@ int init()
 
     gpio_init(); // Init GPIOs
     rtcc_init(); // Init RTCC
+    trng_init(); // Init TRNG
     crypto_init(); // Init Crypto engine
     crc_init(); // Init CRC calculation unit
     adc_init(); // Init ADCs
@@ -435,38 +436,90 @@ int main()
     //DBGPRINTLN_CTX("QSPI RD: %08X", *(volatile uint32_t *)0xC0000000);
     //DBGPRINTLN_CTX("QSPI RD: %08X", *(volatile uint32_t *)0xC0000004);
 
+    for(uint8_t i = 0; i < 112; i++)
+    {
+        usart0_spi_transfer_byte(0xFF); // G
+        usart0_spi_transfer_byte(0xFF); // R
+        usart0_spi_transfer_byte(0xFF); // B
+    }
+
+    for(uint8_t i = 0; i < 112; i++)
+    {
+        usart0_spi_transfer_byte(0x00); // G
+        usart0_spi_transfer_byte(0x00); // R
+        usart0_spi_transfer_byte(0x00); // B
+    }
+
+    delay_ms(1000);
+
     while(1)
     {
         static uint64_t ullLastRfidCheck = 0;
 
-        if (g_ullSystemTick > (ullLastRfidCheck + 500))
+        if (g_ullSystemTick > (ullLastRfidCheck + 2))
         {
-            uint8_t ubUid[7] = {0, 0, 0, 0, 0, 0, 0};
-            uint8_t ubUidLen = 0;
+            static uint8_t ubPosition = 0;
+            static uint8_t ubMaxPosition = 112;
 
-            static uint8_t ubState = 1;
-
-            if(ubState)
-            {
-                usart0_spi_transfer_byte(0xFF); // G
-                usart0_spi_transfer_byte(0xCC); // R
-                usart0_spi_transfer_byte(0x11); // B
-                ubState = 0;
-            }
-            else
+            for(uint8_t i = 0; i < ubPosition; i++)
             {
                 usart0_spi_transfer_byte(0x00); // G
-                usart0_spi_transfer_byte(0xFF); // R
-                usart0_spi_transfer_byte(0xAA); // B
-                ubState = 1;
+                usart0_spi_transfer_byte(0x00); // R
+                usart0_spi_transfer_byte(0x00); // B
+            }
+
+            static uint32_t ulColor = 0;
+
+            if(!ulColor)
+                ulColor = trng_pop_random();
+/*
+            usart0_spi_transfer_byte((ulColor >> 2) & 0xFF); // G
+            usart0_spi_transfer_byte((ulColor >> 16) & 0xFF); // R
+            usart0_spi_transfer_byte((ulColor >> 24) & 0xFF); // B
+
+            usart0_spi_transfer_byte((ulColor >> 2) & 0xFF); // G
+            usart0_spi_transfer_byte((ulColor >> 16) & 0xFF); // R
+            usart0_spi_transfer_byte((ulColor >> 24) & 0xFF); // B
+*/
+            usart0_spi_transfer_byte(0x00); // G
+            usart0_spi_transfer_byte(0xFF); // R
+            usart0_spi_transfer_byte(0x00); // B
+
+            usart0_spi_transfer_byte(0xFF); // G
+            usart0_spi_transfer_byte(0x00); // R
+            usart0_spi_transfer_byte(0x00); // B
+
+            ubPosition += 2;
+
+            if(ubPosition > ubMaxPosition)
+            {
+                ubPosition = 0;
+                ubMaxPosition -= 2;
+
+                ulColor = trng_pop_random();
+            }
+
+            if(ubMaxPosition <= 0)
+            {
+                ubMaxPosition = 112;
+
+                for(uint8_t i = 0; i < ubMaxPosition; i++)
+                {
+                    usart0_spi_transfer_byte(0x00); // G
+                    usart0_spi_transfer_byte(0x00); // R
+                    usart0_spi_transfer_byte(0x00); // B
+                }
             }
 
             /*
-            if(pn532_read_passive_target_id(ubUid, &ubUidLen)) 
+            uint8_t ubUid[7] = {0, 0, 0, 0, 0, 0, 0};
+            uint8_t ubUidLen = 0;
+
+            if(pn532_read_passive_target_id(ubUid, &ubUidLen))
             {
                 DBGPRINTLN_CTX("Found Rfid Card");
                 DBGPRINTLN_CTX("UID Length: %hhu bytes", ubUidLen);
-                if(ubUidLen == 4) 
+                if(ubUidLen == 4)
                 {
                     DBGPRINTLN_CTX("Probably Mifare classic");
                     DBGPRINTLN_CTX("UID: 0x%02X %02X %02X %02X", ubUid[0], ubUid[1], ubUid[2], ubUid[3]);
