@@ -443,6 +443,8 @@ int main()
         usart0_spi_transfer_byte(0xFF); // B
     }
 
+    delay_ms(1000);
+
     for(uint8_t i = 0; i < 112; i++)
     {
         usart0_spi_transfer_byte(0x00); // G
@@ -456,7 +458,7 @@ int main()
     {
         static uint64_t ullLastRfidCheck = 0;
 
-        if (g_ullSystemTick > (ullLastRfidCheck + 2))
+        if (g_ullSystemTick > (ullLastRfidCheck + 5))
         {
             static uint8_t ubPosition = 0;
             static uint8_t ubMaxPosition = 112;
@@ -481,13 +483,13 @@ int main()
             usart0_spi_transfer_byte((ulColor >> 16) & 0xFF); // R
             usart0_spi_transfer_byte((ulColor >> 24) & 0xFF); // B
 */
-            usart0_spi_transfer_byte(0x00); // G
-            usart0_spi_transfer_byte(0xFF); // R
-            usart0_spi_transfer_byte(0x00); // B
+            usart0_spi_transfer_byte(0x86); // G
+            usart0_spi_transfer_byte(0x42); // R
+            usart0_spi_transfer_byte(0xF4); // B
 
-            usart0_spi_transfer_byte(0xFF); // G
-            usart0_spi_transfer_byte(0x00); // R
-            usart0_spi_transfer_byte(0x00); // B
+            usart0_spi_transfer_byte(0x76); // G
+            usart0_spi_transfer_byte(0xE8); // R
+            usart0_spi_transfer_byte(0x0B); // B
 
             ubPosition += 2;
 
