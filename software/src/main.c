@@ -322,6 +322,10 @@ int main()
     i2c1_write_byte(0x76, 0xD0, I2C_RESTART);
     DBGPRINTLN_CTX("BME ID %02X", i2c1_read_byte(0x76, I2C_STOP));
 
+    i2c1_write_byte(0x39, 0x91, I2C_RESTART);
+    DBGPRINTLN_CTX("Color Sensor Revision ID %02X", i2c1_read_byte(0x39, I2C_RESTART));
+    DBGPRINTLN_CTX("Color Sensor ID %02X", i2c1_read_byte(0x39, I2C_STOP));
+
     //usart0_write_byte('a');
     //usart0_write_byte('b');
     //usart0_write_byte('c');
