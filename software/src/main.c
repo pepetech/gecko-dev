@@ -20,6 +20,7 @@
 #include "usart.h"
 #include "i2c.h"
 #include "pn532.h"
+#include "as5048a.h"
 
 // Structs
 
@@ -227,7 +228,8 @@ int init()
 
     //usart0_init(115200, UART_FRAME_STOPBITS_ONE | UART_FRAME_PARITY_NONE | USART_FRAME_DATABITS_EIGHT, 4, 4, -1, -1);
     //usart0_init(1000000, 0, USART_SPI_LSB_FIRST, 0, 0, 0);
-    usart0_init(800000, 1, USART_SPI_MSB_FIRST, -1, 4, 5);
+    //usart0_init(800000, 1, USART_SPI_MSB_FIRST, -1, 4, 5);
+    usart0_init(1000000, 1, USART_SPI_MSB_FIRST, 0, 0, 0);
     i2c1_init(I2C_NORMAL, 1, 1); // Init I2C1 at 100 kHz on location 1
 
     char szDeviceName[32];
@@ -313,7 +315,9 @@ int init()
 }
 int main()
 {
-    DBGPRINTLN_CTX("PN532 Version 0x%08X", pn532_get_version());
+    DBGPRINTLN_CTX("AS5048A Error Register: 0x%04X", as5048a_get_errors());
+
+    //DBGPRINTLN_CTX("PN532 Version 0x%08X", pn532_get_version());
 
     //pn532_set_passive_activation_retries(0x00);
 
@@ -440,30 +444,34 @@ int main()
     //DBGPRINTLN_CTX("QSPI RD: %08X", *(volatile uint32_t *)0xC0000000);
     //DBGPRINTLN_CTX("QSPI RD: %08X", *(volatile uint32_t *)0xC0000004);
 
-    for(uint8_t i = 0; i < 112; i++)
-    {
-        usart0_spi_transfer_byte(0xFF); // G
-        usart0_spi_transfer_byte(0xFF); // R
-        usart0_spi_transfer_byte(0xFF); // B
-    }
+    //for(uint8_t i = 0; i < 112; i++)
+    //{
+    //    usart0_spi_transfer_byte(0xFF); // G
+    //    usart0_spi_transfer_byte(0xFF); // R
+    //    usart0_spi_transfer_byte(0xFF); // B
+    //}
 
-    delay_ms(1000);
+    //delay_ms(1000);
 
-    for(uint8_t i = 0; i < 112; i++)
-    {
-        usart0_spi_transfer_byte(0x00); // G
-        usart0_spi_transfer_byte(0x00); // R
-        usart0_spi_transfer_byte(0x00); // B
-    }
+    //for(uint8_t i = 0; i < 112; i++)
+    //{
+    //    usart0_spi_transfer_byte(0x00); // G
+    //    usart0_spi_transfer_byte(0x00); // R
+    //    usart0_spi_transfer_byte(0x00); // B
+    //}
 
-    delay_ms(1000);
+    //delay_ms(1000);
 
     while(1)
     {
         static uint64_t ullLastRfidCheck = 0;
 
-        if (g_ullSystemTick > (ullLastRfidCheck + 5))
+        if (g_ullSystemTick > (ullLastRfidCheck + 500))
         {
+            DBGPRINTLN_CTX("AS5048 Position: %d", as5048a_get_angle());
+            
+
+            /*
             static uint8_t ubPosition = 0;
             static uint8_t ubMaxPosition = 112;
 
@@ -477,7 +485,7 @@ int main()
             static uint32_t ulColor = 0;
 
             if(!ulColor)
-                ulColor = trng_pop_random();
+                ulColor = trng_pop_random();*/
 /*
             usart0_spi_transfer_byte((ulColor >> 2) & 0xFF); // G
             usart0_spi_transfer_byte((ulColor >> 16) & 0xFF); // R
@@ -486,7 +494,7 @@ int main()
             usart0_spi_transfer_byte((ulColor >> 2) & 0xFF); // G
             usart0_spi_transfer_byte((ulColor >> 16) & 0xFF); // R
             usart0_spi_transfer_byte((ulColor >> 24) & 0xFF); // B
-*/
+*//*
             usart0_spi_transfer_byte(0x86); // G
             usart0_spi_transfer_byte(0x42); // R
             usart0_spi_transfer_byte(0xF4); // B
@@ -515,7 +523,7 @@ int main()
                     usart0_spi_transfer_byte(0x00); // R
                     usart0_spi_transfer_byte(0x00); // B
                 }
-            }
+            }*/
 
             /*
             uint8_t ubUid[7] = {0, 0, 0, 0, 0, 0, 0};

@@ -16,6 +16,9 @@
 #define PN532_UNSELECT()    PERI_REG_BIT_SET(&(GPIO->P[4].DOUT)) = BIT(9)
 #define PN532_READY()       1//PERI_REG_BIT(&(GPIO->P[0].DIN, 2)
 
+#define AS5048A_SELECT()      PERI_REG_BIT_CLEAR(&(GPIO->P[4].DOUT)) = BIT(9)
+#define AS5048A_UNSELECT()    PERI_REG_BIT_SET(&(GPIO->P[4].DOUT)) = BIT(9)
+
 void gpio_init();
 
 #endif  // __GPIO_H__
