@@ -191,6 +191,8 @@ int init()
     rmu_init(RMU_CTRL_PINRMODE_FULL, RMU_CTRL_SYSRMODE_EXTENDED, RMU_CTRL_LOCKUPRMODE_EXTENDED, RMU_CTRL_WDOGRMODE_EXTENDED); // Init RMU and set reset modes
 
     emu_init(0); // Init EMU
+    emu_r5v_vin_config(EMU_R5VCTRL_INPUTMODE_AUTO); // Set 5V regulator automatic input selection
+    emu_r5v_vout_config(3.3f); // Set 5V regulator output voltage to 3.3V
     emu_dcdc_init(1800.f, 200.f, 500.f, 160.f); // Init DC-DC converter (1.8 V, 200 mA active, 500 uA sleep, 160 mA reverse limit)
 
     cmu_hfxo_startup_calib(0x200, 0x087); // Config HFXO Startup for 1280 uA, 20.04 pF
@@ -233,8 +235,8 @@ int init()
     //usart0_init(115200, UART_FRAME_STOPBITS_ONE | UART_FRAME_PARITY_NONE | USART_FRAME_DATABITS_EIGHT, 4, 4, -1, -1);
     //usart0_init(1000000, 0, USART_SPI_LSB_FIRST, 0, 0, 0);
     //usart0_init(800000, 1, USART_SPI_MSB_FIRST, -1, 4, 5);
-    usart0_init(1000000, 1, USART_SPI_MSB_FIRST, 0, 0, 0);
-    i2c1_init(I2C_NORMAL, 1, 1); // Init I2C1 at 100 kHz on location 1
+    //usart0_init(1000000, 1, USART_SPI_MSB_FIRST, 0, 0, 0);
+    //i2c1_init(I2C_NORMAL, 1, 1); // Init I2C1 at 100 kHz on location 1
 
     char szDeviceName[32];
 
@@ -304,9 +306,15 @@ int init()
     DBGPRINTLN_CTX("EMU - IOVDD Voltage: %.2f mV", adc_get_iovdd());
     DBGPRINTLN_CTX("EMU - IOVDD Status: %s", g_ubIOVDDLow ? "LOW" : "OK");
     DBGPRINTLN_CTX("EMU - Core Voltage: %.2f mV", adc_get_corevdd());
+    DBGPRINTLN_CTX("EMU - R5V VREGI Voltage: %.2f mV", adc_get_r5v_vregi());
+    DBGPRINTLN_CTX("EMU - R5V VREGI Current: %.2f mA", adc_get_r5v_vregi_current());
+    DBGPRINTLN_CTX("EMU - R5V VBUS Voltage: %.2f mV", adc_get_r5v_vbus());
+    DBGPRINTLN_CTX("EMU - R5V VBUS Current: %.2f mA", adc_get_r5v_vbus_current());
+    DBGPRINTLN_CTX("EMU - R5V VREGO Voltage: %.2f mV", adc_get_r5v_vrego());
 
     delay_ms(100);
 
+    /*
     DBGPRINTLN_CTX("Scanning I2C bus 1...");
 
     for(uint8_t a = 0x08; a < 0x78; a++)
@@ -314,39 +322,12 @@ int init()
         if(i2c1_write(a, 0, 0, I2C_STOP))
             DBGPRINTLN_CTX("  Address 0x%02X ACKed!", a);
     }
-
-    //if(pn532_init())
-    //    DBGPRINTLN_CTX("PN532 init OK!");
-    //else
-    //    DBGPRINTLN_CTX("PN532 init NOK!");
+    */
 
     return 0;
 }
 int main()
 {
-    DBGPRINTLN_CTX("AS5048A Error Register: 0x%04X", as5048a_get_errors());
-
-    //DBGPRINTLN_CTX("PN532 Version 0x%08X", pn532_get_version());
-
-    //pn532_set_passive_activation_retries(0x00);
-
-    //pn532_sam_configuration(PN532_SAM_NORMAL_MODE, PN532_SAM_TIMEOUT_1S, PN532_SAM_IRQ);
-
-    i2c1_write_byte(0x76, 0xD0, I2C_RESTART);
-    DBGPRINTLN_CTX("BME ID %02X", i2c1_read_byte(0x76, I2C_STOP));
-
-    i2c1_write_byte(0x39, 0x91, I2C_RESTART);
-    DBGPRINTLN_CTX("Color Sensor Revision ID %02X", i2c1_read_byte(0x39, I2C_RESTART));
-    DBGPRINTLN_CTX("Color Sensor ID %02X", i2c1_read_byte(0x39, I2C_STOP));
-
-    //usart0_write_byte('a');
-    //usart0_write_byte('b');
-    //usart0_write_byte('c');
-    //usart0_write_byte('d');
-    //usart0_write_byte('1');
-    //usart0_write_byte('2');
-    //usart0_write_byte('3');
-
     // Internal flash test
     DBGPRINTLN_CTX("Initial calibration dump:");
 
@@ -477,94 +458,13 @@ int main()
 
         if (g_ullSystemTick > (ullLastRfidCheck + 500))
         {
-            DBGPRINTLN_CTX("AS5048 Position: %d", as5048a_get_angle());
-            
-
-            /*
-            static uint8_t ubPosition = 0;
-            static uint8_t ubMaxPosition = 112;
-
-            for(uint8_t i = 0; i < ubPosition; i++)
-            {
-                usart0_spi_transfer_byte(0x00); // G
-                usart0_spi_transfer_byte(0x00); // R
-                usart0_spi_transfer_byte(0x00); // B
-            }
-
-            static uint32_t ulColor = 0;
-
-            if(!ulColor)
-                ulColor = trng_pop_random();*/
-/*
-            usart0_spi_transfer_byte((ulColor >> 2) & 0xFF); // G
-            usart0_spi_transfer_byte((ulColor >> 16) & 0xFF); // R
-            usart0_spi_transfer_byte((ulColor >> 24) & 0xFF); // B
-
-            usart0_spi_transfer_byte((ulColor >> 2) & 0xFF); // G
-            usart0_spi_transfer_byte((ulColor >> 16) & 0xFF); // R
-            usart0_spi_transfer_byte((ulColor >> 24) & 0xFF); // B
-*//*
-            usart0_spi_transfer_byte(0x86); // G
-            usart0_spi_transfer_byte(0x42); // R
-            usart0_spi_transfer_byte(0xF4); // B
-
-            usart0_spi_transfer_byte(0x76); // G
-            usart0_spi_transfer_byte(0xE8); // R
-            usart0_spi_transfer_byte(0x0B); // B
-
-            ubPosition += 2;
-
-            if(ubPosition > ubMaxPosition)
-            {
-                ubPosition = 0;
-                ubMaxPosition -= 2;
-
-                ulColor = trng_pop_random();
-            }
-
-            if(ubMaxPosition <= 0)
-            {
-                ubMaxPosition = 112;
-
-                for(uint8_t i = 0; i < ubMaxPosition; i++)
-                {
-                    usart0_spi_transfer_byte(0x00); // G
-                    usart0_spi_transfer_byte(0x00); // R
-                    usart0_spi_transfer_byte(0x00); // B
-                }
-            }*/
-
-            /*
-            uint8_t ubUid[7] = {0, 0, 0, 0, 0, 0, 0};
-            uint8_t ubUidLen = 0;
-
-            if(pn532_read_passive_target_id(ubUid, &ubUidLen))
-            {
-                DBGPRINTLN_CTX("Found Rfid Card");
-                DBGPRINTLN_CTX("UID Length: %hhu bytes", ubUidLen);
-                if(ubUidLen == 4)
-                {
-                    DBGPRINTLN_CTX("Probably Mifare classic");
-                    DBGPRINTLN_CTX("UID: 0x%02X %02X %02X %02X", ubUid[0], ubUid[1], ubUid[2], ubUid[3]);
-                }
-                else
-                {
-                    DBGPRINTLN_CTX("Probably Mifare Ultraligth");
-                    DBGPRINTLN_CTX("UID: 0x%02X %02X %02X %02X", ubUid[0], ubUid[1], ubUid[2], ubUid[3], ubUid[4], ubUid[5], ubUid[6]);
-                }
-
-                GPIO->P[0].DOUT |= BIT(0);
-                delay_ms(50);
-                GPIO->P[0].DOUT &= ~BIT(0);
-            }
-            */
             ullLastRfidCheck = g_ullSystemTick;
+
+            DBGPRINTLN_CTX("ADC Temp: %.2f", adc_get_temperature());
+            DBGPRINTLN_CTX("EMU Temp: %.2f", emu_get_temperature());
         }
 
-/*
-        DBGPRINTLN_CTX("ADC Temp: %.2f", adc_get_temperature());
-        DBGPRINTLN_CTX("EMU Temp: %.2f", emu_get_temperature());
-
+        /*
         DBGPRINTLN_CTX("HFXO Startup: %.2f pF", cmu_hfxo_get_startup_cap());
         DBGPRINTLN_CTX("HFXO Startup: %.2f uA", cmu_hfxo_get_startup_current());
         DBGPRINTLN_CTX("HFXO Steady: %.2f pF", cmu_hfxo_get_steady_cap());
@@ -577,7 +477,7 @@ int main()
         DBGPRINTLN_CTX("RTCC Time: %lu", rtcc_get_time());
 
         DBGPRINTLN_CTX("Big fag does not need debug uart anymore.");
-*/
+        */
     }
 
     return 0;
