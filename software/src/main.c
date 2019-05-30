@@ -215,7 +215,7 @@ int init()
     float fIOVDDHighThresh, fIOVDDLowThresh;
 
     emu_vmon_avdd_config(1, 3.1f, &fAVDDLowThresh, 3.22f, &fAVDDHighThresh); // Enable AVDD monitor
-    emu_vmon_dvdd_config(1, 2.5f, &fDVDDLowThresh); // Enable DVDD monitor
+    emu_vmon_dvdd_config(1, 1.7f, &fDVDDLowThresh); // Enable DVDD monitor
     emu_vmon_iovdd_config(1, 3.15f, &fIOVDDLowThresh); // Enable IOVDD monitor
 
     fDVDDHighThresh = fDVDDLowThresh + 0.026f; // Hysteresis from datasheet
