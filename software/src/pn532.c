@@ -148,7 +148,7 @@ void pn532_write_frame(uint8_t *pubPayload, uint8_t ubLength)
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
         PN532_SELECT(); // wake up PN532
-        usart0_spi_write(pubBuf, 9 + ubLength);
+        usart0_spi_write(pubBuf, 9 + ubLength, 1);
         PN532_UNSELECT();
     }
 
@@ -173,7 +173,7 @@ uint8_t pn532_read_frame(uint8_t *pubPayload, uint8_t ubMaxLength)
     {
         PN532_SELECT(); // Wake up PN532
 
-        usart0_spi_write(ubPreamble, 4);    // write "header"
+        usart0_spi_write(ubPreamble, 4, 1);    // write "header"
 
         ubLength = usart0_spi_transfer_byte(0x00);  // read length byte
 
@@ -194,8 +194,8 @@ uint8_t pn532_read_frame(uint8_t *pubPayload, uint8_t ubMaxLength)
             return PN532_NO_SPACE;
         }
 
-        usart0_spi_read(pubPayload, ubLength);   // read payload
-        usart0_spi_read(ubPostamble, 2);    // read payload checksum and postamble
+        usart0_spi_read(pubPayload, ubLength, 0x00);   // read payload
+        usart0_spi_read(ubPostamble, 2, 0x00);    // read payload checksum and postamble
 
         PN532_UNSELECT();
     }
@@ -228,7 +228,7 @@ uint8_t pn532_read_ack()
         PN532_SELECT();
 
         usart0_spi_transfer_byte(PN532_SPI_DATA_READ);
-        usart0_spi_read(ubAckBuf, 6);
+        usart0_spi_read(ubAckBuf, 6, 1);
         PN532_UNSELECT();
     }
 
@@ -253,7 +253,7 @@ void pn532_write_ack(uint8_t ubNack)
         ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
         {
             PN532_SELECT();
-            usart0_spi_write(ubNack, 6);
+            usart0_spi_write(ubNack, 6, 1);
             PN532_UNSELECT();
         }
     }
@@ -266,7 +266,7 @@ void pn532_write_ack(uint8_t ubNack)
         ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
         {
             PN532_SELECT();
-            usart0_spi_write(ubAck, 6);
+            usart0_spi_write(ubAck, 6, 1);
             PN532_UNSELECT();
         }
     }

@@ -6,6 +6,7 @@
 #include "nvic.h"
 #include "atomic.h"
 #include "systick.h"
+#include "rmu.h"
 #include "emu.h"
 #include "cmu.h"
 #include "gpio.h"
@@ -187,6 +188,8 @@ uint16_t get_device_revision()
 
 int init()
 {
+    rmu_init(RMU_CTRL_PINRMODE_FULL, RMU_CTRL_SYSRMODE_EXTENDED, RMU_CTRL_LOCKUPRMODE_EXTENDED, RMU_CTRL_WDOGRMODE_EXTENDED); // Init RMU and set reset modes
+
     emu_init(0); // Init EMU
     emu_dcdc_init(1800.f, 200.f, 500.f, 160.f); // Init DC-DC converter (1.8 V, 200 mA active, 500 uA sleep, 160 mA reverse limit)
 
@@ -208,6 +211,7 @@ int init()
     systick_init(); // Init system tick
 
     gpio_init(); // Init GPIOs
+    ldma_init(); // Init LDMA
     rtcc_init(); // Init RTCC
     trng_init(); // Init TRNG
     crypto_init(); // Init Crypto engine
@@ -243,6 +247,11 @@ int init()
     DBGPRINTLN_CTX("RAM Size: %hu kB", SRAM_SIZE >> 10);
     DBGPRINTLN_CTX("Free RAM: %lu B", get_free_ram());
     DBGPRINTLN_CTX("Unique ID: %08X-%08X", DEVINFO->UNIQUEH, DEVINFO->UNIQUEL);
+
+    DBGPRINTLN_CTX("RMU - Reset cause: %hhu", rmu_get_reset_reason());
+    DBGPRINTLN_CTX("RMU - Reset state: %hhu", rmu_get_reset_state());
+
+    rmu_clear_reset_reason();
 
     DBGPRINTLN_CTX("CMU - HFXO Clock: %.1f MHz!", (float)HFXO_VALUE / 1000000);
     DBGPRINTLN_CTX("CMU - HFRCO Clock: %.1f MHz!", (float)HFRCO_VALUE / 1000000);
