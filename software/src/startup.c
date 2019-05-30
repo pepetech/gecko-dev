@@ -12,6 +12,10 @@ extern uint32_t _siiram0; // RAM code source
 extern uint32_t _siram0; // RAM code destination
 extern uint32_t _eiram0;
 
+extern uint32_t _siiram1; // RAMH code source
+extern uint32_t _siram1; // RAMH code destination
+extern uint32_t _eiram1;
+
 extern uint32_t _sidata; // Data source
 extern uint32_t _sdata; // Data destination
 extern uint32_t _edata;
@@ -45,6 +49,12 @@ void _reset_isr()
     dst = &_siram0;
 
     while (dst < &_eiram0) // Copy RAM code
+        *(dst++) = *(src++);
+
+    src = &_siiram1;
+    dst = &_siram1;
+
+    while (dst < &_eiram1) // Copy RAMH code
         *(dst++) = *(src++);
 
     src = &_sidata;

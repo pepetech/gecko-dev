@@ -40,7 +40,7 @@ void gpio_init()
                       | GPIO_P_MODEH_MODE9_DISABLED
                       | GPIO_P_MODEH_MODE10_DISABLED
                       | GPIO_P_MODEH_MODE11_DISABLED
-                      | GPIO_P_MODEH_MODE12_PUSHPULL
+                      | GPIO_P_MODEH_MODE12_DISABLED
                       | GPIO_P_MODEH_MODE13_DISABLED
                       | GPIO_P_MODEH_MODE14_DISABLED
                       | GPIO_P_MODEH_MODE15_DISABLED;
@@ -57,12 +57,12 @@ void gpio_init()
                       | GPIO_P_MODEL_MODE4_DISABLED
                       | GPIO_P_MODEL_MODE5_DISABLED
                       | GPIO_P_MODEL_MODE6_DISABLED
-                      | GPIO_P_MODEL_MODE7_PUSHPULL;
-    GPIO->P[1].MODEH  = GPIO_P_MODEH_MODE8_INPUTPULLFILTER
+                      | GPIO_P_MODEL_MODE7_DISABLED;
+    GPIO->P[1].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
                       | GPIO_P_MODEH_MODE9_DISABLED
                       | GPIO_P_MODEH_MODE10_DISABLED
-                      | GPIO_P_MODEH_MODE11_WIREDANDPULLUPFILTER // I2C1_SDA - Location 1
-                      | GPIO_P_MODEH_MODE12_WIREDANDPULLUPFILTER // I2C1_SCL - Location 1
+                      | GPIO_P_MODEH_MODE11_DISABLED
+                      | GPIO_P_MODEH_MODE12_DISABLED
                       | GPIO_P_MODEH_MODE13_DISABLED
                       | GPIO_P_MODEH_MODE14_DISABLED
                       | GPIO_P_MODEH_MODE15_DISABLED;
@@ -82,8 +82,8 @@ void gpio_init()
                       | GPIO_P_MODEL_MODE7_DISABLED;
     GPIO->P[2].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
                       | GPIO_P_MODEH_MODE9_DISABLED
-                      | GPIO_P_MODEH_MODE10_DISABLED
-                      | GPIO_P_MODEH_MODE11_DISABLED
+                      | GPIO_P_MODEH_MODE10_WIREDANDPULLUPFILTER
+                      | GPIO_P_MODEH_MODE11_WIREDANDPULLUPFILTER
                       | GPIO_P_MODEH_MODE12_DISABLED
                       | GPIO_P_MODEH_MODE13_DISABLED
                       | GPIO_P_MODEH_MODE14_DISABLED
@@ -103,37 +103,15 @@ void gpio_init()
                       | GPIO_P_MODEL_MODE6_DISABLED
                       | GPIO_P_MODEL_MODE7_DISABLED;
     GPIO->P[3].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
-                      | GPIO_P_MODEH_MODE9_PUSHPULL  // QSPI0_DQ0 - Location 0
-                      | GPIO_P_MODEH_MODE10_PUSHPULL // QSPI0_DQ1 - Location 0
-                      | GPIO_P_MODEH_MODE11_PUSHPULL // QSPI0_DQ2 - Location 0
-                      | GPIO_P_MODEH_MODE12_PUSHPULL // QSPI0_DQ3 - Location 0
+                      | GPIO_P_MODEH_MODE9_DISABLED
+                      | GPIO_P_MODEH_MODE10_DISABLED
+                      | GPIO_P_MODEH_MODE11_DISABLED
+                      | GPIO_P_MODEH_MODE12_DISABLED
                       | GPIO_P_MODEH_MODE13_DISABLED
                       | GPIO_P_MODEH_MODE14_DISABLED
                       | GPIO_P_MODEH_MODE15_DISABLED;
     GPIO->P[3].DOUT   = 0;
     GPIO->P[3].OVTDIS = 0;
-
-    // Port E
-    GPIO->P[4].CTRL   = GPIO_P_CTRL_DRIVESTRENGTHALT_STRONG | (5 << _GPIO_P_CTRL_SLEWRATEALT_SHIFT)
-                      | GPIO_P_CTRL_DRIVESTRENGTH_STRONG | (5 << _GPIO_P_CTRL_SLEWRATE_SHIFT);
-    GPIO->P[4].MODEL  = GPIO_P_MODEL_MODE0_DISABLED
-                      | GPIO_P_MODEL_MODE1_DISABLED
-                      | GPIO_P_MODEL_MODE2_DISABLED
-                      | GPIO_P_MODEL_MODE3_DISABLED
-                      | GPIO_P_MODEL_MODE4_DISABLED
-                      | GPIO_P_MODEL_MODE5_DISABLED
-                      | GPIO_P_MODEL_MODE6_DISABLED
-                      | GPIO_P_MODEL_MODE7_DISABLED;
-    GPIO->P[4].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
-                      | GPIO_P_MODEH_MODE9_PUSHPULL
-                      | GPIO_P_MODEH_MODE10_PUSHPULL
-                      | GPIO_P_MODEH_MODE11_INPUTPULL
-                      | GPIO_P_MODEH_MODE12_PUSHPULL
-                      | GPIO_P_MODEH_MODE13_DISABLED
-                      | GPIO_P_MODEH_MODE14_DISABLED
-                      | GPIO_P_MODEH_MODE15_DISABLED;
-    GPIO->P[4].DOUT   = 0;
-    GPIO->P[4].OVTDIS = 0;
 
     // Port F
     GPIO->P[5].CTRL   = GPIO_P_CTRL_DRIVESTRENGTHALT_STRONG | (5 << _GPIO_P_CTRL_SLEWRATEALT_SHIFT)
@@ -144,8 +122,8 @@ void gpio_init()
                       | GPIO_P_MODEL_MODE3_DISABLED
                       | GPIO_P_MODEL_MODE4_DISABLED
                       | GPIO_P_MODEL_MODE5_DISABLED
-                      | GPIO_P_MODEL_MODE6_PUSHPULL  // QSPI0_SCLK - Location 0
-                      | GPIO_P_MODEL_MODE7_PUSHPULL; // QSPI0_CS0 - Location 0
+                      | GPIO_P_MODEL_MODE6_DISABLED
+                      | GPIO_P_MODEL_MODE7_DISABLED;
     GPIO->P[5].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
                       | GPIO_P_MODEH_MODE9_DISABLED
                       | GPIO_P_MODEH_MODE10_DISABLED
@@ -163,21 +141,21 @@ void gpio_init()
     GPIO->ROUTELOC0 = GPIO_ROUTELOC0_SWVLOC_LOC0; // SWO on PF2
 
     // External interrupts
-    GPIO->EXTIPSELL = GPIO_EXTIPSELL_EXTIPSEL0_PORTE            // 
-                    | GPIO_EXTIPSELL_EXTIPSEL1_PORTB            // 
-                    | GPIO_EXTIPSELL_EXTIPSEL2_PORTB            // 
-                    | GPIO_EXTIPSELL_EXTIPSEL3_PORTB            // 
+    GPIO->EXTIPSELL = GPIO_EXTIPSELL_EXTIPSEL0_PORTA            // 
+                    | GPIO_EXTIPSELL_EXTIPSEL1_PORTA            // 
+                    | GPIO_EXTIPSELL_EXTIPSEL2_PORTA            // 
+                    | GPIO_EXTIPSELL_EXTIPSEL3_PORTA            // 
                     | GPIO_EXTIPSELL_EXTIPSEL4_PORTA            // 
                     | GPIO_EXTIPSELL_EXTIPSEL5_PORTA            // 
-                    | GPIO_EXTIPSELL_EXTIPSEL6_PORTC            // 
-                    | GPIO_EXTIPSELL_EXTIPSEL7_PORTC;           // 
+                    | GPIO_EXTIPSELL_EXTIPSEL6_PORTA            // 
+                    | GPIO_EXTIPSELL_EXTIPSEL7_PORTA;           // 
     GPIO->EXTIPSELH = GPIO_EXTIPSELH_EXTIPSEL8_PORTA            // 
-                    | GPIO_EXTIPSELH_EXTIPSEL9_PORTE            // 
-                    | GPIO_EXTIPSELH_EXTIPSEL10_PORTF           // 
+                    | GPIO_EXTIPSELH_EXTIPSEL9_PORTA            // 
+                    | GPIO_EXTIPSELH_EXTIPSEL10_PORTA           // 
                     | GPIO_EXTIPSELH_EXTIPSEL11_PORTA           // 
                     | GPIO_EXTIPSELH_EXTIPSEL12_PORTA           // 
-                    | GPIO_EXTIPSELH_EXTIPSEL13_PORTE           // 
-                    | GPIO_EXTIPSELH_EXTIPSEL14_PORTF           // 
+                    | GPIO_EXTIPSELH_EXTIPSEL13_PORTA           // 
+                    | GPIO_EXTIPSELH_EXTIPSEL14_PORTA           // 
                     | GPIO_EXTIPSELH_EXTIPSEL15_PORTA;          // 
 
     GPIO->EXTIPINSELL = GPIO_EXTIPINSELL_EXTIPINSEL0_PIN3       // 

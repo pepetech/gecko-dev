@@ -5,16 +5,14 @@
 
 // Memory sections & aliases
 #define IRAM0_TEXT __attribute__ ((section(".iram0.text")))
+#define IRAM1_TEXT __attribute__ ((section(".iram1.text")))
 #define IROM1_TEXT __attribute__ ((section(".irom1.text")))
-#define IROM2_TEXT __attribute__ ((section(".irom2.text")))
 #define DROM0_DATA __attribute__ ((section(".drom0.data")))
-#define DROM1_DATA __attribute__ ((section(".drom1.data")))
 
 #define RAM_CODE IRAM0_TEXT
+#define RAMH_CODE IRAM1_TEXT
 #define BOOT_CODE IROM1_TEXT
-#define QSPI_CODE IROM2_TEXT
 #define USER_DATA DROM0_DATA
-#define QSPI_DATA DROM1_DATA
 
 // Macro to make a dummy read
 #define REG_DISCARD(reg) __asm__ volatile ("" : : "r" (*(volatile uint32_t *)(reg)))
@@ -47,8 +45,5 @@
 
 // Absolute value of
 #define ABS(a)      ((a) < 0 ? (-(a)) : (a))
-
-// Swap two variables
-#define SWAP(a, b)  do{ typeof(a) SWAP = a; a = b; b = SWAP; }while(0)
 
 #endif  // __UTILS_H__

@@ -36,9 +36,6 @@ uint8_t rmu_get_reset_reason()
     if((ulReason & RMU_RSTCAUSE_WDOG_MASK) == RMU_RSTCAUSE_WDOG_COMP)
         return RMU_RESET_CAUSE_WATCHDOG;
 
-    if((ulReason & RMU_RSTCAUSE_BUM_MASK) == RMU_RSTCAUSE_BUM_COMP)
-        return RMU_RESET_CAUSE_BACKUP_MODE;
-
     if((ulReason & RMU_RSTCAUSE_EM4_MASK) == RMU_RSTCAUSE_EM4_COMP)
         return RMU_RESET_CAUSE_EM4_MODE;
 

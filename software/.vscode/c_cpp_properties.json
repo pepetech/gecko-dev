@@ -10,7 +10,7 @@
                 "D:/Program Files (x86)/GNU Tools ARM Embedded/8 2018-q4-major/arm-none-eabi/include/c++/8.2.1",
                 "D:/Program Files (x86)/GNU Tools ARM Embedded/8 2018-q4-major/arm-none-eabi/include/c++/8.2.1/backward",
                 "E:/Projetos/ARM/ARMdev/lib/ARM.CMSIS.5.4.0/CMSIS/Include",
-                "E:/Projetos/ARM/ARMdev/lib/SiliconLabs.EFM32GG11B_DFP.5.7.0/Device/SiliconLabs/EFM32GG11B/Include"
+                "E:/Projetos/ARM/ARMdev/lib/SiliconLabs.EFM32PG1B_DFP.5.7.0/Device/SiliconLabs/EFM32PG1B/Include"
             ],
             "defines": [
                 "__ACCUM_EPSILON__=0x1P-15K",
@@ -443,7 +443,7 @@
                 "HFXO_VALUE=8000000UL",
                 "LFXO_VALUE=32768UL",
                 "BUILD_VERSION",
-                "EFM32GG11B820F2048GQ100"
+                "EFM32PG1B200F256GM32"
             ],
             "compilerPath": "D:/Program Files (x86)/GNU Tools ARM Embedded/8 2018-q4-major/bin/arm-none-eabi-gcc.exe -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16",
             "cStandard": "c99",
@@ -460,7 +460,7 @@
                 "/opt/gcc-arm-none-eabi/arm-none-eabi/include/c++/8.2.1",
                 "/opt/gcc-arm-none-eabi/arm-none-eabi/include/c++/8.2.1/backward",
                 "${env:ARM_LIBROOT}/ARM.CMSIS.5.4.0/CMSIS/Include",
-                "${env:ARM_LIBROOT}/SiliconLabs.EFM32GG11B_DFP.5.7.0/Device/SiliconLabs/EFM32GG11B/Include"
+                "${env:ARM_LIBROOT}/SiliconLabs.EFM32PG1B_DFP.5.7.0/Device/SiliconLabs/EFM32PG1B/Include"
             ],
             "defines": [
                 "__ACCUM_EPSILON__=0x1P-15K",
@@ -893,7 +893,7 @@
                 "HFXO_VALUE=8000000UL",
                 "LFXO_VALUE=32768UL",
                 "BUILD_VERSION",
-                "EFM32GG11B820F2048GQ100"
+                "EFM32PG1B200F256GM32"
             ],
             "compilerPath": "/opt/gcc-arm-none-eabi/bin/arm-none-eabi-gcc -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16",
             "cStandard": "c99",

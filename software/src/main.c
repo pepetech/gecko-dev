@@ -13,15 +13,10 @@
 #include "dbg.h"
 #include "msc.h"
 #include "crypto.h"
-#include "crc.h"
-#include "trng.h"
 #include "rtcc.h"
 #include "adc.h"
-#include "qspi.h"
 #include "usart.h"
 #include "i2c.h"
-#include "pn532.h"
-#include "as5048a.h"
 
 // Structs
 
@@ -191,14 +186,13 @@ int init()
     rmu_init(RMU_CTRL_PINRMODE_FULL, RMU_CTRL_SYSRMODE_EXTENDED, RMU_CTRL_LOCKUPRMODE_EXTENDED, RMU_CTRL_WDOGRMODE_EXTENDED); // Init RMU and set reset modes
 
     emu_init(0); // Init EMU
-    emu_dcdc_init(1800.f, 200.f, 500.f, 160.f); // Init DC-DC converter (1.8 V, 200 mA active, 500 uA sleep, 160 mA reverse limit)
+    emu_dcdc_init(1800.f, 200.f, 500.f, 0.f); // Init DC-DC converter (1.8 V, 200 mA active, 500 uA sleep, 10 mA reverse limit)
 
-    cmu_hfxo_startup_calib(0x200, 0x087); // Config HFXO Startup for 1280 uA, 20.04 pF
-    cmu_hfxo_steady_calib(0x006, 0x087); // Config HFXO Steady state for 12 uA, 20.04 pF
+    //cmu_hfxo_startup_calib(0x200, 0x087); // Config HFXO Startup for 1280 uA, 20.04 pF
+    //cmu_hfxo_steady_calib(0x006, 0x087); // Config HFXO Steady state for 12 uA, 20.04 pF
 
     cmu_init(); // Init Clocks
 
-    cmu_ushfrco_calib(1, USHFRCO_CALIB_8M, 8000000); // Enable and calibrate USHFRCO for 8 MHz
     cmu_auxhfrco_calib(1, AUXHFRCO_CALIB_32M, 32000000); // Enable and calibrate AUXHFRCO for 32 MHz
 
     cmu_update_clocks(); // Update Clocks
@@ -213,11 +207,8 @@ int init()
     gpio_init(); // Init GPIOs
     ldma_init(); // Init LDMA
     rtcc_init(); // Init RTCC
-    trng_init(); // Init TRNG
     crypto_init(); // Init Crypto engine
-    crc_init(); // Init CRC calculation unit
     adc_init(); // Init ADCs
-    qspi_init(); // Init QSPI memory
 
     float fAVDDHighThresh, fAVDDLowThresh;
     float fDVDDHighThresh, fDVDDLowThresh;
@@ -230,11 +221,8 @@ int init()
     fDVDDHighThresh = fDVDDLowThresh + 0.026f; // Hysteresis from datasheet
     fIOVDDHighThresh = fIOVDDLowThresh + 0.026f; // Hysteresis from datasheet
 
-    //usart0_init(115200, UART_FRAME_STOPBITS_ONE | UART_FRAME_PARITY_NONE | USART_FRAME_DATABITS_EIGHT, 4, 4, -1, -1);
-    //usart0_init(1000000, 0, USART_SPI_LSB_FIRST, 0, 0, 0);
-    //usart0_init(800000, 1, USART_SPI_MSB_FIRST, -1, 4, 5);
-    usart0_init(1000000, 1, USART_SPI_MSB_FIRST, 0, 0, 0);
-    i2c1_init(I2C_NORMAL, 1, 1); // Init I2C1 at 100 kHz on location 1
+    //usart0_init(1000000, 1, USART_SPI_MSB_FIRST, 0, 0, 0);
+    i2c0_init(I2C_NORMAL, 15, 15); // Init I2C1 at 100 kHz on location 15
 
     char szDeviceName[32];
 
@@ -255,39 +243,23 @@ int init()
 
     DBGPRINTLN_CTX("CMU - HFXO Clock: %.1f MHz!", (float)HFXO_VALUE / 1000000);
     DBGPRINTLN_CTX("CMU - HFRCO Clock: %.1f MHz!", (float)HFRCO_VALUE / 1000000);
-    DBGPRINTLN_CTX("CMU - USHFRCO Clock: %.1f MHz!", (float)USHFRCO_VALUE / 1000000);
     DBGPRINTLN_CTX("CMU - AUXHFRCO Clock: %.1f MHz!", (float)AUXHFRCO_VALUE / 1000000);
     DBGPRINTLN_CTX("CMU - LFXO Clock: %.3f kHz!", (float)LFXO_VALUE / 1000);
     DBGPRINTLN_CTX("CMU - LFRCO Clock: %.3f kHz!", (float)LFRCO_VALUE / 1000);
     DBGPRINTLN_CTX("CMU - ULFRCO Clock: %.3f kHz!", (float)ULFRCO_VALUE / 1000);
     DBGPRINTLN_CTX("CMU - HFSRC Clock: %.1f MHz!", (float)HFSRC_CLOCK_FREQ / 1000000);
     DBGPRINTLN_CTX("CMU - HF Clock: %.1f MHz!", (float)HF_CLOCK_FREQ / 1000000);
-    DBGPRINTLN_CTX("CMU - HFBUS Clock: %.1f MHz!", (float)HFBUS_CLOCK_FREQ / 1000000);
     DBGPRINTLN_CTX("CMU - HFCORE Clock: %.1f MHz!", (float)HFCORE_CLOCK_FREQ / 1000000);
     DBGPRINTLN_CTX("CMU - HFEXP Clock: %.1f MHz!", (float)HFEXP_CLOCK_FREQ / 1000000);
     DBGPRINTLN_CTX("CMU - HFPER Clock: %.1f MHz!", (float)HFPER_CLOCK_FREQ / 1000000);
-    DBGPRINTLN_CTX("CMU - HFPERB Clock: %.1f MHz!", (float)HFPERB_CLOCK_FREQ / 1000000);
-    DBGPRINTLN_CTX("CMU - HFPERC Clock: %.1f MHz!", (float)HFPERC_CLOCK_FREQ / 1000000);
     DBGPRINTLN_CTX("CMU - HFLE Clock: %.1f MHz!", (float)HFLE_CLOCK_FREQ / 1000000);
-    DBGPRINTLN_CTX("CMU - QSPI Clock: %.1f MHz!", (float)QSPI_CLOCK_FREQ / 1000000);
-    DBGPRINTLN_CTX("CMU - SDIO Clock: %.1f MHz!", (float)SDIO_CLOCK_FREQ / 1000000);
-    DBGPRINTLN_CTX("CMU - USB Clock: %.1f MHz!", (float)USB_CLOCK_FREQ / 1000000);
     DBGPRINTLN_CTX("CMU - ADC0 Clock: %.1f MHz!", (float)ADC0_CLOCK_FREQ / 1000000);
-    DBGPRINTLN_CTX("CMU - ADC1 Clock: %.1f MHz!", (float)ADC1_CLOCK_FREQ / 1000000);
     DBGPRINTLN_CTX("CMU - DBG Clock: %.1f MHz!", (float)DBG_CLOCK_FREQ / 1000000);
     DBGPRINTLN_CTX("CMU - AUX Clock: %.1f MHz!", (float)AUX_CLOCK_FREQ / 1000000);
     DBGPRINTLN_CTX("CMU - LFA Clock: %.3f kHz!", (float)LFA_CLOCK_FREQ / 1000);
-    DBGPRINTLN_CTX("CMU - LESENSE Clock: %.3f kHz!", (float)LESENSE_CLOCK_FREQ / 1000);
-    DBGPRINTLN_CTX("CMU - RTC Clock: %.3f kHz!", (float)RTC_CLOCK_FREQ / 1000);
-    DBGPRINTLN_CTX("CMU - LCD Clock: %.3f kHz!", (float)LCD_CLOCK_FREQ / 1000);
     DBGPRINTLN_CTX("CMU - LETIMER0 Clock: %.3f kHz!", (float)LETIMER0_CLOCK_FREQ / 1000);
-    DBGPRINTLN_CTX("CMU - LETIMER1 Clock: %.3f kHz!", (float)LETIMER1_CLOCK_FREQ / 1000);
     DBGPRINTLN_CTX("CMU - LFB Clock: %.3f kHz!", (float)LFB_CLOCK_FREQ / 1000);
     DBGPRINTLN_CTX("CMU - LEUART0 Clock: %.3f kHz!", (float)LEUART0_CLOCK_FREQ / 1000);
-    DBGPRINTLN_CTX("CMU - LEUART1 Clock: %.3f kHz!", (float)LEUART1_CLOCK_FREQ / 1000);
-    DBGPRINTLN_CTX("CMU - SYSTICK Clock: %.3f kHz!", (float)SYSTICK_CLOCK_FREQ / 1000);
-    DBGPRINTLN_CTX("CMU - CSEN Clock: %.3f kHz!", (float)CSEN_CLOCK_FREQ / 1000);
-    DBGPRINTLN_CTX("CMU - LFC Clock: %.3f kHz!", (float)LFC_CLOCK_FREQ / 1000);
     DBGPRINTLN_CTX("CMU - LFE Clock: %.3f kHz!", (float)LFE_CLOCK_FREQ / 1000);
     DBGPRINTLN_CTX("CMU - RTCC Clock: %.3f kHz!", (float)RTCC_CLOCK_FREQ / 1000);
 
@@ -307,51 +279,25 @@ int init()
 
     delay_ms(100);
 
-    DBGPRINTLN_CTX("Scanning I2C bus 1...");
+    DBGPRINTLN_CTX("Scanning I2C bus 0...");
 
     for(uint8_t a = 0x08; a < 0x78; a++)
     {
-        if(i2c1_write(a, 0, 0, I2C_STOP))
+        if(i2c0_write(a, 0, 0, I2C_STOP))
             DBGPRINTLN_CTX("  Address 0x%02X ACKed!", a);
     }
-
-    //if(pn532_init())
-    //    DBGPRINTLN_CTX("PN532 init OK!");
-    //else
-    //    DBGPRINTLN_CTX("PN532 init NOK!");
 
     return 0;
 }
 int main()
 {
-    DBGPRINTLN_CTX("AS5048A Error Register: 0x%04X", as5048a_get_errors());
-
-    //DBGPRINTLN_CTX("PN532 Version 0x%08X", pn532_get_version());
-
-    //pn532_set_passive_activation_retries(0x00);
-
-    //pn532_sam_configuration(PN532_SAM_NORMAL_MODE, PN532_SAM_TIMEOUT_1S, PN532_SAM_IRQ);
-
-    i2c1_write_byte(0x76, 0xD0, I2C_RESTART);
-    DBGPRINTLN_CTX("BME ID %02X", i2c1_read_byte(0x76, I2C_STOP));
-
-    i2c1_write_byte(0x39, 0x91, I2C_RESTART);
-    DBGPRINTLN_CTX("Color Sensor Revision ID %02X", i2c1_read_byte(0x39, I2C_RESTART));
-    DBGPRINTLN_CTX("Color Sensor ID %02X", i2c1_read_byte(0x39, I2C_STOP));
-
-    //usart0_write_byte('a');
-    //usart0_write_byte('b');
-    //usart0_write_byte('c');
-    //usart0_write_byte('d');
-    //usart0_write_byte('1');
-    //usart0_write_byte('2');
-    //usart0_write_byte('3');
-
     // Internal flash test
+    /*
     DBGPRINTLN_CTX("Initial calibration dump:");
 
     for(init_calib_t *psCalibTbl = g_psInitCalibrationTable; psCalibTbl->pulRegister; psCalibTbl++)
         DBGPRINTLN_CTX("  0x%08X -> 0x%08X", psCalibTbl->ulInitialCalibration, psCalibTbl->pulRegister);
+    */
 
     /*
     DBGPRINTLN_CTX("Boot lock word: %08X", g_psLockBits->CLW[0]);
@@ -373,198 +319,26 @@ int main()
     DBGPRINTLN_CTX("0x00100000: %08X", *(volatile uint32_t *)0x00100000);
     */
 
-    // QSPI
-    DBGPRINTLN_CTX("Flash Part ID: %06X", qspi_flash_read_jedec_id());
-
-    uint8_t ubFlashUID[8];
-
-    qspi_flash_read_security(0x0000, ubFlashUID, 8);
-
-    DBGPRINTLN_CTX("Flash ID: %02X%02X%02X%02X%02X%02X%02X%02X", ubFlashUID[0], ubFlashUID[1], ubFlashUID[2], ubFlashUID[3], ubFlashUID[4], ubFlashUID[5], ubFlashUID[6], ubFlashUID[7]);
-
-    //qspi_flash_chip_erase();
-
-    //uint8_t rd[16];
-
-    //qspi_flash_cmd(QSPI_FLASH_CMD_READ_FAST, 0x00008000, 3, 0, 8, NULL, 0, rd, 10);
-    //DBGPRINTLN_CTX("Flash RD C: %02X%02X%02X%02X%02X%02X%02X%02X %02X%02X%02X%02X%02X%02X%02X%02X", rd[0], rd[1], rd[2], rd[3], rd[4], rd[5], rd[6], rd[7], rd[8], rd[9], rd[10], rd[11], rd[12], rd[13], rd[14], rd[15]);
-
-    //DBGPRINTLN_CTX("Flash RD: %08X", *(volatile uint32_t *)0xC0000000);
-    //*(volatile uint32_t *)0xC0000000 = 0xABCDEF12;
-
-    //qspi_flash_cmd(QSPI_FLASH_CMD_READ_FAST, 0x00000000, 3, 0, 8, NULL, 0, rd, 10);
-    //DBGPRINTLN_CTX("Flash RD C: %02X%02X%02X%02X%02X%02X%02X%02X %02X%02X%02X%02X%02X%02X%02X%02X", rd[0], rd[1], rd[2], rd[3], rd[4], rd[5], rd[6], rd[7], rd[8], rd[9], rd[10], rd[11], rd[12], rd[13], rd[14], rd[15]);
-
-    //uint32_t wr = 0xA2B3C4D5;
-    //qspi_flash_busy_wait();
-    //qspi_flash_write_enable();
-    //qspi_flash_cmd(QSPI_FLASH_CMD_WRITE, 0x00000004, 3, 0, 0, (uint8_t*)&wr, 4, NULL, 0);
-    //qspi_flash_busy_wait();
-
-    //qspi_flash_cmd(QSPI_FLASH_CMD_READ_FAST, 0x00000000, 3, 0, 8, NULL, 0, rd, 10);
-    //DBGPRINTLN_CTX("Flash RD C: %02X%02X%02X%02X%02X%02X%02X%02X %02X%02X%02X%02X%02X%02X%02X%02X", rd[0], rd[1], rd[2], rd[3], rd[4], rd[5], rd[6], rd[7], rd[8], rd[9], rd[10], rd[11], rd[12], rd[13], rd[14], rd[15]);
-
-    //*(volatile uint32_t *)0xC0000000 = 0x12AB34CD;
-
-    //////// Test for page wrapping (write beyond page boundary)
-
-    /*
-    for(uint8_t i = 0; i <= 64; i++)
-        *(volatile uint32_t *)(0xC0000000 + i * 4) = 0x0123ABCD;
-
-    DBGPRINTLN_CTX("Flash RD: %02X", *(volatile uint8_t *)0xC0000000); // CD
-    DBGPRINTLN_CTX("Flash RD: %02X", *(volatile uint8_t *)0xC0000001); // AB
-    DBGPRINTLN_CTX("Flash RD: %02X", *(volatile uint8_t *)0xC0000002); // 23
-    DBGPRINTLN_CTX("Flash RD: %02X", *(volatile uint8_t *)0xC0000003); // 01
-    DBGPRINTLN_CTX("Flash RD: %08X", *(volatile uint32_t *)0xC0000000); // 0123ABCD
-    DBGPRINTLN_CTX("Flash RD: %08X", *(volatile uint32_t *)0xC0000010); // 0123ABCD
-    DBGPRINTLN_CTX("Flash RD: %02X", *(volatile uint8_t *)0xC00000FC); // CD
-    DBGPRINTLN_CTX("Flash RD: %02X", *(volatile uint8_t *)0xC00000FD); // AB
-    DBGPRINTLN_CTX("Flash RD: %02X", *(volatile uint8_t *)0xC00000FE); // 23
-    DBGPRINTLN_CTX("Flash RD: %02X", *(volatile uint8_t *)0xC00000FF); // 01
-    DBGPRINTLN_CTX("Flash RD: %08X", *(volatile uint32_t *)0xC0000100); // 0123ABCD
-    */
-
-    //////// Test for code copy to QSPI flash
-
-    /*
-    for(uint32_t i = 0; i < bin_v1_test_bin_qspi_len / 4; i++)
-        *(volatile uint32_t *)(0x04000000 + i * 4) = *(uint32_t *)(bin_v1_test_bin_qspi + i * 4);
-
-    DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000000);
-    DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000001);
-    DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000002);
-    DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000003);
-
-    DBGPRINTLN_CTX("QSPI Dest %08X", get_family_name);
-    DBGPRINTLN_CTX("Device: %s%hu", get_family_name((DEVINFO->PART & _DEVINFO_PART_DEVICE_FAMILY_MASK) >> _DEVINFO_PART_DEVICE_FAMILY_SHIFT), (DEVINFO->PART & _DEVINFO_PART_DEVICE_NUMBER_MASK) >> _DEVINFO_PART_DEVICE_NUMBER_SHIFT);
-    */
-
-    DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000000);
-    DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000001);
-    DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000002);
-    DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000003);
-    DBGPRINTLN_CTX("Boot RD: %02X", *(volatile uint8_t *)0x0FE10000);
-    DBGPRINTLN_CTX("Data RD: %02X", *(volatile uint8_t *)0x0FE00000);
-
-    //qspi_flash_cmd(QSPI_FLASH_CMD_READ_FAST, 0x00000000, 3, 0, 8, NULL, 0, rd, 10);
-    //DBGPRINTLN_CTX("Flash RD C: %02X%02X%02X%02X%02X%02X%02X%02X %02X%02X%02X%02X%02X%02X%02X%02X", rd[0], rd[1], rd[2], rd[3], rd[4], rd[5], rd[6], rd[7], rd[8], rd[9], rd[10], rd[11], rd[12], rd[13], rd[14], rd[15]);
-
-    //DBGPRINTLN_CTX("QSPI RD: %08X", *(volatile uint32_t *)0xC0000000);
-    //DBGPRINTLN_CTX("QSPI RD: %08X", *(volatile uint32_t *)0xC0000004);
-
-    //for(uint8_t i = 0; i < 112; i++)
-    //{
-    //    usart0_spi_transfer_byte(0xFF); // G
-    //    usart0_spi_transfer_byte(0xFF); // R
-    //    usart0_spi_transfer_byte(0xFF); // B
-    //}
-
-    //delay_ms(1000);
-
-    //for(uint8_t i = 0; i < 112; i++)
-    //{
-    //    usart0_spi_transfer_byte(0x00); // G
-    //    usart0_spi_transfer_byte(0x00); // R
-    //    usart0_spi_transfer_byte(0x00); // B
-    //}
-
-    //delay_ms(1000);
-
     while(1)
     {
         static uint64_t ullLastRfidCheck = 0;
 
         if (g_ullSystemTick > (ullLastRfidCheck + 500))
         {
-            DBGPRINTLN_CTX("AS5048 Position: %d", as5048a_get_angle());
-            
-
-            /*
-            static uint8_t ubPosition = 0;
-            static uint8_t ubMaxPosition = 112;
-
-            for(uint8_t i = 0; i < ubPosition; i++)
-            {
-                usart0_spi_transfer_byte(0x00); // G
-                usart0_spi_transfer_byte(0x00); // R
-                usart0_spi_transfer_byte(0x00); // B
-            }
-
-            static uint32_t ulColor = 0;
-
-            if(!ulColor)
-                ulColor = trng_pop_random();*/
-/*
-            usart0_spi_transfer_byte((ulColor >> 2) & 0xFF); // G
-            usart0_spi_transfer_byte((ulColor >> 16) & 0xFF); // R
-            usart0_spi_transfer_byte((ulColor >> 24) & 0xFF); // B
-
-            usart0_spi_transfer_byte((ulColor >> 2) & 0xFF); // G
-            usart0_spi_transfer_byte((ulColor >> 16) & 0xFF); // R
-            usart0_spi_transfer_byte((ulColor >> 24) & 0xFF); // B
-*//*
-            usart0_spi_transfer_byte(0x86); // G
-            usart0_spi_transfer_byte(0x42); // R
-            usart0_spi_transfer_byte(0xF4); // B
-
-            usart0_spi_transfer_byte(0x76); // G
-            usart0_spi_transfer_byte(0xE8); // R
-            usart0_spi_transfer_byte(0x0B); // B
-
-            ubPosition += 2;
-
-            if(ubPosition > ubMaxPosition)
-            {
-                ubPosition = 0;
-                ubMaxPosition -= 2;
-
-                ulColor = trng_pop_random();
-            }
-
-            if(ubMaxPosition <= 0)
-            {
-                ubMaxPosition = 112;
-
-                for(uint8_t i = 0; i < ubMaxPosition; i++)
-                {
-                    usart0_spi_transfer_byte(0x00); // G
-                    usart0_spi_transfer_byte(0x00); // R
-                    usart0_spi_transfer_byte(0x00); // B
-                }
-            }*/
-
-            /*
-            uint8_t ubUid[7] = {0, 0, 0, 0, 0, 0, 0};
-            uint8_t ubUidLen = 0;
-
-            if(pn532_read_passive_target_id(ubUid, &ubUidLen))
-            {
-                DBGPRINTLN_CTX("Found Rfid Card");
-                DBGPRINTLN_CTX("UID Length: %hhu bytes", ubUidLen);
-                if(ubUidLen == 4)
-                {
-                    DBGPRINTLN_CTX("Probably Mifare classic");
-                    DBGPRINTLN_CTX("UID: 0x%02X %02X %02X %02X", ubUid[0], ubUid[1], ubUid[2], ubUid[3]);
-                }
-                else
-                {
-                    DBGPRINTLN_CTX("Probably Mifare Ultraligth");
-                    DBGPRINTLN_CTX("UID: 0x%02X %02X %02X %02X", ubUid[0], ubUid[1], ubUid[2], ubUid[3], ubUid[4], ubUid[5], ubUid[6]);
-                }
-
-                GPIO->P[0].DOUT |= BIT(0);
-                delay_ms(50);
-                GPIO->P[0].DOUT &= ~BIT(0);
-            }
-            */
             ullLastRfidCheck = g_ullSystemTick;
+
+            DBGPRINTLN_CTX("ADC Temp: %.2f", adc_get_temperature());
+            DBGPRINTLN_CTX("EMU Temp: %.2f", emu_get_temperature());
+
+            GPIO->P[0].DOUTTGL = BIT(0);
+
+            i2c0_write_byte(0x48, 0x00, I2C_RESTART);
+            int8_t bTemp = i2c0_read_byte(0x48, I2C_STOP);
+
+            DBGPRINTLN_CTX("Ext Temp: %i", bTemp);
         }
 
 /*
-        DBGPRINTLN_CTX("ADC Temp: %.2f", adc_get_temperature());
-        DBGPRINTLN_CTX("EMU Temp: %.2f", emu_get_temperature());
-
         DBGPRINTLN_CTX("HFXO Startup: %.2f pF", cmu_hfxo_get_startup_cap());
         DBGPRINTLN_CTX("HFXO Startup: %.2f uA", cmu_hfxo_get_startup_current());
         DBGPRINTLN_CTX("HFXO Steady: %.2f pF", cmu_hfxo_get_steady_cap());
