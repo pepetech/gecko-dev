@@ -4,9 +4,9 @@ void adc_init()
 {
     CMU->HFPERCLKEN0 |= CMU_HFPERCLKEN0_ADC0;
     CMU->HFPERCLKEN0 |= CMU_HFPERCLKEN0_ADC1;
-    
+
     CMU->ADCCTRL = CMU_ADCCTRL_ADC0CLKINV | CMU_ADCCTRL_ADC0CLKSEL_AUXHFRCO | (3 << _CMU_ADCCTRL_ADC0CLKDIV_SHIFT) | CMU_ADCCTRL_ADC1CLKINV | CMU_ADCCTRL_ADC1CLKSEL_AUXHFRCO | (3 << _CMU_ADCCTRL_ADC1CLKDIV_SHIFT);
-    
+
     cmu_update_clocks();
 
     // ADC_CLK is 8 MHz
@@ -30,8 +30,7 @@ float adc_get_avdd()
 
     while(!(ADC0->IF & ADC_IF_SINGLE));
 
-    float fADCCode = ADC0->SINGLEDATA >> 4;
-    float fAVDD = fADCCode * 5000.f / 4096.f;
+    float fAVDD = ADC0->SINGLEDATA * 5000.f / 65535.f;
 
     return fAVDD;
 }
@@ -50,8 +49,7 @@ float adc_get_dvdd()
 
     while(!(ADC0->IF & ADC_IF_SINGLE));
 
-    float fADCCode = ADC0->SINGLEDATA >> 4;
-    float fDVDD = fADCCode * 5000.f / 4096.f;
+    float fDVDD = ADC0->SINGLEDATA * 5000.f / 4096.f;
 
     return fDVDD;
 }
@@ -70,8 +68,7 @@ float adc_get_iovdd()
 
     while(!(ADC0->IF & ADC_IF_SINGLE));
 
-    float fADCCode = ADC0->SINGLEDATA >> 4;
-    float fIOVDD = fADCCode * 5000.f / 4096.f;
+    float fIOVDD = ADC0->SINGLEDATA * 5000.f / 4096.f;
 
     return fIOVDD;
 }
@@ -90,8 +87,7 @@ float adc_get_corevdd()
 
     while(!(ADC0->IF & ADC_IF_SINGLE));
 
-    float fADCCode = ADC0->SINGLEDATA >> 4;
-    float fDECOUPLE = fADCCode * 2500.f / 4096.f;
+    float fDECOUPLE = ADC0->SINGLEDATA * 2500.f / 4096.f;
 
     return fDECOUPLE;
 }
@@ -112,8 +108,7 @@ float adc_get_r5v_vregi()
 
     while(!(ADC0->IF & ADC_IF_SINGLE));
 
-    float fADCCode = ADC0->SINGLEDATA >> 4;
-    float fVREGI = fADCCode * 5000.f / 4096.f;
+    float fVREGI = ADC0->SINGLEDATA * 5000.f / 4096.f;
 
     emu_r5v_amux_config(0, 0);
 
@@ -136,8 +131,7 @@ float adc_get_r5v_vregi_current()
 
     while(!(ADC0->IF & ADC_IF_SINGLE));
 
-    float fADCCode = ADC0->SINGLEDATA >> 4;
-    float fIVREGI = fADCCode * 5000.f / 4096.f;
+    float fIVREGI = ADC0->SINGLEDATA * 5000.f / 4096.f;
 
     emu_r5v_amux_config(0, 0);
 
@@ -160,8 +154,7 @@ float adc_get_r5v_vbus()
 
     while(!(ADC0->IF & ADC_IF_SINGLE));
 
-    float fADCCode = ADC0->SINGLEDATA >> 4;
-    float fVBUS = fADCCode * 5000.f / 4096.f;
+    float fVBUS = ADC0->SINGLEDATA * 5000.f / 4096.f;
 
     emu_r5v_amux_config(0, 0);
 
@@ -184,8 +177,7 @@ float adc_get_r5v_vbus_current()
 
     while(!(ADC0->IF & ADC_IF_SINGLE));
 
-    float fADCCode = ADC0->SINGLEDATA >> 4;
-    float fIVBUS = fADCCode * 5000.f / 4096.f;
+    float fIVBUS = ADC0->SINGLEDATA * 5000.f / 4096.f;
 
     emu_r5v_amux_config(0, 0);
 
@@ -208,8 +200,7 @@ float adc_get_r5v_vrego()
 
     while(!(ADC0->IF & ADC_IF_SINGLE));
 
-    float fADCCode = ADC0->SINGLEDATA >> 4;
-    float fVREGO = fADCCode * 5000.f / 4096.f;
+    float fVREGO = ADC0->SINGLEDATA * 5000.f / 4096.f;
 
     emu_r5v_amux_config(0, 0);
 
