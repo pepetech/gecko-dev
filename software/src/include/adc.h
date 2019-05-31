@@ -4,6 +4,7 @@
 #include <em_device.h>
 #include "cmu.h"
 #include "emu.h"
+#include "systick.h"
 
 void adc_init();
 

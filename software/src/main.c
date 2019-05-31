@@ -193,7 +193,7 @@ int init()
     emu_init(0); // Init EMU
     emu_r5v_vin_config(EMU_R5VCTRL_INPUTMODE_AUTO); // Set 5V regulator automatic input selection
     emu_r5v_vout_config(3.3f); // Set 5V regulator output voltage to 3.3V
-    emu_dcdc_init(1800.f, 200.f, 500.f, 160.f); // Init DC-DC converter (1.8 V, 200 mA active, 500 uA sleep, 160 mA reverse limit)
+    emu_dcdc_init(2500.f, 200.f, 500.f, 0.f); // Init DC-DC converter (1.8 V, 200 mA active, 500 uA sleep, 160 mA reverse limit)
 
     cmu_hfxo_startup_calib(0x200, 0x087); // Config HFXO Startup for 1280 uA, 20.04 pF
     cmu_hfxo_steady_calib(0x006, 0x087); // Config HFXO Steady state for 12 uA, 20.04 pF
@@ -236,7 +236,7 @@ int init()
     //usart0_init(1000000, 0, USART_SPI_LSB_FIRST, 0, 0, 0);
     //usart0_init(800000, 1, USART_SPI_MSB_FIRST, -1, 4, 5);
     //usart0_init(1000000, 1, USART_SPI_MSB_FIRST, 0, 0, 0);
-    //i2c1_init(I2C_NORMAL, 1, 1); // Init I2C1 at 100 kHz on location 1
+    i2c0_init(I2C_NORMAL, 1, 1); // Init I2C0 at 100 kHz on location 1
 
     char szDeviceName[32];
 
@@ -314,15 +314,13 @@ int init()
 
     delay_ms(100);
 
-    /*
-    DBGPRINTLN_CTX("Scanning I2C bus 1...");
+    DBGPRINTLN_CTX("Scanning I2C bus 0...");
 
     for(uint8_t a = 0x08; a < 0x78; a++)
     {
-        if(i2c1_write(a, 0, 0, I2C_STOP))
+        if(i2c0_write(a, 0, 0, I2C_STOP))
             DBGPRINTLN_CTX("  Address 0x%02X ACKed!", a);
     }
-    */
 
     return 0;
 }
@@ -451,6 +449,8 @@ int main()
     //}
 
     //delay_ms(1000);
+
+    DBGPRINTLN_CTX("CURRMON: %08X", DEVINFO->CURRMON5V);
 
     while(1)
     {

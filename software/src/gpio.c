@@ -100,8 +100,8 @@ void gpio_init()
                       | GPIO_P_MODEL_MODE3_DISABLED
                       | GPIO_P_MODEL_MODE4_DISABLED
                       | GPIO_P_MODEL_MODE5_DISABLED
-                      | GPIO_P_MODEL_MODE6_DISABLED
-                      | GPIO_P_MODEL_MODE7_DISABLED;
+                      | GPIO_P_MODEL_MODE6_WIREDANDFILTER
+                      | GPIO_P_MODEL_MODE7_WIREDANDFILTER;
     GPIO->P[3].MODEH  = GPIO_P_MODEH_MODE8_DISABLED
                       | GPIO_P_MODEH_MODE9_PUSHPULL  // QSPI0_DQ0 - Location 0
                       | GPIO_P_MODEH_MODE10_PUSHPULL // QSPI0_DQ1 - Location 0

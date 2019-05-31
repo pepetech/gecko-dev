@@ -362,7 +362,7 @@ void emu_r5v_vout_config(float fTargetVoltage)
     EMU->R5VOUTLEVEL = (ulCode << _EMU_R5VOUTLEVEL_OUTLEVEL_SHIFT);
     while(EMU->R5VSYNC & EMU_R5VSYNC_OUTLEVELBUSY);
 
-    while(!(EMU->IFC & EMU_IFC_R5VVSINT));
+    while(!(EMU->IF & EMU_IF_R5VVSINT));
 }
 void emu_r5v_vin_config(uint32_t ulInput)
 {
