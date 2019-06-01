@@ -71,9 +71,9 @@ uint16_t as5048a_read(uint16_t usRegisterAddress)
 	AS5048A_UNSELECT();
 
     delay_ms(1);
-    
+
 	//Check if the error bit is set
-	if(usResponse & 0x4000) 
+	if(usResponse & 0x4000)
     {
         DBGPRINTLN_CTX("error bit set");
 	}
@@ -103,7 +103,7 @@ uint16_t as5048a_write(uint16_t usRegisterAddress, uint16_t usData)
 	usart0_spi_transfer_byte(usCommand & 0xFF);
 	usart0_spi_transfer_byte((usCommand >> 8) & 0xFF);
 	AS5048A_UNSELECT();
-	
+
     delay_ms(1);
 
 	uint16_t usDataToSend = 0b0000000000000000;
@@ -119,7 +119,7 @@ uint16_t as5048a_write(uint16_t usRegisterAddress, uint16_t usData)
 	AS5048A_UNSELECT();
 
     delay_ms(1);
-	
+
     uint16_t usReturnData = 0;
 
 	//Send a NOP to get the new data in the register
