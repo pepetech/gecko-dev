@@ -54,16 +54,6 @@
 #define TFT_BL_ON()         PERI_REG_BIT_SET(&(GPIO->P[1].DOUT)) = BIT(10)
 #define TFT_BL_OFF()        PERI_REG_BIT_CLEAR(&(GPIO->P[1].DOUT)) = BIT(10)
 
-// BUTTON MACROS
-#define BTN_3_STATE()       !PERI_REG_BIT(&(GPIO->P[1].DIN), 1)
-#define BTN_2_STATE()       !PERI_REG_BIT(&(GPIO->P[1].DIN), 2)
-#define BTN_1_STATE()       !PERI_REG_BIT(&(GPIO->P[1].DIN), 3)
-
-// BAT / POW MACROS
-#define BAT_STDBY()         !PERI_REG_BIT(&(GPIO->P[2].DIN), 6)
-#define BAT_CHRG()          !PERI_REG_BIT(&(GPIO->P[2].DIN), 7)
-#define VREG_ERR()          !PERI_REG_BIT(&(GPIO->P[5].DIN), 11)
-
 // WIFI COPROCESSOR MACROS
 #define WIFI_SELECT()       PERI_REG_BIT_CLEAR(&(GPIO->P[2].DOUT)) = BIT(8)
 #define WIFI_UNSELECT()     PERI_REG_BIT_SET(&(GPIO->P[2].DOUT)) = BIT(8)
@@ -77,9 +67,6 @@
 #define CCS811_SLEEP()      PERI_REG_BIT_SET(&(GPIO->P[4].DOUT)) = BIT(10)
 #define CCS811_WAKE()       PERI_REG_BIT_CLEAR(&(GPIO->P[4].DOUT)) = BIT(10)
 #define CCS811_IRQ()        PERI_REG_BIT(&(GPIO->P[4].DIN), 9)
-
-// MAG MACROS
-#define MAG_ALERT()         PERI_REG_BIT(&(GPIO->P[4].DIN), 15)
 
 void gpio_init();
 
