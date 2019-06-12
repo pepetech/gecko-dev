@@ -28,8 +28,7 @@ float adc_get_avdd()
 
     while(!(ADC0->IF & ADC_IF_SINGLE));
 
-    float fADCCode = ADC0->SINGLEDATA >> 4;
-    float fAVDD = fADCCode * 5000.f / 4096.f;
+    float fAVDD = ADC0->SINGLEDATA * 5000.f / 65535.f;
 
     return fAVDD;
 }
@@ -47,8 +46,7 @@ float adc_get_dvdd()
 
     while(!(ADC0->IF & ADC_IF_SINGLE));
 
-    float fADCCode = ADC0->SINGLEDATA >> 4;
-    float fDVDD = fADCCode * 5000.f / 4096.f;
+    float fDVDD = ADC0->SINGLEDATA * 5000.f / 65535.f;
 
     return fDVDD;
 }
@@ -66,8 +64,7 @@ float adc_get_iovdd()
 
     while(!(ADC0->IF & ADC_IF_SINGLE));
 
-    float fADCCode = ADC0->SINGLEDATA >> 4;
-    float fIOVDD = fADCCode * 5000.f / 4096.f;
+    float fIOVDD = ADC0->SINGLEDATA * 5000.f / 65535.f;
 
     return fIOVDD;
 }
@@ -84,8 +81,7 @@ float adc_get_corevdd()
 
     while(!(ADC0->IF & ADC_IF_SINGLE));
 
-    float fADCCode = ADC0->SINGLEDATA >> 4;
-    float fDECOUPLE = fADCCode * 2500.f / 4096.f;
+    float fDECOUPLE = ADC0->SINGLEDATA * 2500.f / 65535.f;;
 
     return fDECOUPLE;
 }
