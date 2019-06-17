@@ -23,3 +23,8 @@ void delay_ms(uint64_t ullTicks)
         while(g_ullSystemTick - ullStartTick < ullTicks);
     }
 }
+void delay_us(uint64_t ullTicks)
+{
+    uint64_t ullTarget = SysTick->VAL + (ullTicks * 72);
+    while(SysTick->VAL < ullTarget);
+}

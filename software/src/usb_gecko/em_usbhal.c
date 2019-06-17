@@ -18,6 +18,7 @@
 #include "em_usb.h"
 
 #include "atomic.h"
+#include "systick.h"
 #include "em_usbtypes.h"
 #include "em_usbhal.h"
 #include "em_usbd.h"
@@ -151,8 +152,7 @@ void USBHAL_CoreReset( void )
   USB->GRSTCTL |= USB_GRSTCTL_CSFTRST;
   while ( USB->GRSTCTL & USB_GRSTCTL_CSFTRST ) {}
 
-  // TODO:
-  //USBTIMER_DelayUs( 1 );
+  delay_us(1);  // TODO: maybe 1ms works?
 
   /* Wait for AHB master IDLE state. */
   while ( !( USB->GRSTCTL & USB_GRSTCTL_AHBIDLE ) ) {}
@@ -189,8 +189,7 @@ USB_Status_TypeDef USBDHAL_CoreInit( uint32_t totalRxFifoSize,
 #endif
 
   ATOMIC_IRQ_ENABLE();
-  // TODO:
-  //USBTIMER_DelayMs( 50 );
+  delay_ms(50);
   ATOMIC_IRQ_DISABLE();
 
   /* Set device speed */

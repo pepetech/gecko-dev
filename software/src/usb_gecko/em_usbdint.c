@@ -19,6 +19,7 @@
 
 //#include "em_cmu.h"
 //#include "em_core.h"
+#include "systick.h"
 #include "atomic.h"
 #include "em_usbtypes.h"
 #include "em_usbhal.h"
@@ -778,7 +779,7 @@ void USBDINT_RemoteWakeup(void)
     // Turn on resume signalling.
     USB->DCTL = x_USB_DCTL | USB_DCTL_RMTWKUPSIG;
 
-    USBTIMER_DelayMs(2);
+    delay_ms(2);
     USB->GINTSTS = 0xFFFFFFFF;        // Clear all pending interrupt flags.
 
     RestoreEpCtrlRegisters();
@@ -800,8 +801,7 @@ void USBDINT_RemoteWakeup(void)
 #endif
 
     ATOMIC_IRQ_ENABLE();
-    // TODO:
-    //USBTIMER_DelayMs( 10 );
+    delay_ms(10);
     ATOMIC_IRQ_DISABLE();
 
     USBDHAL_ClearRemoteWakeup();
@@ -815,8 +815,7 @@ void USBDINT_RemoteWakeup(void)
     USBDHAL_SetRemoteWakeup();
 
     ATOMIC_IRQ_ENABLE();
-    // TODO:
-    //USBTIMER_DelayMs( 10 );
+    delay_ms(10);
     ATOMIC_IRQ_DISABLE();
 
     USBDHAL_ClearRemoteWakeup();

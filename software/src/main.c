@@ -23,7 +23,15 @@
 #include "pn532.h"
 #include "as5048a.h"
 
-// Structs
+#include "em_usb.h"
+#include "descriptors.h"
+
+// defines
+#define LED0            0
+#define LED1            1
+
+#define VND_GET_LEDS    0x10
+#define VND_SET_LED     0x11
 
 // Forward declarations
 static void reset() __attribute__((noreturn));
@@ -33,6 +41,29 @@ static uint32_t get_free_ram();
 
 void get_device_name(char *pszDeviceName, uint32_t ulDeviceNameSize);
 static uint16_t get_device_revision();
+
+static int usb_setup_cmd(const USB_Setup_TypeDef *setup);
+
+// Structs
+static const USBD_Callbacks_TypeDef usbCallbacks =
+{
+  .usbReset        = NULL,
+  .usbStateChange  = NULL,
+  .setupCmd        = usb_setup_cmd,
+  .isSelfPowered   = NULL,
+  .sofInt          = NULL
+};
+
+static const USBD_Init_TypeDef usbInitStruct =
+{
+  .deviceDescriptor    = &USBDESC_deviceDesc,
+  .configDescriptor    = USBDESC_configDesc,
+  .stringDescriptors   = USBDESC_strings,
+  .numberOfStrings     = sizeof(USBDESC_strings)/sizeof(void*),
+  .callbacks           = &usbCallbacks,
+  .bufferingMultiplier = USBDESC_bufferingMultiplier,
+  .reserved            = 0
+};
 
 // Variables
 
@@ -232,11 +263,8 @@ int init()
     fDVDDHighThresh = fDVDDLowThresh + 0.026f; // Hysteresis from datasheet
     fIOVDDHighThresh = fIOVDDLowThresh + 0.026f; // Hysteresis from datasheet
 
-    //usart0_init(115200, UART_FRAME_STOPBITS_ONE | UART_FRAME_PARITY_NONE | USART_FRAME_DATABITS_EIGHT, 4, 4, -1, -1);
-    //usart0_init(1000000, 0, USART_SPI_LSB_FIRST, 0, 0, 0);
-    //usart0_init(800000, 1, USART_SPI_MSB_FIRST, -1, 4, 5);
     //usart0_init(1000000, 1, USART_SPI_MSB_FIRST, 0, 0, 0);
-    i2c0_init(I2C_NORMAL, 1, 1); // Init I2C0 at 100 kHz on location 1
+    //i2c0_init(I2C_NORMAL, 1, 1); // Init I2C0 at 100 kHz on location 1
 
     char szDeviceName[32];
 
@@ -314,24 +342,25 @@ int init()
 
     delay_ms(100);
 
-    DBGPRINTLN_CTX("Scanning I2C bus 0...");
+    /*DBGPRINTLN_CTX("Scanning I2C bus 0...");
 
     for(uint8_t a = 0x08; a < 0x78; a++)
     {
         if(i2c0_write(a, 0, 0, I2C_STOP))
             DBGPRINTLN_CTX("  Address 0x%02X ACKed!", a);
-    }
+    }*/
 
     return 0;
 }
 int main()
 {
     // Internal flash test
+    /*
     DBGPRINTLN_CTX("Initial calibration dump:");
 
     for(init_calib_t *psCalibTbl = g_psInitCalibrationTable; psCalibTbl->pulRegister; psCalibTbl++)
         DBGPRINTLN_CTX("  0x%08X -> 0x%08X", psCalibTbl->ulInitialCalibration, psCalibTbl->pulRegister);
-
+    */
     /*
     DBGPRINTLN_CTX("Boot lock word: %08X", g_psLockBits->CLW[0]);
     DBGPRINTLN_CTX("User lock word: %08X", g_psLockBits->ULW);
@@ -452,16 +481,17 @@ int main()
 
     DBGPRINTLN_CTX("CURRMON: %08X", DEVINFO->CURRMON5V);
 
+    USBD_Init( &usbInitStruct );
+
     while(1)
     {
-        static uint64_t ullLastRfidCheck = 0;
+        static uint64_t ullLastTask = 0;
 
-        if (g_ullSystemTick > (ullLastRfidCheck + 500))
+        if (g_ullSystemTick > (ullLastTask + 1000))
         {
-            ullLastRfidCheck = g_ullSystemTick;
+            ullLastTask = g_ullSystemTick;
 
-            DBGPRINTLN_CTX("ADC Temp: %.2f", adc_get_temperature());
-            DBGPRINTLN_CTX("EMU Temp: %.2f", emu_get_temperature());
+            DBGPRINTLN_CTX("Tick");
         }
 
         /*
@@ -481,4 +511,61 @@ int main()
     }
 
     return 0;
+}
+
+/**************************************************************************//**
+ * @brief
+ *   Handle USB setup commands.
+ *
+ * @param[in] setup Pointer to the setup packet received.
+ *
+ * @return USB_STATUS_OK if command accepted.
+ *         USB_STATUS_REQ_UNHANDLED when command is unknown, the USB device
+ *         stack will handle the request.
+ *****************************************************************************/
+static int usb_setup_cmd(const USB_Setup_TypeDef *setup)
+{
+  int             retVal;
+  static uint32_t buffer;
+  uint8_t         *pBuffer = (uint8_t*) &buffer;
+
+  retVal = USB_STATUS_REQ_UNHANDLED;
+
+  if (setup->Type == USB_SETUP_TYPE_VENDOR)
+  {
+    switch(setup->bRequest)
+    {
+    case VND_GET_LEDS:
+      /********************/
+      // TODO:
+      *pBuffer =  0x55;//(uint8_t)BSP_LedsGet();
+      retVal   = USBD_Write(0, pBuffer, setup->wLength, NULL);
+      break;
+
+    case VND_SET_LED:
+      /********************/
+      if(setup->wValue)
+      {
+        if(setup->wIndex == LED0)
+        // TODO:
+          ;//BSP_LedSet(LED0);
+        else if(setup->wIndex == LED1)
+        // TODO:
+          ;//BSP_LedSet(LED1);
+      }
+      else
+      {
+        if(setup->wIndex == LED0)
+        // TODO:
+          ;//BSP_LedClear(LED0);
+        else if(setup->wIndex == LED1)
+        // TODO:
+          ;//BSP_LedClear(LED1);
+      }
+      retVal = USB_STATUS_OK;
+      break;
+    }
+  }
+
+  return retVal;
 }

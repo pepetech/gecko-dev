@@ -9,7 +9,7 @@ APP_ADDRESS = 0x00000000
 APP_NAME = test
 
 # Multiprocessing
-MAX_PARALLEL =
+MAX_PARALLEL = 6
 
 # Directories
 TARGETDIR = bin

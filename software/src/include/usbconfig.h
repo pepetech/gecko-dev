@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file    usbconfig.h
- * @brief   USB protocol stack library, application supplied configuration
- *          options.
+ * @file usbconfig.h
+ * @brief USB protocol stack library, application supplied configuration options.
  * @version 5.1.2
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>Copyright 2015 Silicon Labs, Inc. http://www.silabs.com</b>
  *******************************************************************************
  *
  * This file is licensed under the Silabs License Agreement. See the file
@@ -14,14 +13,14 @@
  *
  ******************************************************************************/
 
-#ifndef SILICON_LABS_USBCONFIG_H
-#define SILICON_LABS_USBCONFIG_H
+#ifndef __USBCONFIG_H
+#define __USBCONFIG_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define USB_DEVICE        // Compile stack for device mode.
+#define USB_DEVICE        /* Compile stack for device mode. */
 
 #define USB_CORECLK_HFRCO // Use HFRCO as core clock, default is HFXO.
 
@@ -34,18 +33,10 @@ extern "C" {
 ** Specify number of endpoints used (in addition to EP0).                  **
 **                                                                         **
 *****************************************************************************/
-#define NUM_EP_USED 2
-
-/****************************************************************************
-**                                                                         **
-** Specify number of application timers you need.                          **
-**                                                                         **
-*****************************************************************************/
-#define NUM_APP_TIMERS 1
-
+#define NUM_EP_USED 0
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // SILICON_LABS_USBCONFIG_H
+#endif /* __USBCONFIG_H */
