@@ -19,7 +19,6 @@
 #include "em_device.h"
 #if defined( USB_PRESENT ) && ( USB_COUNT == 1 )
 #include "em_usb.h"
-#if defined( USB_DEVICE ) || defined( USB_HOST )
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,39 +53,30 @@ extern "C" {
 /* Limit imposed by the USB standard */
 #define MAX_USB_EP_NUM      15
 
-#if defined( USB_DEVICE )
-  /* Check power saving modes. */
-  #ifndef USB_PWRSAVE_MODE
-    /* Default powersave-mode is OFF. */
-    #define USB_PWRSAVE_MODE  USB_PWRSAVE_MODE_OFF
-  #else
-    #if ( USB_PWRSAVE_MODE                                               &  \
-          ~( USB_PWRSAVE_MODE_ONSUSPEND | USB_PWRSAVE_MODE_ONVBUSOFF |      \
-             USB_PWRSAVE_MODE_ENTEREM2                                 )    )
-      #error "Illegal USB powersave mode."
-    #endif
-  #endif /* ifndef USB_PWRSAVE_MODE */
 
-  /* Check power saving low frequency clock selection. */
-  #ifndef USB_USBC_32kHz_CLK
-    /* Default clock source is LFXO. */
-    #define USB_USBC_32kHz_CLK USB_USBC_32kHz_CLK_LFXO
-  #else
-    #if ( ( USB_USBC_32kHz_CLK != USB_USBC_32kHz_CLK_LFXO  ) &&  \
-          ( USB_USBC_32kHz_CLK != USB_USBC_32kHz_CLK_LFRCO )     )
-      #error "Illegal USB 32kHz powersave clock selection."
-    #endif
-  #endif /* ifndef USB_USBC_32kHz_CLK */
-#endif /* defined( USB_DEVICE ) */
-
-#if defined( USB_HOST )
-  /* Check VBUS overcurrent definitions. */
-  #ifndef USB_VBUSOVRCUR_PORT
-    #define USB_VBUSOVRCUR_PORT       gpioPortE
-    #define USB_VBUSOVRCUR_PIN        2
-    #define USB_VBUSOVRCUR_POLARITY   USB_VBUSOVRCUR_POLARITY_LOW
+/* Check power saving modes. */
+#ifndef USB_PWRSAVE_MODE
+  /* Default powersave-mode is OFF. */
+  #define USB_PWRSAVE_MODE  USB_PWRSAVE_MODE_OFF
+#else
+  #if ( USB_PWRSAVE_MODE                                               &  \
+        ~( USB_PWRSAVE_MODE_ONSUSPEND | USB_PWRSAVE_MODE_ONVBUSOFF |      \
+            USB_PWRSAVE_MODE_ENTEREM2                                 )    )
+    #error "Illegal USB powersave mode."
   #endif
-#endif
+#endif /* ifndef USB_PWRSAVE_MODE */
+
+/* Check power saving low frequency clock selection. */
+#ifndef USB_USBC_32kHz_CLK
+  /* Default clock source is LFXO. */
+  #define USB_USBC_32kHz_CLK USB_USBC_32kHz_CLK_LFXO
+#else
+  #if ( ( USB_USBC_32kHz_CLK != USB_USBC_32kHz_CLK_LFXO  ) &&  \
+        ( USB_USBC_32kHz_CLK != USB_USBC_32kHz_CLK_LFRCO )     )
+    #error "Illegal USB 32kHz powersave clock selection."
+  #endif
+#endif /* ifndef USB_USBC_32kHz_CLK */
+
 
 /* Developer mode debugging macro's */
 #if defined( DEBUG_USB_INT_LO )
@@ -105,14 +95,6 @@ extern "C" {
   #define DEBUG_USB_INT_HI_PUTCHAR( c )
 #endif /* defined( DEBUG_USB_INT_HI ) */
 
-#if defined( USB_HOST )
-  #if defined( NUM_APP_TIMERS )
-    #define HOSTPORT_TIMER_INDEX  (NUM_APP_TIMERS)
-  #else
-    #define HOSTPORT_TIMER_INDEX  (0)
-  #endif
-  #define HOSTCH_TIMER_INDEX      (HOSTPORT_TIMER_INDEX + 1 )
-#endif
 
 /* Macros for selecting a hardware timer. */
 #define USB_TIMER0 0
@@ -120,18 +102,8 @@ extern "C" {
 #define USB_TIMER2 2
 #define USB_TIMER3 3
 
-#if defined( USB_HOST )
-#define HCS_NAK       0x01
-#define HCS_STALL     0x02
-#define HCS_XACT      0x04
-#define HCS_TGLERR    0x08
-#define HCS_BABBLE    0x10
-#define HCS_TIMEOUT   0x20
-#define HCS_COMPLETED 0x40
-#define HCS_RETRY     0x80
-#endif
 
-#if defined( USB_DEVICE )
+
 typedef enum
 {
   D_EP_IDLE          = 0,
@@ -180,36 +152,6 @@ typedef struct
   uint8_t                               outEpAddr2EpIndex[ MAX_USB_EP_NUM + 1 ];
   uint32_t                              ep0MpsCode;
 } USBD_Device_TypeDef;
-#endif /* defined( USB_DEVICE ) */
-
-#if defined( USB_HOST )
-typedef enum
-{
-  H_PORT_DISCONNECTED         = 0,
-  H_PORT_CONNECTED_DEBOUNCING = 1,
-  H_PORT_CONNECTED_RESETTING  = 2,
-  H_PORT_CONNECTED            = 3,
-  H_PORT_OVERCURRENT          = 4
-} USBH_PortState_TypeDef;
-
-typedef struct
-{
-  int   debounceTime;
-  int   resetTime;
-} USBH_AttachTiming_TypeDef;
-
-typedef struct
-{
-  uint8_t                 *buf;
-  int                     errorCnt;
-  uint32_t                remaining;
-  uint32_t                xferred;
-  uint32_t                hwXferSize;
-  uint8_t                 status;
-  bool                    idle;
-  USBH_Ep_TypeDef         *ep;
-} USBH_Hc_TypeDef;
-#endif /* defined( USB_HOST ) */
 
 /** @endcond */
 
@@ -217,6 +159,6 @@ typedef struct
 }
 #endif
 
-#endif /* defined( USB_DEVICE ) || defined( USB_HOST ) */
+
 #endif /* defined( USB_PRESENT ) && ( USB_COUNT == 1 ) */
 #endif /* __EM_USBTYPES_H */

@@ -43,7 +43,6 @@ extern "C" {
 #pragma anon_unions
 #endif
 
-#if defined(USB_HOST)
 /***************************************************************************//**
  * @addtogroup USB
  * @{
@@ -53,17 +52,6 @@ extern "C" {
  * @addtogroup USB_COMMON
  * @{
  ******************************************************************************/
-#else
-/***************************************************************************//**
- * @addtogroup USB
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup USB_COMMON
- * @{
- ******************************************************************************/
-#endif
 
 #define SILABS_USB_VID          0x10C4          /**< Silicon Labs Vendor ID, supplied by USB-IF.       */
 
@@ -623,20 +611,12 @@ int USB_PRINTF(const char *format, ...);
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
-#if defined(USB_HOST)
-  #if defined(NUM_APP_TIMERS)
-    #define NUM_QTIMERS (NUM_HC_USED + 2 + NUM_APP_TIMERS + 1)
-  #else
-    #define NUM_QTIMERS (NUM_HC_USED + 2 + 1)
-  #endif
-  /* + 2 for default ctrl. host ch. 0 & 1, + 1 for host port timer  */
-#else
+
   #if defined(NUM_APP_TIMERS)
     #define NUM_QTIMERS (NUM_APP_TIMERS)
   #else
     #define NUM_QTIMERS 0
   #endif
-#endif /* defined(USB_HOST) */
 /** @endcond */
 
 /** @addtogroup USB_COMMON
@@ -695,7 +675,6 @@ void  USBTIMER_Init(                    void);
 #endif /* (NUM_QTIMERS > 0) */
 /** @} (end addtogroup USB_COMMON) */
 
-#if defined(USB_DEVICE)
 /** @addtogroup USB_DEVICE
  *  @{*/
 /*** -------------------- DEVICE mode API definitions -------------------- ***/
@@ -983,6 +962,5 @@ int     USBH_WriteB(                       USBH_Ep_TypeDef *ep, void *data, int 
 }
 #endif
 
-#endif /* defined(USB_DEVICE) || defined(USB_HOST) */
 #endif /* defined(USB_PRESENT) && (USB_COUNT == 1) */
 #endif /* __EM_USB_H */

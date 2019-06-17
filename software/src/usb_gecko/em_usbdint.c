@@ -16,26 +16,26 @@
 #include "em_device.h"
 #if defined( USB_PRESENT ) && ( USB_COUNT == 1 )
 #include "em_usb.h"
-#if defined( USB_DEVICE )
 
 //#include "em_cmu.h"
 //#include "em_core.h"
+#include "atomic.h"
 #include "em_usbtypes.h"
 #include "em_usbhal.h"
 #include "em_usbd.h"
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
-#define HANDLE_INT( x ) if ( status & x ) { Handle_##x(); status &= ~x; }
+#define HANDLE_INT(x) if(status & x){ Handle_##x(); status &= ~x; }
 
-static void Handle_USB_GINTSTS_ENUMDONE  ( void );
-static void Handle_USB_GINTSTS_IEPINT    ( void );
-static void Handle_USB_GINTSTS_OEPINT    ( void );
-static void Handle_USB_GINTSTS_RESETDET  ( void );
-static void Handle_USB_GINTSTS_SOF       ( void );
-static void Handle_USB_GINTSTS_USBRST    ( void );
-static void Handle_USB_GINTSTS_USBSUSP   ( void );
-static void Handle_USB_GINTSTS_WKUPINT   ( void );
+static void Handle_USB_GINTSTS_ENUMDONE (void);
+static void Handle_USB_GINTSTS_IEPINT   (void);
+static void Handle_USB_GINTSTS_OEPINT   (void);
+static void Handle_USB_GINTSTS_RESETDET (void);
+static void Handle_USB_GINTSTS_SOF      (void);
+static void Handle_USB_GINTSTS_USBRST   (void);
+static void Handle_USB_GINTSTS_USBSUSP  (void);
+static void Handle_USB_GINTSTS_WKUPINT  (void);
 #if defined( USB_DOEP0INT_STUPPKTRCVD )
 static void HandleOutEpIntr( uint32_t status, USBD_Ep_TypeDef *ep );
 #else
@@ -96,9 +96,9 @@ void USB_IRQHandler( void )
 {
   uint32_t status;
   bool servedVbusInterrupt = false;
-  //CORE_DECLARE_IRQ_STATE;
+  ATOMIC_DECLARE_IRQ_STATE;
 
-  CORE_ENTER_ATOMIC();
+  ATOMIC_ENTER();
 
 #if ( USB_PWRSAVE_MODE )
   if ( USBD_poweredDown )
@@ -124,16 +124,17 @@ void USB_IRQHandler( void )
 #endif
 
     /* Select correct USBC clock.*/
-#if defined( CMU_OSCENCMD_USHFRCOEN )
-    CMU->CMD = CMU_CMD_USBCCLKSEL_USHFRCO;
-    while ( ( CMU->STATUS & CMU_STATUS_USBCUSHFRCOSEL ) == 0 ){}
+#if defined( CMU_OSCENCMD_USHFRCOEN ) // TODO:
+    //CMU->CMD = CMU_CMD_USBCCLKSEL_USHFRCO;
+    //while ( ( CMU->STATUS & CMU_STATUS_USBCUSHFRCOSEL ) == 0 ){}
 #else
     CMU->CMD = CMU_CMD_USBCCLKSEL_HFCLKNODIV;
     while ( ( CMU->STATUS & CMU_STATUS_USBCHFCLKSEL ) == 0 ){}
 #endif
   }
 #endif /* if ( USB_PWRSAVE_MODE ) */
-
+// TODO:
+/*
   if ( USB->IF && ( USB->CTRL & USB_CTRL_VREGOSEN ) )
   {
     if ( USB->IF & USB_IF_VREGOSH )
@@ -178,12 +179,12 @@ void USB_IRQHandler( void )
 #endif
       }
     }
-  }
+  }*/
 
   status = USBHAL_GetCoreInts();
   if ( status == 0 )
   {
-    CORE_EXIT_ATOMIC();
+    ATOMIC_EXIT();
     if ( !servedVbusInterrupt )
     {
       DEBUG_USB_INT_LO_PUTS( "\nSinT" );
@@ -200,7 +201,7 @@ void USB_IRQHandler( void )
   HANDLE_INT( USB_GINTSTS_IEPINT     )
   HANDLE_INT( USB_GINTSTS_OEPINT     )
 
-  CORE_EXIT_ATOMIC();
+  ATOMIC_EXIT();
 
   if ( status != 0 )
   {
@@ -420,7 +421,7 @@ static void Handle_USB_GINTSTS_RESETDET  ( void )
 
 #if ( USB_PWRSAVE_MODE & USB_PWRSAVE_MODE_ONVBUSOFF )
   /* Power down immediately if VBUS is off. */
-  if ( ! ( USB->STATUS & USB_STATUS_VREGOS ) )
+  //if ( ! ( USB->STATUS & USB_STATUS_VREGOS ) )
   {
     UsbPowerDown();
   }
@@ -429,8 +430,9 @@ static void Handle_USB_GINTSTS_RESETDET  ( void )
 #else
   USB->GINTSTS = USB_GINTSTS_RESETDET;
 #endif /* if ( USB_PWRSAVE_MODE ) */
-
-  if ( USB->STATUS & USB_STATUS_VREGOS )
+  // TODO:
+  //if ( USB->STATUS & USB_STATUS_VREGOS )
+  if(1)
   {
     USBD_SetUsbState( USBD_STATE_DEFAULT );
   }
@@ -642,8 +644,9 @@ static bool UsbPowerDown( void )
 
     /* Switch USBC clock to 32 kHz. */
 #if ( USB_USBC_32kHz_CLK == USB_USBC_32kHz_CLK_LFXO )
-    CMU->CMD = CMU_CMD_USBCCLKSEL_LFXO;
-    while ( ( CMU->STATUS & CMU_STATUS_USBCLFXOSEL ) == 0 ){}
+// TODO:
+    //CMU->CMD = CMU_CMD_USBCCLKSEL_LFXO;
+    //while ( ( CMU->STATUS & CMU_STATUS_USBCLFXOSEL ) == 0 ){}
 #else
     CMU->CMD = CMU_CMD_USBCCLKSEL_LFRCO;
     while ( ( CMU->STATUS & CMU_STATUS_USBCLFRCOSEL ) == 0 ){}
@@ -756,8 +759,9 @@ void USBDINT_RemoteWakeup(void)
 
     // Select 48MHz for USBC clock.
 #if defined( CMU_OSCENCMD_USHFRCOEN )
-    CMU->CMD = CMU_CMD_USBCCLKSEL_USHFRCO;
-    while ( ( CMU->STATUS & CMU_STATUS_USBCUSHFRCOSEL ) == 0 ){}
+// TODO:
+    //CMU->CMD = CMU_CMD_USBCCLKSEL_USHFRCO;
+    //while ( ( CMU->STATUS & CMU_STATUS_USBCUSHFRCOSEL ) == 0 ){}
 #else
     CMU->CMD = CMU_CMD_USBCCLKSEL_HFCLKNODIV;
     while ( ( CMU->STATUS & CMU_STATUS_USBCHFCLKSEL ) == 0 ){}
@@ -795,9 +799,10 @@ void USBDINT_RemoteWakeup(void)
     SCB->SCR &= ~(SCB_SCR_SLEEPDEEP_Msk | SCB_SCR_SLEEPONEXIT_Msk);
 #endif
 
-    CORE_ATOMIC_IRQ_ENABLE();
-    USBTIMER_DelayMs( 10 );
-    CORE_ATOMIC_IRQ_DISABLE();
+    ATOMIC_IRQ_ENABLE();
+    // TODO:
+    //USBTIMER_DelayMs( 10 );
+    ATOMIC_IRQ_DISABLE();
 
     USBDHAL_ClearRemoteWakeup();
     // Setup EP0 for new commands.
@@ -809,9 +814,10 @@ void USBDINT_RemoteWakeup(void)
 #endif // if (USB_PWRSAVE_MODE)
     USBDHAL_SetRemoteWakeup();
 
-    CORE_ATOMIC_IRQ_ENABLE();
-    USBTIMER_DelayMs( 10 );
-    CORE_ATOMIC_IRQ_DISABLE();
+    ATOMIC_IRQ_ENABLE();
+    // TODO:
+    //USBTIMER_DelayMs( 10 );
+    ATOMIC_IRQ_DISABLE();
 
     USBDHAL_ClearRemoteWakeup();
 #if (USB_PWRSAVE_MODE)
@@ -1001,5 +1007,4 @@ retry:
 
 /** @endcond */
 
-#endif /* defined( USB_DEVICE ) */
 #endif /* defined( USB_PRESENT ) && ( USB_COUNT == 1 ) */

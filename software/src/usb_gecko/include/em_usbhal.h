@@ -19,7 +19,6 @@
 #include "em_device.h"
 #if defined( USB_PRESENT ) && ( USB_COUNT == 1 )
 #include "em_usb.h"
-#if defined( USB_DEVICE ) || defined( USB_HOST )
 
 #ifdef __cplusplus
 extern "C" {
@@ -95,7 +94,6 @@ typedef __IO uint32_t USB_DIEPTXF_TypeDef;
 
 void USBHAL_CoreReset( void );
 
-#if defined( USB_DEVICE )
 void USBDHAL_AbortAllTransfers( USB_Status_TypeDef reason );
 USB_Status_TypeDef USBDHAL_CoreInit( const uint32_t totalRxFifoSize,
                                      const uint32_t totalTxFifoSize );
@@ -110,7 +108,6 @@ __STATIC_INLINE USB_Status_TypeDef USBDHAL_GetStallStatusEp(
 __STATIC_INLINE uint32_t USBDHAL_GetInEpInts( USBD_Ep_TypeDef *ep );
 __STATIC_INLINE uint32_t USBDHAL_GetOutEpInts( USBD_Ep_TypeDef *ep );
 __STATIC_INLINE void USBDHAL_SetEPDISNAK( USBD_Ep_TypeDef *ep );
-#endif /* defined( USB_DEVICE ) */
 
 #if defined( USB_HOST )
 USB_Status_TypeDef USBHHAL_CoreInit( const uint32_t rxFifoSize,
@@ -165,10 +162,10 @@ __STATIC_INLINE uint32_t USBHAL_GetCoreInts( void )
 
 __STATIC_INLINE bool USBHAL_VbusIsOn( void )
 {
-  return ( USB->STATUS & USB_STATUS_VREGOS ) != 0;
+  // TODO:
+  //return ( USB->STATUS & USB_STATUS_VREGOS ) != 0;
 }
 
-#if defined( USB_DEVICE )
 __STATIC_INLINE void USBDHAL_ActivateEp( USBD_Ep_TypeDef *ep, bool forceIdle )
 {
 #define DIEP_MPS_EPTYPE_TXFNUM_MASK ( _USB_DIEP_CTL_MPS_MASK    | \
@@ -612,7 +609,7 @@ __STATIC_INLINE USB_Status_TypeDef USBDHAL_UnStallEp( USBD_Ep_TypeDef *ep )
 
   return retVal;
 }
-#endif /* defined( USB_DEVICE ) */
+
 
 #if defined( USB_HOST )
 __STATIC_INLINE void USBHHAL_HCActivate( int hcnum, uint32_t hcchar, bool intep )
@@ -744,6 +741,5 @@ __STATIC_INLINE void USBHHAL_VbusOn( bool on )
 }
 #endif
 
-#endif /* defined( USB_DEVICE ) || defined( USB_HOST ) */
 #endif /* defined( USB_PRESENT ) && ( USB_COUNT == 1 ) */
 #endif /* __EM_USBHAL_H */

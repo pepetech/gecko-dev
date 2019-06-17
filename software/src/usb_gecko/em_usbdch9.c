@@ -16,7 +16,6 @@
 #include "em_device.h"
 #if defined( USB_PRESENT ) && ( USB_COUNT == 1 )
 #include "em_usb.h"
-#if defined( USB_DEVICE )
 
 #include "em_usbtypes.h"
 #include "em_usbhal.h"
@@ -505,5 +504,4 @@ static int SetInterface( USBD_Device_TypeDef *pDev )
 
 /** @endcond */
 
-#endif /* defined( USB_DEVICE ) */
 #endif /* defined( USB_PRESENT ) && ( USB_COUNT == 1 ) */

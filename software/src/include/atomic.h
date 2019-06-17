@@ -39,4 +39,25 @@ static inline void __iRestore(const uint32_t *__s)
 #define NONATOMIC_RESTORESTATE uint32_t primask_save __attribute__((__cleanup__(__iRestore))) = __get_PRIMASK()
 #define NONATOMIC_FORCEOFF uint32_t primask_save __attribute__((__cleanup__(__iDisableIRQParam))) = 0
 
+// usb compatibility
+
+/** Storage for PRIMASK or BASEPRI value. */
+typedef uint32_t atomic_irqState_t;
+
+#define ATOMIC_DECLARE_IRQ_STATE    atomic_irqState_t __atomic_irqState
+
+/** Enter ATOMIC section. Assumes that a @ref CORE_DECLARE_IRQ_STATE exist in
+ *  scope. */
+#define ATOMIC_ENTER() do{ (__atomic_irqState) = __get_PRIMASK(); __disable_irq(); }while(0)
+
+/** Exit ATOMIC section. Assumes that a @ref CORE_DECLARE_IRQ_STATE exist in
+ *  scope. */
+#define ATOMIC_EXIT()  do{ if((__atomic_irqState) == 0){ __enable_irq(); } }while(0)
+
+/** ATOMIC style interrupt enable. */
+#define ATOMIC_IRQ_ENABLE()    __enable_irq()
+
+/** ATOMIC style interrupt disable. */
+#define ATOMIC_IRQ_DISABLE()   __disable_irq();
+
 #endif  // __ATOMIC_H__

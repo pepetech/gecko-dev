@@ -19,7 +19,6 @@
 #include "em_device.h"
 #if defined( USB_PRESENT ) && ( USB_COUNT == 1 )
 #include "em_usb.h"
-#if defined( USB_DEVICE )
 
 #ifdef __cplusplus
 extern "C" {
@@ -195,6 +194,5 @@ __STATIC_INLINE void USBD_AbortEp( USBD_Ep_TypeDef *ep )
 }
 #endif
 
-#endif /* defined( USB_DEVICE ) */
 #endif /* defined( USB_PRESENT ) && ( USB_COUNT == 1 ) */
 #endif /* __EM_USBD_H */
