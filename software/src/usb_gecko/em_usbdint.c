@@ -18,8 +18,8 @@
 #include "em_usb.h"
 #if defined( USB_DEVICE )
 
-#include "em_cmu.h"
-#include "em_core.h"
+//#include "em_cmu.h"
+//#include "em_core.h"
 #include "em_usbtypes.h"
 #include "em_usbhal.h"
 #include "em_usbd.h"
@@ -96,7 +96,7 @@ void USB_IRQHandler( void )
 {
   uint32_t status;
   bool servedVbusInterrupt = false;
-  CORE_DECLARE_IRQ_STATE;
+  //CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_ATOMIC();
 

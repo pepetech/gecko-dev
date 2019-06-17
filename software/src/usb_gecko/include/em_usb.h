@@ -17,13 +17,18 @@
 #define __EM_USB_H
 
 #include "em_device.h"
-#include "em_assert.h"
+
+//#include "em_assert.h"
+/** Default assertion is no operation */
+#define EFM_ASSERT(expr)    ((void)(expr))
+
 #if defined(USB_PRESENT) && (USB_COUNT == 1)
 #include "usbconfig.h"
 #if defined(USB_DEVICE) || defined(USB_HOST)
 
 #include <string.h>
 #include <stddef.h>
+
 #include "em_common.h"
 
 #if defined(USB_USE_PRINTF)

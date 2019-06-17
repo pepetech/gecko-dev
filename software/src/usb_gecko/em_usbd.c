@@ -18,9 +18,10 @@
 #include "em_usb.h"
 #if defined( USB_DEVICE )
 
-#include "em_cmu.h"
-#include "em_core.h"
-#include "em_system.h"
+//#include "em_cmu.h"
+//#include "em_core.h"
+//#include "em_system.h"
+#include "atomic.h"
 #include "em_usbtypes.h"
 #include "em_usbhal.h"
 #include "em_usbd.h"
@@ -54,9 +55,10 @@ static const char *stateNames[] =
  ******************************************************************************/
 void USBD_AbortAllTransfers( void )
 {
-  CORE_ATOMIC_SECTION(
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
     USBDHAL_AbortAllTransfers( USB_STATUS_EP_ABORTED );
-  )
+  }
 }
 
 /***************************************************************************//**
@@ -129,9 +131,10 @@ int USBD_AbortTransfer( int epAddr )
  ******************************************************************************/
 void USBD_Connect( void )
 {
-  CORE_ATOMIC_SECTION(
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
     USBDHAL_Connect();
-  )
+  }
 }
 
 /***************************************************************************//**
@@ -144,9 +147,10 @@ void USBD_Connect( void )
  ******************************************************************************/
 void USBD_Disconnect( void )
 {
-  CORE_ATOMIC_SECTION(
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
     USBDHAL_Disconnect();
-  )
+  }
 }
 
 /***************************************************************************//**
