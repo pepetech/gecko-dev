@@ -54,10 +54,4 @@ typedef uint32_t atomic_irqState_t;
  *  scope. */
 #define ATOMIC_EXIT()  do{ if((__atomic_irqState) == 0){ __enable_irq(); } }while(0)
 
-/** ATOMIC style interrupt enable. */
-#define ATOMIC_IRQ_ENABLE()    __enable_irq()
-
-/** ATOMIC style interrupt disable. */
-#define ATOMIC_IRQ_DISABLE()   __disable_irq();
-
 #endif  // __ATOMIC_H__

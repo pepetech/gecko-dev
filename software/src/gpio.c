@@ -144,7 +144,7 @@ void gpio_init()
                       | GPIO_P_MODEL_MODE2_PUSHPULL  // DBG_SWO - Location 0
                       | GPIO_P_MODEL_MODE3_DISABLED
                       | GPIO_P_MODEL_MODE4_DISABLED
-                      | GPIO_P_MODEL_MODE5_DISABLED
+                      | GPIO_P_MODEL_MODE5_DISABLED  // USB_VBUSEN
                       | GPIO_P_MODEL_MODE6_PUSHPULL  // QSPI0_SCLK - Location 0
                       | GPIO_P_MODEL_MODE7_PUSHPULL; // QSPI0_CS0 - Location 0
     GPIO->P[5].MODEH  = GPIO_P_MODEH_MODE8_DISABLED

@@ -130,6 +130,15 @@ void cmu_init()
         while(!(CMU->STATUS & CMU_STATUS_QSPI0CLKENS) && ubQSPIClockEnabled);
     }
 
+    // LFA Clock
+    CMU->LFACLKSEL = CMU_LFACLKSEL_LFA_LFRCO;
+
+    // LFB Clock
+    CMU->LFBCLKSEL = CMU_LFBCLKSEL_LFB_LFRCO;
+
+    // LFC Clock
+    CMU->LFCCLKSEL = CMU_LFCCLKSEL_LFC_LFRCO;
+
     // LFE Clock
     CMU->LFECLKSEL = CMU_LFECLKSEL_LFE_ULFRCO;
 }
@@ -517,7 +526,7 @@ float cmu_hfxo_get_pda_current(uint8_t ubTrigger)
 {
     if(!(CMU->STATUS & CMU_STATUS_HFXOENS))
         return 0;
-    
+
     return HFXO_IBTRIM_TO_UA(cmu_hfxo_get_pda_ibtrim(ubTrigger));
 }
 uint16_t cmu_hfxo_get_pma_ibtrim()
@@ -531,7 +540,7 @@ float cmu_hfxo_get_pma_current()
 {
     if(!(CMU->STATUS & CMU_STATUS_HFXOENS))
         return 0;
-    
+
     return HFXO_IBTRIM_TO_UA(cmu_hfxo_get_pma_ibtrim());
 }
 
@@ -539,7 +548,7 @@ void cmu_lfxo_calib(uint8_t ubCTune)
 {
     if(CMU->STATUS & CMU_STATUS_LFXOENS)
         return;
-    
+
     float fCLoad = LFXO_CTUNE_TO_PF(ubCTune) / 2.f;
     uint8_t ubGain = 0;
 

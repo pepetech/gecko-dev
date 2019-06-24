@@ -23,7 +23,8 @@
 #include "pn532.h"
 #include "as5048a.h"
 
-#include "em_usb.h"
+#include "cdc.h"
+#include "usb.h"
 #include "descriptors.h"
 
 // defines
@@ -42,14 +43,12 @@ static uint32_t get_free_ram();
 void get_device_name(char *pszDeviceName, uint32_t ulDeviceNameSize);
 static uint16_t get_device_revision();
 
-static int usb_setup_cmd(const USB_Setup_TypeDef *setup);
-
 // Structs
-static const USBD_Callbacks_TypeDef usbCallbacks =
+static const USBD_Callbacks_TypeDef callbacks =
 {
   .usbReset        = NULL,
-  .usbStateChange  = NULL,
-  .setupCmd        = usb_setup_cmd,
+  .usbStateChange  = CDC_StateChangeEvent,
+  .setupCmd        = CDC_SetupCmd,
   .isSelfPowered   = NULL,
   .sofInt          = NULL
 };
@@ -59,8 +58,8 @@ static const USBD_Init_TypeDef usbInitStruct =
   .deviceDescriptor    = &USBDESC_deviceDesc,
   .configDescriptor    = USBDESC_configDesc,
   .stringDescriptors   = USBDESC_strings,
-  .numberOfStrings     = sizeof(USBDESC_strings)/sizeof(void*),
-  .callbacks           = &usbCallbacks,
+  .numberOfStrings     = sizeof(USBDESC_strings) / sizeof(void*),
+  .callbacks           = &callbacks,
   .bufferingMultiplier = USBDESC_bufferingMultiplier,
   .reserved            = 0
 };
@@ -231,7 +230,7 @@ int init()
 
     cmu_init(); // Init Clocks
 
-    cmu_ushfrco_calib(1, USHFRCO_CALIB_8M, 8000000); // Enable and calibrate USHFRCO for 8 MHz
+    cmu_ushfrco_calib(1, USHFRCO_CALIB_48M, 48000000); // Enable and calibrate USHFRCO for 48 MHz (for usb)
     cmu_auxhfrco_calib(1, AUXHFRCO_CALIB_32M, 32000000); // Enable and calibrate AUXHFRCO for 32 MHz
 
     cmu_update_clocks(); // Update Clocks
@@ -250,7 +249,7 @@ int init()
     crypto_init(); // Init Crypto engine
     crc_init(); // Init CRC calculation unit
     adc_init(); // Init ADCs
-    qspi_init(); // Init QSPI memory
+    //qspi_init(); // Init QSPI memory
 
     float fAVDDHighThresh, fAVDDLowThresh;
     float fDVDDHighThresh, fDVDDLowThresh;
@@ -382,13 +381,13 @@ int main()
     */
 
     // QSPI
-    DBGPRINTLN_CTX("Flash Part ID: %06X", qspi_flash_read_jedec_id());
+    //DBGPRINTLN_CTX("Flash Part ID: %06X", qspi_flash_read_jedec_id());
 
-    uint8_t ubFlashUID[8];
+    //uint8_t ubFlashUID[8];
 
-    qspi_flash_read_security(0x0000, ubFlashUID, 8);
+    //qspi_flash_read_security(0x0000, ubFlashUID, 8);
 
-    DBGPRINTLN_CTX("Flash ID: %02X%02X%02X%02X%02X%02X%02X%02X", ubFlashUID[0], ubFlashUID[1], ubFlashUID[2], ubFlashUID[3], ubFlashUID[4], ubFlashUID[5], ubFlashUID[6], ubFlashUID[7]);
+    //DBGPRINTLN_CTX("Flash ID: %02X%02X%02X%02X%02X%02X%02X%02X", ubFlashUID[0], ubFlashUID[1], ubFlashUID[2], ubFlashUID[3], ubFlashUID[4], ubFlashUID[5], ubFlashUID[6], ubFlashUID[7]);
 
     //qspi_flash_chip_erase();
 
@@ -448,12 +447,12 @@ int main()
     DBGPRINTLN_CTX("Device: %s%hu", get_family_name((DEVINFO->PART & _DEVINFO_PART_DEVICE_FAMILY_MASK) >> _DEVINFO_PART_DEVICE_FAMILY_SHIFT), (DEVINFO->PART & _DEVINFO_PART_DEVICE_NUMBER_MASK) >> _DEVINFO_PART_DEVICE_NUMBER_SHIFT);
     */
 
-    DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000000);
-    DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000001);
-    DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000002);
-    DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000003);
-    DBGPRINTLN_CTX("Boot RD: %02X", *(volatile uint8_t *)0x0FE10000);
-    DBGPRINTLN_CTX("Data RD: %02X", *(volatile uint8_t *)0x0FE00000);
+    //DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000000);
+    //DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000001);
+    //DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000002);
+    //DBGPRINTLN_CTX("QSPI RD: %02X", *(volatile uint8_t *)0xC0000003);
+    //DBGPRINTLN_CTX("Boot RD: %02X", *(volatile uint8_t *)0x0FE10000);
+    //DBGPRINTLN_CTX("Data RD: %02X", *(volatile uint8_t *)0x0FE00000);
 
     //qspi_flash_cmd(QSPI_FLASH_CMD_READ_FAST, 0x00000000, 3, 0, 8, NULL, 0, rd, 10);
     //DBGPRINTLN_CTX("Flash RD C: %02X%02X%02X%02X%02X%02X%02X%02X %02X%02X%02X%02X%02X%02X%02X%02X", rd[0], rd[1], rd[2], rd[3], rd[4], rd[5], rd[6], rd[7], rd[8], rd[9], rd[10], rd[11], rd[12], rd[13], rd[14], rd[15]);
@@ -479,9 +478,9 @@ int main()
 
     //delay_ms(1000);
 
-    DBGPRINTLN_CTX("CURRMON: %08X", DEVINFO->CURRMON5V);
+    //DBGPRINTLN_CTX("CURRMON: %08X", DEVINFO->CURRMON5V);
 
-    USBD_Init( &usbInitStruct );
+    USBD_Init(&usbInitStruct);
 
     while(1)
     {
@@ -511,61 +510,4 @@ int main()
     }
 
     return 0;
-}
-
-/**************************************************************************//**
- * @brief
- *   Handle USB setup commands.
- *
- * @param[in] setup Pointer to the setup packet received.
- *
- * @return USB_STATUS_OK if command accepted.
- *         USB_STATUS_REQ_UNHANDLED when command is unknown, the USB device
- *         stack will handle the request.
- *****************************************************************************/
-static int usb_setup_cmd(const USB_Setup_TypeDef *setup)
-{
-  int             retVal;
-  static uint32_t buffer;
-  uint8_t         *pBuffer = (uint8_t*) &buffer;
-
-  retVal = USB_STATUS_REQ_UNHANDLED;
-
-  if (setup->Type == USB_SETUP_TYPE_VENDOR)
-  {
-    switch(setup->bRequest)
-    {
-    case VND_GET_LEDS:
-      /********************/
-      // TODO:
-      *pBuffer =  0x55;//(uint8_t)BSP_LedsGet();
-      retVal   = USBD_Write(0, pBuffer, setup->wLength, NULL);
-      break;
-
-    case VND_SET_LED:
-      /********************/
-      if(setup->wValue)
-      {
-        if(setup->wIndex == LED0)
-        // TODO:
-          ;//BSP_LedSet(LED0);
-        else if(setup->wIndex == LED1)
-        // TODO:
-          ;//BSP_LedSet(LED1);
-      }
-      else
-      {
-        if(setup->wIndex == LED0)
-        // TODO:
-          ;//BSP_LedClear(LED0);
-        else if(setup->wIndex == LED1)
-        // TODO:
-          ;//BSP_LedClear(LED1);
-      }
-      retVal = USB_STATUS_OK;
-      break;
-    }
-  }
-
-  return retVal;
 }
