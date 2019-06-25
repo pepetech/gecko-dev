@@ -237,7 +237,8 @@ void _usb_isr(void)
 
   ATOMIC_EXIT();
 
-  if ( status != 0 ) {
+  if(status != 0)
+  {
     DEBUG_USB_INT_LO_PUTS("\nUinT");
   }
 }

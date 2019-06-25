@@ -23,9 +23,9 @@
 #include "pn532.h"
 #include "as5048a.h"
 
-#include "cdc.h"
 #include "usb.h"
 #include "descriptors.h"
+#include "usb_user.h"
 
 // defines
 #define LED0            0
@@ -33,6 +33,8 @@
 
 #define VND_GET_LEDS    0x10
 #define VND_SET_LED     0x11
+
+#define USB_BUFFER_SIZE         8
 
 // Forward declarations
 static void reset() __attribute__((noreturn));
@@ -43,12 +45,14 @@ static uint32_t get_free_ram();
 void get_device_name(char *pszDeviceName, uint32_t ulDeviceNameSize);
 static uint16_t get_device_revision();
 
+void usb_callback(void);
+
 // Structs
 static const USBD_Callbacks_TypeDef callbacks =
 {
-  .usbReset        = NULL,
-  .usbStateChange  = CDC_StateChangeEvent,
-  .setupCmd        = CDC_SetupCmd,
+  .usbReset        = USBX_ResetCb,
+  .usbStateChange  = USBX_DeviceStateChangeCb,
+  .setupCmd        = USBX_SetupCmdCb,
   .isSelfPowered   = NULL,
   .sofInt          = NULL
 };
@@ -65,6 +69,15 @@ static const USBD_Init_TypeDef usbInitStruct =
 };
 
 // Variables
+
+/// Last packet received from host
+UBUF(outPacket, USB_BUFFER_SIZE);
+
+/// Next packet to sent to host
+UBUF(inPacket, USB_BUFFER_SIZE);
+
+/// Flag determining whether USB data should be transmitted
+bool transmitUsbData = false;
 
 // ISRs
 
@@ -480,6 +493,7 @@ int main()
 
     //DBGPRINTLN_CTX("CURRMON: %08X", DEVINFO->CURRMON5V);
 
+    USBX_setCallBack(usb_callback);
     USBD_Init(&usbInitStruct);
 
     while(1)
@@ -510,4 +524,51 @@ int main()
     }
 
     return 0;
+}
+
+void usb_callback(void)
+{
+  uint32_t readLen;
+  uint32_t intval = USBX_getCallbackSource();
+
+  // Device Opened
+  if(intval & USBX_DEV_OPEN)
+  {
+    USBX_blockRead(outPacket, USB_BUFFER_SIZE, &readLen);
+    transmitUsbData = true;
+  }
+
+  // Device Closed or Suspended
+  if (intval & (USBX_DEV_CLOSE | USBX_DEV_SUSPEND))
+  {
+    transmitUsbData = false;
+
+    // Turn off LEDs
+    //BSP_LedClear(0);
+    //BSP_LedClear(1);
+  }
+
+  // USB Read complete
+  if (intval & USBX_RX_COMPLETE)
+  {
+    // Set the LEDs based on the values sent from the host
+    if(outPacket[0] == 1)
+    {
+      //BSP_LedSet(0);
+    }
+    else
+    {
+      //BSP_LedClear(0);
+    }
+    if(outPacket[1] == 1)
+    {
+      //BSP_LedSet(1);
+    }
+    else
+    {
+      //BSP_LedClear(1);
+    }
+
+    USBX_blockRead(outPacket, USB_BUFFER_SIZE, &readLen);
+  }
 }

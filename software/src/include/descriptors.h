@@ -19,6 +19,18 @@
 
 #include "usb.h"
 
+// USB Identification
+// Initial VID/PID values.  Should never be used.  VID/PID loaded by USB_Init()
+#define USB_VENDOR_ID               SILABS_USB_VID
+#define USB_PRODUCT_ID              0x0000
+
+// Interface number for USBXpress
+#define USBXPRESS_IFC_NUMBER        0
+
+#define USBXPRESS_SETUP_EP_ADDR     0x00
+#define USBXPRESS_IN_EP_ADDR        0x81
+#define USBXPRESS_OUT_EP_ADDR       0x01
+
 #ifdef __cplusplus
 extern "C" {
 #endif

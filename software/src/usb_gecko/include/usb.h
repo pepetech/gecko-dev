@@ -242,6 +242,8 @@ extern "C" {
 #define USB_CLASS_MISC_COMMON_SUBCLASS    2     /**< MISCELLANEOUS Common sub class code.                */
 #define USB_CLASS_MISC_IAD_PROTOCOL       1     /**< MISCELLANEOUS Interface Association Descriptor protocol code. */
 
+#define USB_CLASS_VENDOR                  0xFF  /**< This base class is defined for vendors to use as they please. */
+
 #define PORT_FULL_SPEED                   1     /**< Full speed return value for USBH_GetPortSpeed(). */
 #define PORT_LOW_SPEED                    2     /**< Low speed return value for USBH_GetPortSpeed().  */
 
