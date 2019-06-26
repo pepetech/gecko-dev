@@ -23,6 +23,8 @@
 #include "usb.h"
 #if defined(USB_DEVICE)
 
+#include "utils.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -95,7 +97,7 @@ __STATIC_INLINE void USBD_ArmEp0(USBD_Ep_TypeDef *ep)
     }
 
     USBDHAL_SetEp0InDmaPtr(ep->buf);
-    USBDHAL_StartEp0In(SL_MIN(ep->remaining, ep->packetSize), dev->ep0MpsCode);
+    USBDHAL_StartEp0In(MIN(ep->remaining, ep->packetSize), dev->ep0MpsCode);
   }
   else
   {
@@ -173,7 +175,7 @@ __STATIC_INLINE void USBD_ReArmEp0(USBD_Ep_TypeDef *ep)
 {
   if(ep->in)
   {
-    USBDHAL_StartEp0In(SL_MIN(ep->remaining, ep->packetSize), dev->ep0MpsCode);
+    USBDHAL_StartEp0In(MIN(ep->remaining, ep->packetSize), dev->ep0MpsCode);
   }
   else
   {

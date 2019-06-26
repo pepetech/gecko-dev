@@ -21,7 +21,7 @@
 #include "em_device.h"
 
 //TODO:
-#define EFM_ASSERT(expr)    ((void)(expr)) /** Default assertion is no operation */
+#define EFM_ASSERT(expr)    ((void)(expr))  /** Default assertion is no operation */
 
 #if defined(USB_PRESENT) && (USB_COUNT == 1)
 #include "usbconfig.h"
@@ -29,8 +29,8 @@
 
 #include <string.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include "debug_macros.h"
-#include "usb_common_tmp.h"
 
 #if defined(USB_USE_PRINTF)
 #include <stdio.h>
@@ -38,10 +38,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifdef __CC_ARM
-#pragma anon_unions
 #endif
 
 #if defined(USB_HOST)
@@ -250,18 +246,10 @@ extern "C" {
 #define USB_DPLL_SRC_LFXO                 1     /**< Use LFXO as DPLL clock source.                        */
 #define USB_DPLL_SRC_HFXO                 2     /**< Use HFXO as DPLL clock source.                        */
 
-#if defined(__GNUC__)                     /* GCC compilers */
-#if defined(__CHAR16_TYPE__)
+#if defined(__CHAR16_TYPE__)              /* GCC compilers */
 typedef __CHAR16_TYPE__ char16_t;
 #else
 typedef unsigned short char16_t;          /**< Data type used for UTF-16LE formatted USB string descriptors. */
-#endif
-
-#elif defined(__ICCARM__)                 /* IAR compiler */
-#include <uchar.h>
-
-#elif defined(__CC_ARM)                   /* MDK-ARM compiler */
-typedef unsigned short char16_t;
 #endif
 
 /** Macro for creating USB compliant UTF-16LE UNICODE string descriptors.
@@ -272,58 +260,48 @@ typedef unsigned short char16_t;
  *        and is therefore correct usb wise.
  */
 #define STATIC_CONST_STRING_DESC(_name, ...)                    \
-  SL_PACK_START(1)                                              \
   typedef struct                                                \
   {                                                             \
     uint8_t  len;                                               \
     uint8_t  type;                                              \
     char16_t name[1 + sizeof((char16_t[]){ __VA_ARGS__ }) / 2]; \
-  } SL_ATTRIBUTE_PACKED _##_name;                               \
-  SL_PACK_END()                                                 \
-  SL_ALIGN(4)                                                   \
-  SL_PACK_START(1)                                              \
-  static const _##_name _name SL_ATTRIBUTE_ALIGN(4) =           \
+  }__attribute__((packed)) _##_name;                            \
+  static const _##_name _name __attribute__((aligned(4))) =     \
   {                                                             \
     .len  = sizeof(_##_name) - 2,                               \
     .type = USB_STRING_DESCRIPTOR,                              \
     .name = { __VA_ARGS__ },                                    \
     .name[((sizeof(_##_name) - 2) / 2) - 1] = '\0'              \
-  }                                                             \
-  SL_PACK_END()
+  }
 
 /** Macro for creating USB compliant language string descriptors.
  *  @n Example: STATIC_CONST_STRING_DESC_LANGID(langID, 0x04, 0x09);
  */
-#define STATIC_CONST_STRING_DESC_LANGID(_name, x, y)  \
-  SL_PACK_START(1)                                    \
-  typedef struct                                      \
-  {                                                   \
-    uint8_t len;                                      \
-    uint8_t type;                                     \
-    uint8_t name[2];                                  \
-  } SL_ATTRIBUTE_PACKED _##_name;                     \
-  SL_PACK_END()                                       \
-  SL_ALIGN(4)                                         \
-  SL_PACK_START(1)                                    \
-  static const _##_name _name SL_ATTRIBUTE_ALIGN(4) = \
-  {                                                   \
-    .len = 4,                                         \
-    .type = USB_STRING_DESCRIPTOR,                    \
-    .name = { y, x }                                  \
-  }                                                   \
-  SL_PACK_END()
+#define STATIC_CONST_STRING_DESC_LANGID(_name, x, y)        \
+  typedef struct                                            \
+  {                                                         \
+    uint8_t len;                                            \
+    uint8_t type;                                           \
+    uint8_t name[2];                                        \
+  } __attribute__((packed)) _##_name;                       \
+  static const _##_name _name __attribute__((aligned(4))) = \
+  {                                                         \
+    .len = 4,                                               \
+    .type = USB_STRING_DESCRIPTOR,                          \
+    .name = { y, x }                                        \
+  }
 
 /** Macro for creating WORD (4 byte) aligned uint8_t array with size which
  *  is a multiple of WORD size.
  *  @n Example: @n UBUF(rxBuffer, 37);  =>  uint8_t rxBuffer[40];
  */
-#define UBUF(x, y) SL_ALIGN(4) uint8_t x[((y) + 3) & ~3] SL_ATTRIBUTE_ALIGN(4)
+#define UBUF(x, y) uint8_t x[((y) + 3) & ~3] __attribute__((aligned(4)))
 
 /** Macro for creating WORD (4 byte) aligned static uint8_t arrays with size which
  *  is a multiple of WORD size.
  *  @n Example: @n STATIC_UBUF(rxBuffer, 37);  =>  static uint8_t rxBuffer[40];
  */
-#define STATIC_UBUF(x, y) SL_ALIGN(4) static uint8_t x[((y) + 3) & ~3] SL_ATTRIBUTE_ALIGN(4)
+#define STATIC_UBUF(x, y) static uint8_t x[((y) + 3) & ~3] __attribute__((aligned(4)))
 
 /** @brief USB transfer status enumerator. */
 typedef enum
@@ -383,9 +361,7 @@ typedef enum
 
 /** @addtogroup USB_COMMON
  *  @{*/
-
 /** @brief USB Setup request package. */
-SL_PACK_START(1)
 typedef struct {
   union {
     struct {
@@ -404,16 +380,13 @@ typedef struct {
     };
     uint32_t  dw[2];
   };
-} SL_ATTRIBUTE_PACKED USB_Setup_TypeDef;
-SL_PACK_END()
+} __attribute__((packed)) USB_Setup_TypeDef;
 
 /** @brief USB Device Descriptor. */
-SL_PACK_START(1)
 typedef struct {
   uint8_t  bLength;                             /**< Size of this descriptor in bytes                  */
   uint8_t  bDescriptorType;                     /**< Constant DEVICE Descriptor Type                   */
-  uint16_t bcdUSB;                              /**< USB Specification Release Number in Binary-Coded
-                                                     Decimal                                           */
+  uint16_t bcdUSB;                              /**< USB Specification Release Number in Binary-Coded Decimal */
   uint8_t  bDeviceClass;                        /**< Class code (assigned by the USB-IF)               */
   uint8_t  bDeviceSubClass;                     /**< Subclass code (assigned by the USB-IF)            */
   uint8_t  bDeviceProtocol;                     /**< Protocol code (assigned by the USB-IF)            */
@@ -423,14 +396,12 @@ typedef struct {
   uint16_t bcdDevice;                           /**< Device release number in binary-coded decimal     */
   uint8_t  iManufacturer;                       /**< Index of string descriptor describing manufacturer*/
   uint8_t  iProduct;                            /**< Index of string descriptor describing product     */
-  uint8_t  iSerialNumber;                       /**< Index of string descriptor describing the device
-                                                     serialnumber                                      */
+  uint8_t  iSerialNumber;                       /**< Index of string descriptor describing the device serialnumber */
   uint8_t  bNumConfigurations;                  /**< Number of possible configurations                 */
-} SL_ATTRIBUTE_PACKED USB_DeviceDescriptor_TypeDef;
-SL_PACK_END()
+} __attribute__((packed)) USB_DeviceDescriptor_TypeDef;
+
 
 /** @brief USB Configuration Descriptor. */
-SL_PACK_START(1)
 typedef struct {
   uint8_t  bLength;                             /**< Size of this descriptor in bytes                  */
   uint8_t  bDescriptorType;                     /**< Constant CONFIGURATION Descriptor Type            */
@@ -453,11 +424,10 @@ typedef struct {
                                                      @n D4...0: Reserved (reset to zero)               */
   uint8_t  bMaxPower;                           /**< Maximum power consumption of the USB device, unit
                                                      is 2mA per LSB                                    */
-} SL_ATTRIBUTE_PACKED USB_ConfigurationDescriptor_TypeDef;
-SL_PACK_END()
+} __attribute__((packed)) USB_ConfigurationDescriptor_TypeDef;
+
 
 /** @brief USB Interface Descriptor. */
-SL_PACK_START(1)
 typedef struct {
   uint8_t bLength;                              /**< Size of this descriptor in bytes.                 */
   uint8_t bDescriptorType;                      /**< Constant INTERFACE Descriptor Type.               */
@@ -492,11 +462,10 @@ typedef struct {
                                                      uses a vendor-specific protocol for this interface*/
   uint8_t iInterface;                           /**< Index of string descriptor describing this
                                                      interface.                                        */
-} SL_ATTRIBUTE_PACKED USB_InterfaceDescriptor_TypeDef;
-SL_PACK_END()
+} __attribute__((packed)) USB_InterfaceDescriptor_TypeDef;
+
 
 /** @brief USB Endpoint Descriptor. */
-SL_PACK_START(1)
 typedef struct {
   uint8_t   bLength;                            /**< Size of this descriptor in bytes                  */
   uint8_t   bDescriptorType;                    /**< Constant ENDPOINT Descriptor Type                 */
@@ -504,81 +473,15 @@ typedef struct {
   uint8_t   bmAttributes;                       /**< This field describes the endpoint attributes      */
   uint16_t  wMaxPacketSize;                     /**< Maximum packet size for the endpoint              */
   uint8_t   bInterval;                          /**< Interval for polling EP for data transfers        */
-} SL_ATTRIBUTE_PACKED USB_EndpointDescriptor_TypeDef;
-SL_PACK_END()
+} __attribute__((packed)) USB_EndpointDescriptor_TypeDef;
+
 
 /** @brief USB String Descriptor. */
-SL_PACK_START(1)
 typedef struct {
   uint8_t len;                                  /**< Size of this descriptor in bytes.                 */
   uint8_t type;                                 /**< Constant STRING Descriptor Type.                  */
   char16_t name[];                              /**< The string encoded with UTF-16LE UNICODE charset. */
-} SL_ATTRIBUTE_PACKED USB_StringDescriptor_TypeDef;
-SL_PACK_END()
-
-/** @} (end addtogroup USB_COMMON) */
-
-/*** -------------------- Serial port debug configuration ---------------- ***/
-
-#if defined(DOXY_DOC_ONLY)
-/** @addtogroup USB_COMMON
- *  @{*/
-
-/***************************************************************************//**
- * @brief
- *   Transmit a single char on the debug serial port.
- *
- * @note
- *   This function is enabled with \#define DEBUG_USB_API when configuring the
- *   protocol stack in "usbconfig.h".
- *   This is convenient when debugging code, no need to remove use of this
- *   function when debugging has completed.
- *
- * @param[in] c
- *   Char to transmit.
- *
- * @return
- *   The char transmitted.
- ******************************************************************************/
-int USB_PUTCHAR(char c);
-
-/***************************************************************************//**
- * @brief
- *   Transmit a zero terminated string on the debug serial port.
- *
- * @note
- *   This function is enabled with \#define DEBUG_USB_API when configuring the
- *   protocol stack in "usbconfig.h".
- *   This is convenient when debugging code, no need to remove use of this
- *   function when debugging has completed.
- *
- * @param[in] p
- *   Pointer to string to transmit.
- ******************************************************************************/
-void USB_PUTS(const char *p);
-
-/***************************************************************************//**
- * @brief
- *   Transmit "printf" formated data on the debug serial port.
- *
- * @note
- *   This function is enabled with \#define USB_USE_PRINTF when configuring the
- *   protocol stack in "usbconfig.h".
- *   This is convenient when debugging code, no need to remove use of this
- *   function when debugging has completed.
- *
- * @param[in] format
- *   Format string (as in printf). No floating point format support.
- *
- * @return
- *   Number of chars transmitted.
- ******************************************************************************/
-int USB_PRINTF(const char *format, ...);
-
-/** @} (end addtogroup USB_COMMON) */
-#endif /* defined(DOXY_DOC_ONLY) */
-
-/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+} __attribute__((packed)) USB_StringDescriptor_TypeDef;
 
 /* Hardware constraint, do not change. */
 #define MAX_NUM_HOSTCHANNELS  14
@@ -622,12 +525,6 @@ void USB_Puts(const char *p);
     #define NUM_QTIMERS (NUM_HC_USED + 2 + 1)
   #endif
 /* + 2 for default ctrl. host ch. 0 & 1, + 1 for host port timer  */
-#else
-  #if defined(NUM_APP_TIMERS)
-    #define NUM_QTIMERS (NUM_APP_TIMERS)
-  #else
-    #define NUM_QTIMERS 0
-  #endif
 #endif /* defined(USB_HOST) */
 /** @endcond */
 
@@ -659,16 +556,6 @@ void USB_Puts(const char *p);
  ******************************************************************************/
 typedef int (*USB_XferCompleteCb_TypeDef)(USB_Status_TypeDef status, uint32_t xferred, uint32_t remaining);
 
-/***************************************************************************//**
- * @brief
- *  USBTIMER callback function.
- *
- * @details
- *  The callback function is called when an USBTIMER has expired. The callback
- *  is done with interrupts disabled.
- ******************************************************************************/
-typedef void (*USBTIMER_Callback_TypeDef)(void);
-
 char *USB_GetErrorMsgString(int error);
 
 #if defined(USB_USE_PRINTF)
@@ -677,14 +564,6 @@ void USB_PrintErrorMsgString(char *pre, int error);
   #define USB_PrintErrorMsgString(pre, error)
 #endif
 
-void  USBTIMER_DelayMs(uint32_t msec);
-void  USBTIMER_DelayUs(uint32_t usec);
-void  USBTIMER_Init(void);
-
-#if (NUM_QTIMERS > 0)
-void  USBTIMER_Start(uint32_t id, uint32_t timeout, USBTIMER_Callback_TypeDef callback);
-void  USBTIMER_Stop(uint32_t id);
-#endif /* (NUM_QTIMERS > 0) */
 /** @} (end addtogroup USB_COMMON) */
 
 #if defined(USB_DEVICE)

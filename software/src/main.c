@@ -25,14 +25,8 @@
 
 #include "usb.h"
 #include "descriptors.h"
-#include "usb_user.h"
 
 // defines
-#define LED0            0
-#define LED1            1
-
-#define VND_GET_LEDS    0x10
-#define VND_SET_LED     0x11
 
 #define USB_BUFFER_SIZE         64
 
@@ -45,29 +39,29 @@ static uint32_t get_free_ram();
 void get_device_name(char *pszDeviceName, uint32_t ulDeviceNameSize);
 static uint16_t get_device_revision();
 
-void USB_ResetCb(void);
-void USB_DeviceStateChangeCb(USBD_State_TypeDef oldState, USBD_State_TypeDef newState);
-int USB_SetupCmdCb(const USB_Setup_TypeDef *setup);
-int USB_inXferCompleteCb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining);
-int USB_outXferCompleteCb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining);
+void usb_reset_cb(void);
+void usb_dev_state_change_cb(USBD_State_TypeDef oldState, USBD_State_TypeDef newState);
+int usb_setup_cmd_cb(const USB_Setup_TypeDef *setup);
+int usb_in_xfer_done_cb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining);
+int usb_out_xfer_done_cb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining);
 
 // Structs
-static const USBD_Callbacks_TypeDef callbacks =
+static const USBD_Callbacks_TypeDef xUsbCallbacks =
 {
-  .usbReset        = USB_ResetCb,
-  .usbStateChange  = USB_DeviceStateChangeCb,
-  .setupCmd        = USB_SetupCmdCb,
+  .usbReset        = usb_reset_cb,
+  .usbStateChange  = usb_dev_state_change_cb,
+  .setupCmd        = usb_setup_cmd_cb,
   .isSelfPowered   = NULL,
   .sofInt          = NULL
 };
 
-static const USBD_Init_TypeDef usbInitStruct =
+static const USBD_Init_TypeDef xUsbInitStruct =
 {
   .deviceDescriptor    = &USBDESC_deviceDesc,
   .configDescriptor    = USBDESC_configDesc,
   .stringDescriptors   = USBDESC_strings,
   .numberOfStrings     = sizeof(USBDESC_strings) / sizeof(void*),
-  .callbacks           = &callbacks,
+  .callbacks           = &xUsbCallbacks,
   .bufferingMultiplier = USBDESC_bufferingMultiplier,
   .reserved            = 0
 };
@@ -278,6 +272,8 @@ int init()
 
     //usart0_init(1000000, 1, USART_SPI_MSB_FIRST, 0, 0, 0);
     //i2c0_init(I2C_NORMAL, 1, 1); // Init I2C0 at 100 kHz on location 1
+
+    USBD_Init(&xUsbInitStruct); // USB Device init
 
     char szDeviceName[32];
 
@@ -494,7 +490,6 @@ int main()
 
     //DBGPRINTLN_CTX("CURRMON: %08X", DEVINFO->CURRMON5V);
 
-    USBD_Init(&usbInitStruct);
 
     while(1)
     {
@@ -527,24 +522,12 @@ int main()
 }
 
 
-/**************************************************************************//**
- * @brief   USB Reset call-back
- *
- * Jump to user API RESET call-back.
- *
- *****************************************************************************/
-void USB_ResetCb(void)
+void usb_reset_cb(void)
 {
 
 }
 
-/**************************************************************************//**
- * @brief   USB device state change call-back
- *
- * Set new state and jump to user API call-back.
- *
- *****************************************************************************/
-void USB_DeviceStateChangeCb(USBD_State_TypeDef oldState, USBD_State_TypeDef newState)
+void usb_dev_state_change_cb(USBD_State_TypeDef oldState, USBD_State_TypeDef newState)
 {
   DBGPRINTLN("USBX_DeviceStateChangeCb %d", newState);
   (void) oldState;    // Suppress compiler warning: unused parameter
@@ -564,14 +547,7 @@ void USB_DeviceStateChangeCb(USBD_State_TypeDef oldState, USBD_State_TypeDef new
   }
 }
 
-/**************************************************************************//**
- * @brief   USB setup command call-back
- *
- * If the setup command is a vendor request, pass to the USB command request
- * parsing routine and acknowledge.  Otherwise ignore the request.
- *
- *****************************************************************************/
-int USB_SetupCmdCb(const USB_Setup_TypeDef *setup)
+int usb_setup_cmd_cb(const USB_Setup_TypeDef *setup)
 {
   DBGPRINTLN("Setup cmd");
   DBGPRINTLN("type %d, bRequest %d, wValue %d", setup->Type, setup->bRequest, setup->wValue);
@@ -603,8 +579,15 @@ int USB_SetupCmdCb(const USB_Setup_TypeDef *setup)
           // Enable
           case SI_USBXPRESS_CLEAR_TO_SEND:
             DBGPRINTLN("Device Opened");
-            USBD_Read(USBXPRESS_OUT_EP_ADDR, outPacket, 64, (USB_XferCompleteCb_TypeDef) USB_outXferCompleteCb);
-            //USBD_Write(USBXPRESS_IN_EP_ADDR, inPacket, 64, (USB_XferCompleteCb_TypeDef) USB_inXferCompleteCb);
+
+            for(uint8_t i = 0; i < 64; i++)
+            {
+              inPacket[i] = i;
+            }
+
+
+            //USBD_Read(USBXPRESS_OUT_EP_ADDR, outPacket, 64, (USB_XferCompleteCb_TypeDef) usb_out_xfer_done_cb);
+            USBD_Write(USBXPRESS_IN_EP_ADDR, inPacket, 64, (USB_XferCompleteCb_TypeDef) usb_in_xfer_done_cb);
             retval = USB_STATUS_OK;
             break;
 
@@ -621,30 +604,18 @@ int USB_SetupCmdCb(const USB_Setup_TypeDef *setup)
     return retval;
 }
 
-/**************************************************************************//**
- * @brief   USBXpress IN Endpoint Transfer Complete Callback
- *
- * Gets the number of IN bytes transferred and passes them to the user API
- * call-back.
- *
- *****************************************************************************/
-int USB_inXferCompleteCb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining)
+int usb_in_xfer_done_cb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining)
 {
   DBGPRINTLN("USBX_inXferCompleteCb");
   (void) remaining;   // Suppress compiler warning: unused parameter
   (void) xferred;
 
+  USBD_Write(USBXPRESS_IN_EP_ADDR, inPacket, 64, (USB_XferCompleteCb_TypeDef) usb_in_xfer_done_cb);
+
   return 0;
 }
 
-/**************************************************************************//**
- * @brief   USBXpress OUT Endpoint Transfer Complete Callback
- *
- * Gets the number of OUT bytes transferred and passes them to the user API
- * call-back.
- *
- *****************************************************************************/
-int USB_outXferCompleteCb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining)
+int usb_out_xfer_done_cb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining)
 {
   DBGPRINTLN("USBX_outXferCompleteCb");
   (void) remaining;   // Suppress compiler warning: unused parameter

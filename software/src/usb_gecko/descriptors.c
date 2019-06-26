@@ -17,8 +17,7 @@
 #include "descriptors.h"
 
 /// USB Device Descriptor
-SL_ALIGN(4)
-const USB_DeviceDescriptor_TypeDef USBDESC_deviceDesc SL_ATTRIBUTE_ALIGN(4) =
+const USB_DeviceDescriptor_TypeDef USBDESC_deviceDesc  __attribute__((aligned(4))) =
 {
   .bLength            = USB_DEVICE_DESCSIZE,
   .bDescriptorType    = USB_DEVICE_DESCRIPTOR,
@@ -45,8 +44,7 @@ const USB_DeviceDescriptor_TypeDef USBDESC_deviceDesc SL_ATTRIBUTE_ALIGN(4) =
                          + 5)  /*CDC Union Functional descriptor length*/
 
 /// USB Configuration Descriptor
-SL_ALIGN(4)
-const uint8_t USBDESC_configDesc[] SL_ATTRIBUTE_ALIGN(4) =
+const uint8_t USBDESC_configDesc[]  __attribute__((aligned(4))) =
 {
   // Configuration descriptor
   USB_CONFIG_DESCSIZE,              // bLength

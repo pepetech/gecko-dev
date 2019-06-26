@@ -20,9 +20,6 @@
 #include "usb.h"
 #if defined(USB_DEVICE)
 
-//#include "em_cmu.h"
-//#include "em_core.h"
-//#include "em_system.h"
 #include "cmu.h"
 #include "atomic.h"
 #include "usb_types.h"

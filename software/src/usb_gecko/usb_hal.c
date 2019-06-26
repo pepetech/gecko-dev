@@ -28,11 +28,9 @@
 #if defined(USB_HOST)
 #include "usb_host.h"
 #endif
+#include "utils.h"
 #include "atomic.h"
 #include "systick.h"
-//#include "em_cmu.h"
-//#include "em_core.h"
-//#include "em_gpio.h"
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
@@ -219,12 +217,12 @@ USB_Status_TypeDef USBDHAL_CoreInit(uint32_t totalRxFifoSize, uint32_t totalTxFi
   USB->DCTL = (USB->DCTL & ~DCTL_WO_BITMASK) | USB_DCTL_IGNRFRMNUM;
 
   /* Set Rx FIFO size */
-  start = SL_MAX(totalRxFifoSize, MIN_EP_FIFO_SIZE_INWORDS);
+  start = MAX(totalRxFifoSize, MIN_EP_FIFO_SIZE_INWORDS);
   USB->GRXFSIZ = (start << _USB_GRXFSIZ_RXFDEP_SHIFT)
                  & _USB_GRXFSIZ_RXFDEP_MASK;
 
   /* Set Tx EP0 FIFO size */
-  depth = SL_MAX(dev->ep[0].fifoSize, MIN_EP_FIFO_SIZE_INWORDS);
+  depth = MAX(dev->ep[0].fifoSize, MIN_EP_FIFO_SIZE_INWORDS);
   USB->GNPTXFSIZ = ( (depth << _USB_GNPTXFSIZ_NPTXFINEPTXF0DEP_SHIFT)
                      & _USB_GNPTXFSIZ_NPTXFINEPTXF0DEP_MASK)
                    | ( (start << _USB_GNPTXFSIZ_NPTXFSTADDR_SHIFT)
@@ -241,7 +239,7 @@ USB_Status_TypeDef USBDHAL_CoreInit(uint32_t totalRxFifoSize, uint32_t totalTxFi
         if(ep->txFifoNum == j) /* Is it correct FIFO number ? */
         {
           start += depth;
-          depth = SL_MAX(ep->fifoSize, MIN_EP_FIFO_SIZE_INWORDS);
+          depth = MAX(ep->fifoSize, MIN_EP_FIFO_SIZE_INWORDS);
           USB_DIEPTXFS[ep->txFifoNum - 1] =
             (depth << _USB_DIEPTXF1_INEPNTXFDEP_SHIFT)
             | (start &  _USB_DIEPTXF1_INEPNTXFSTADDR_MASK);

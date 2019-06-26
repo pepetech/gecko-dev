@@ -20,6 +20,7 @@
 #include "usb.h"
 #if defined(USB_DEVICE)
 
+#include "utils.h"
 #include "usb_types.h"
 #include "usb_hal.h"
 #include "usb_device.h"
@@ -227,7 +228,7 @@ static int GetDescriptor(USBD_Device_TypeDef *pDev)
 
   if(length)
   {
-    retVal = USBD_Write(0, (void*)data, SL_MIN(length, p->wLength), NULL);
+    retVal = USBD_Write(0, (void*)data, MIN(length, p->wLength), NULL);
   }
 
   return retVal;
