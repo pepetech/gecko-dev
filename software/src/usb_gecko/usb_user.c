@@ -135,6 +135,7 @@ void USBX_ResetCb(void)
  *****************************************************************************/
 void USBX_DeviceStateChangeCb(USBD_State_TypeDef oldState, USBD_State_TypeDef newState)
 {
+  DBGPRINTLN("USBX_DeviceStateChangeCb %d", newState);
   (void) oldState;    // Suppress compiler warning: unused parameter
 
   // Entering suspend mode, power internal and external blocks down
@@ -154,6 +155,7 @@ void USBX_DeviceStateChangeCb(USBD_State_TypeDef oldState, USBD_State_TypeDef ne
 
   if ((USBXCORE_apiEa & APIEA_GIE) && (USBXCORE_apiIntValue)) {
     // Call to assembly function to cleanup stack and jump to API ISR
+    DBGPRINTLN("USBX_outXferCompleteCb jump callback");
     USBX_jumpCallback();
   }
 }
@@ -167,22 +169,27 @@ void USBX_DeviceStateChangeCb(USBD_State_TypeDef oldState, USBD_State_TypeDef ne
  *****************************************************************************/
 int USBX_SetupCmdCb(const USB_Setup_TypeDef *setup)
 {
+  DBGPRINTLN("Setup cmd");
+  DBGPRINTLN("type %d, bRequest %d, wValue %d", setup->Type, setup->bRequest, setup->wValue);
   USB_Status_TypeDef retval = USB_STATUS_REQ_UNHANDLED;
   uint16_t length;
 
   // Handle open and close events
-  if (setup->Type == USB_SETUP_TYPE_VENDOR)
+  if(setup->Type == USB_SETUP_TYPE_VENDOR)
   {
+    DBGPRINTLN("USB_SETUP_TYPE_VENDOR");
     // Look for vendor-specific requests
     switch(setup->bRequest)
     {
       // Requests directed to a USBXpress Device
       case SI_USBXPRESS_REQUEST:
+        DBGPRINTLN("SI_USBXPRESS_REQUEST");
         switch(setup->wValue)
         {
           // Flush Buffers
           case SI_USBXPRESS_FLUSH_BUFFERS:
-            if (USBXCORE_apiEa & APIEA_GIE)
+            DBGPRINTLN("SI_USBXPRESS_FLUSH_BUFFERS");
+            if(USBXCORE_apiEa & APIEA_GIE)
             {
               USBXCORE_apiEa &= ~APIEA_GIE;      // Turn off bit 1
               USBXCORE_apiEa |= APIEA_GIE_TEMP;   // Turn on bit 2
@@ -246,6 +253,7 @@ int USBX_SetupCmdCb(const USB_Setup_TypeDef *setup)
  *****************************************************************************/
 int USBX_inXferCompleteCb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining)
 {
+  DBGPRINTLN("USBX_inXferCompleteCb");
   (void) remaining;   // Suppress compiler warning: unused parameter
 
   if(status == USB_STATUS_OK)
@@ -287,10 +295,14 @@ int USBX_inXferCompleteCb(USB_Status_TypeDef status, uint16_t xferred, uint16_t 
  *****************************************************************************/
 int USBX_outXferCompleteCb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining)
 {
+  DBGPRINTLN("USBX_outXferCompleteCb");
   (void) remaining;   // Suppress compiler warning: unused parameter
 
   if(status == USB_STATUS_OK)
   {
+    DBGPRINTLN("xferred: %d", xferred);
+    DBGPRINTLN("remaining: %d", remaining);
+    DBGPRINTLN("USBXCORE_readSize: %d", USBXCORE_readSize);
     if(xferred <= USBXCORE_readSize)
     {
       USBXCORE_readSize -= xferred;
@@ -301,6 +313,7 @@ int USBX_outXferCompleteCb(USB_Status_TypeDef status, uint16_t xferred, uint16_t
       *USBXCORE_byteCountOutPtr += USBXCORE_readSize;
       USBXCORE_readSize = 0;
     }
+    DBGPRINTLN("USBXCORE_readSize: %d", USBXCORE_readSize);
 
     // If the total read size is not decremented to zero, the transfer has ended.
     if(USBXCORE_readSize)
@@ -340,6 +353,7 @@ int USBX_outXferCompleteCb(USB_Status_TypeDef status, uint16_t xferred, uint16_t
 
 int USBX_blockRead(uint8_t *block, uint32_t numBytes, uint32_t *countPtr)
 {
+  DBGPRINTLN("USBX_blockRead");
   uint32_t i;
 
   USBXCORE_byteCountOutPtr = countPtr;
@@ -385,6 +399,7 @@ int USBX_blockRead(uint8_t *block, uint32_t numBytes, uint32_t *countPtr)
 
 int USBX_blockWrite(uint8_t *block, uint32_t numBytes, uint32_t *countPtr)
 {
+  DBGPRINTLN("USBX_blockWrite");
   USBXCORE_byteCountInPtr = countPtr;
   *USBXCORE_byteCountInPtr = 0;
   USBXCORE_writeSize = numBytes;

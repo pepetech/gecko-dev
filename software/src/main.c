@@ -34,7 +34,7 @@
 #define VND_GET_LEDS    0x10
 #define VND_SET_LED     0x11
 
-#define USB_BUFFER_SIZE         8
+#define USB_BUFFER_SIZE         64
 
 // Forward declarations
 static void reset() __attribute__((noreturn));
@@ -45,14 +45,18 @@ static uint32_t get_free_ram();
 void get_device_name(char *pszDeviceName, uint32_t ulDeviceNameSize);
 static uint16_t get_device_revision();
 
-void usb_callback(void);
+void USB_ResetCb(void);
+void USB_DeviceStateChangeCb(USBD_State_TypeDef oldState, USBD_State_TypeDef newState);
+int USB_SetupCmdCb(const USB_Setup_TypeDef *setup);
+int USB_inXferCompleteCb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining);
+int USB_outXferCompleteCb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining);
 
 // Structs
 static const USBD_Callbacks_TypeDef callbacks =
 {
-  .usbReset        = USBX_ResetCb,
-  .usbStateChange  = USBX_DeviceStateChangeCb,
-  .setupCmd        = USBX_SetupCmdCb,
+  .usbReset        = USB_ResetCb,
+  .usbStateChange  = USB_DeviceStateChangeCb,
+  .setupCmd        = USB_SetupCmdCb,
   .isSelfPowered   = NULL,
   .sofInt          = NULL
 };
@@ -75,9 +79,6 @@ UBUF(outPacket, USB_BUFFER_SIZE);
 
 /// Next packet to sent to host
 UBUF(inPacket, USB_BUFFER_SIZE);
-
-/// Flag determining whether USB data should be transmitted
-bool transmitUsbData = false;
 
 // ISRs
 
@@ -493,7 +494,6 @@ int main()
 
     //DBGPRINTLN_CTX("CURRMON: %08X", DEVINFO->CURRMON5V);
 
-    USBX_setCallBack(usb_callback);
     USBD_Init(&usbInitStruct);
 
     while(1)
@@ -526,49 +526,140 @@ int main()
     return 0;
 }
 
-void usb_callback(void)
+
+/**************************************************************************//**
+ * @brief   USB Reset call-back
+ *
+ * Jump to user API RESET call-back.
+ *
+ *****************************************************************************/
+void USB_ResetCb(void)
 {
-  uint32_t readLen;
-  uint32_t intval = USBX_getCallbackSource();
 
-  // Device Opened
-  if(intval & USBX_DEV_OPEN)
+}
+
+/**************************************************************************//**
+ * @brief   USB device state change call-back
+ *
+ * Set new state and jump to user API call-back.
+ *
+ *****************************************************************************/
+void USB_DeviceStateChangeCb(USBD_State_TypeDef oldState, USBD_State_TypeDef newState)
+{
+  DBGPRINTLN("USBX_DeviceStateChangeCb %d", newState);
+  (void) oldState;    // Suppress compiler warning: unused parameter
+
+  // Entering suspend mode, power internal and external blocks down
+  if(newState == USBD_STATE_SUSPENDED)
   {
-    USBX_blockRead(outPacket, USB_BUFFER_SIZE, &readLen);
-    transmitUsbData = true;
+    DBGPRINTLN("Device Closed or Suspended");
+  }
+  if(newState == USBD_STATE_CONFIGURED)
+  {
+    DBGPRINTLN("Device Configured");
+  }
+  if(newState < USBD_STATE_CONFIGURED)
+  {
+    DBGPRINTLN("Device Not Configured");
+  }
+}
+
+/**************************************************************************//**
+ * @brief   USB setup command call-back
+ *
+ * If the setup command is a vendor request, pass to the USB command request
+ * parsing routine and acknowledge.  Otherwise ignore the request.
+ *
+ *****************************************************************************/
+int USB_SetupCmdCb(const USB_Setup_TypeDef *setup)
+{
+  DBGPRINTLN("Setup cmd");
+  DBGPRINTLN("type %d, bRequest %d, wValue %d", setup->Type, setup->bRequest, setup->wValue);
+  USB_Status_TypeDef retval = USB_STATUS_REQ_UNHANDLED;
+
+  // Handle open and close events
+  if(setup->Type == USB_SETUP_TYPE_VENDOR)
+  {
+    DBGPRINTLN("USB_SETUP_TYPE_VENDOR");
+    // Look for vendor-specific requests
+    switch(setup->bRequest)
+    {
+      // Requests directed to a USBXpress Device
+      case SI_USBXPRESS_REQUEST:
+        DBGPRINTLN("SI_USBXPRESS_REQUEST");
+        switch(setup->wValue)
+        {
+          // Flush Buffers
+          case SI_USBXPRESS_FLUSH_BUFFERS:
+            DBGPRINTLN("SI_USBXPRESS_FLUSH_BUFFERS");
+
+            // Abort the current write transfer.
+            // This will flush any data in the FIFO.
+            USBD_AbortTransfer(USBXPRESS_IN_EP_ADDR);
+
+            retval = USB_STATUS_OK;
+            break;
+
+          // Enable
+          case SI_USBXPRESS_CLEAR_TO_SEND:
+            DBGPRINTLN("Device Opened");
+            USBD_Read(USBXPRESS_OUT_EP_ADDR, outPacket, 64, (USB_XferCompleteCb_TypeDef) USB_outXferCompleteCb);
+            //USBD_Write(USBXPRESS_IN_EP_ADDR, inPacket, 64, (USB_XferCompleteCb_TypeDef) USB_inXferCompleteCb);
+            retval = USB_STATUS_OK;
+            break;
+
+          // Disable
+          case SI_USBXPRESS_NOT_CLEAR_TO_SEND:
+            DBGPRINTLN("Device Closed or Suspended");
+            retval = USB_STATUS_OK;
+            break;
+        }
+        break;
+    }
   }
 
-  // Device Closed or Suspended
-  if (intval & (USBX_DEV_CLOSE | USBX_DEV_SUSPEND))
-  {
-    transmitUsbData = false;
+    return retval;
+}
 
-    // Turn off LEDs
-    //BSP_LedClear(0);
-    //BSP_LedClear(1);
+/**************************************************************************//**
+ * @brief   USBXpress IN Endpoint Transfer Complete Callback
+ *
+ * Gets the number of IN bytes transferred and passes them to the user API
+ * call-back.
+ *
+ *****************************************************************************/
+int USB_inXferCompleteCb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining)
+{
+  DBGPRINTLN("USBX_inXferCompleteCb");
+  (void) remaining;   // Suppress compiler warning: unused parameter
+  (void) xferred;
+
+  return 0;
+}
+
+/**************************************************************************//**
+ * @brief   USBXpress OUT Endpoint Transfer Complete Callback
+ *
+ * Gets the number of OUT bytes transferred and passes them to the user API
+ * call-back.
+ *
+ *****************************************************************************/
+int USB_outXferCompleteCb(USB_Status_TypeDef status, uint16_t xferred, uint16_t remaining)
+{
+  DBGPRINTLN("USBX_outXferCompleteCb");
+  (void) remaining;   // Suppress compiler warning: unused parameter
+  (void) remaining;
+
+    DBGPRINTLN("xferred: %d", xferred);
+    DBGPRINTLN("remaining: %d", remaining);
+
+  if(status == USB_STATUS_OK)
+  {
+    for(uint8_t i = 0; i < 64; i++)
+    {
+        DBGPRINTLN("0x%02X", outPacket[i]);
+    }
   }
 
-  // USB Read complete
-  if (intval & USBX_RX_COMPLETE)
-  {
-    // Set the LEDs based on the values sent from the host
-    if(outPacket[0] == 1)
-    {
-      //BSP_LedSet(0);
-    }
-    else
-    {
-      //BSP_LedClear(0);
-    }
-    if(outPacket[1] == 1)
-    {
-      //BSP_LedSet(1);
-    }
-    else
-    {
-      //BSP_LedClear(1);
-    }
-
-    USBX_blockRead(outPacket, USB_BUFFER_SIZE, &readLen);
-  }
+  return 0;
 }

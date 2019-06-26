@@ -66,6 +66,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "debug_macros.h"
 #include "usb_common_tmp.h"
 #include "usb.h"
 
@@ -150,26 +151,6 @@ typedef void (*USBX_apiCallback_t)(void);
 #define SI_USBXPRESS_FLUSH_BUFFERS      0x0001  //!< Value
 #define SI_USBXPRESS_CLEAR_TO_SEND      0x0002  //!< Value
 #define SI_USBXPRESS_NOT_CLEAR_TO_SEND  0x0004  //!< Value
-
-
-//! @cond DOXYGEN_SKIP
-#ifdef char16_t
-#undef char16_t
-#endif
-#if defined(__GNUC__)                     /* GCC compilers */
-#if defined(__CHAR16_TYPE__)
-typedef __CHAR16_TYPE__ char16_t;
-#else
-typedef unsigned short char16_t;          /**< Data type used for UTF-16LE formatted USB string descriptors. */
-#endif
-
-#elif defined(__ICCARM__)                 /* IAR compiler */
-#include <uchar.h>
-
-#elif defined(__CC_ARM)                   /* MDK-ARM compiler */
-typedef unsigned short char16_t;
-#endif
-//! @endcond
 
 
 /**************************************************************************//**

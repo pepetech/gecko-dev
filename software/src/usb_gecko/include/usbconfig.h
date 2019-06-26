@@ -48,6 +48,28 @@ extern "C" {
 *****************************************************************************/
 #define NUM_APP_TIMERS 1
 
+#define USBX_RESET               0x00000001     //!< USB Reset Interrupt has occurred
+#define USBX_TX_COMPLETE         0x00000002     //!< Transmit Complete Interrupt has occurred
+#define USBX_RX_COMPLETE         0x00000004     //!< Receive Complete Interrupt has occurred
+#define USBX_FIFO_PURGE          0x00000008     //!< Receive and Transmit FIFO's were purged
+#define USBX_DEV_OPEN            0x00000010     //!< Device Instance Opened on host side
+#define USBX_DEV_CLOSE           0x00000020     //!< Device Instance Closed on host side
+#define USBX_DEV_CONFIGURED      0x00000040     //!< Device has entered configured state
+#define USBX_DEV_SUSPEND         0x00000080     //!< USB suspend signaling present on bus
+#define USBX_RX_OVERRUN          0x00000100     //!< Data received with no place to put it
+
+#define USBX_STATUS_OK                  USB_STATUS_OK                   //!< Success
+#define USBX_STATUS_EP_BUSY             USB_STATUS_EP_BUSY              //!< Failed because the endpoint is busy
+#define USBX_STATUS_ILLEGAL             USB_STATUS_ILLEGAL              //!< Failed due to an illegal parameter
+#define USBX_STATUS_EP_STALLED          USB_STATUS_EP_STALLED           //!< Failed because the endpoint is stalled
+#define USBX_STATUS_DEVICE_UNCONFIGURED USB_STATUS_DEVICE_UNCONFIGURED  //!< Failed because the device is not configured
+
+// Control command requests and values
+#define SI_USBXPRESS_REQUEST            0x02    //!< Request
+#define SI_USBXPRESS_FLUSH_BUFFERS      0x0001  //!< Value
+#define SI_USBXPRESS_CLEAR_TO_SEND      0x0002  //!< Value
+#define SI_USBXPRESS_NOT_CLEAR_TO_SEND  0x0004  //!< Value
+
 #ifdef __cplusplus
 }
 #endif
