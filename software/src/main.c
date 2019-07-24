@@ -193,7 +193,7 @@ int init()
 
     cmu_init(); // Init Clocks
 
-    cmu_auxhfrco_calib(1, AUXHFRCO_CALIB_32M, 32000000); // Enable and calibrate AUXHFRCO for 32 MHz
+    cmu_auxhfrco_calib(1, AUXHFRCO_CALIB_8M, 8000000); // Enable and calibrate AUXHFRCO for 32 MHz
 
     cmu_update_clocks(); // Update Clocks
 
@@ -228,6 +228,7 @@ int init()
 
     get_device_name(szDeviceName, 32);
 
+    DBGPRINTLN_CTX("Pearl Gecko Development v%lu (%s %s)!", BUILD_VERSION, __DATE__, __TIME__);
     DBGPRINTLN_CTX("Device: %s", szDeviceName);
     DBGPRINTLN_CTX("Device Revision: 0x%04X", get_device_revision());
     DBGPRINTLN_CTX("Calibration temperature: %hhu C", (DEVINFO->CAL & _DEVINFO_CAL_TEMP_MASK) >> _DEVINFO_CAL_TEMP_SHIFT);
