@@ -121,7 +121,7 @@ void emu_dcdc_init(float fTargetVoltage, float fMaxLNCurrent, float fMaxLPCurren
     EMU->DCDCMISCCTRL = (EMU->DCDCMISCCTRL & ~_EMU_DCDCMISCCTRL_PFETCNT_MASK) | ((uint32_t)(ubFETCount - 1) << _EMU_DCDCMISCCTRL_PFETCNT_SHIFT);
 
     uint8_t ubLNCurrentLimit = (((fMaxLNCurrent + 40.f) * 1.5f) / (5.f * ubFETCount)) - 1;
-    uint8_t ubLPCurrentLimit = (fMaxLPCurrent / 40.f) - 1;
+    uint8_t ubLPCurrentLimit = 1; // Recommended value
 
     EMU->DCDCMISCCTRL = (EMU->DCDCMISCCTRL & ~(_EMU_DCDCMISCCTRL_LNCLIMILIMSEL_MASK | _EMU_DCDCMISCCTRL_LPCLIMILIMSEL_MASK)) | ((uint32_t)ubLNCurrentLimit << _EMU_DCDCMISCCTRL_LNCLIMILIMSEL_SHIFT) | ((uint32_t)ubLPCurrentLimit << _EMU_DCDCMISCCTRL_LPCLIMILIMSEL_SHIFT);
 
@@ -345,63 +345,4 @@ void emu_vmon_iovdd_config(uint8_t ubEnable, float fLowThresh, float *pfLowThres
     EMU->IFC = EMU_IFC_VMONIO0RISE | EMU_IFC_VMONIO0FALL;
     EMU->IEN |= EMU_IEN_VMONIO0RISE | EMU_IEN_VMONIO0FALL;
     EMU->VMONIO0CTRL = ((uint32_t)ubLowThresh << _EMU_VMONIO0CTRL_THRESFINE_SHIFT) | EMU_VMONIO0CTRL_EN;
-}
-
-void emu_r5v_vout_config(float fTargetVoltage)
-{
-    if(fTargetVoltage < 2.4f || fTargetVoltage > 3.8f)
-        return;
-
-    uint32_t ulCode = (fTargetVoltage - 2.3f) / 0.1f;
-
-    while(EMU->R5VSTATUS & EMU_R5VSTATUS_COLDSTART);
-    while(EMU->R5VSYNC & EMU_R5VSYNC_OUTLEVELBUSY);
-
-    EMU->IFC = EMU_IFC_R5VVSINT;
-
-    EMU->R5VOUTLEVEL = (ulCode << _EMU_R5VOUTLEVEL_OUTLEVEL_SHIFT);
-    while(EMU->R5VSYNC & EMU_R5VSYNC_OUTLEVELBUSY);
-
-    while(!(EMU->IF & EMU_IF_R5VVSINT));
-}
-void emu_r5v_vin_config(uint32_t ulInput)
-{
-    if(ulInput != EMU_R5VCTRL_INPUTMODE_AUTO &&
-       ulInput != EMU_R5VCTRL_INPUTMODE_VBUS &&
-       ulInput != EMU_R5VCTRL_INPUTMODE_VREGI)
-        return;
-
-    while(EMU->R5VSTATUS & EMU_R5VSTATUS_COLDSTART);
-
-    EMU->R5VCTRL = (EMU->R5VCTRL & ~_EMU_R5VCTRL_INPUTMODE_MASK) | ulInput;
-}
-void emu_r5v_amux_config(uint8_t ubEnable, uint32_t ulInput)
-{
-    if(!ubEnable)
-    {
-        EMU->R5VADCCTRL &= ~EMU_R5VADCCTRL_ENAMUX;
-        EMU->R5VCTRL &= ~EMU_R5VCTRL_IMONEN;
-
-        return;
-    }
-
-    if(ulInput != EMU_R5VADCCTRL_AMUXSEL_VBUSDIV10 &&
-       ulInput != EMU_R5VADCCTRL_AMUXSEL_VREGIDIV10 &&
-       ulInput != EMU_R5VADCCTRL_AMUXSEL_VREGODIV6 &&
-       ulInput != EMU_R5VADCCTRL_AMUXSEL_VREGIIMON &&
-       ulInput != EMU_R5VADCCTRL_AMUXSEL_VBUSIMON)
-        return;
-
-    EMU->R5VADCCTRL = ulInput | EMU_R5VADCCTRL_ENAMUX;
-
-    if(ulInput == EMU_R5VADCCTRL_AMUXSEL_VREGIIMON || ulInput == EMU_R5VADCCTRL_AMUXSEL_VBUSIMON)
-        EMU->R5VCTRL |= EMU_R5VCTRL_IMONEN;
-}
-uint8_t emu_r5v_get_input()
-{
-    return !!(EMU->R5VSTATUS & EMU_R5VSTATUS_VBUSGTVREGI);
-}
-uint8_t emu_r5v_get_droupout()
-{
-    return !!(EMU->R5VSTATUS & EMU_R5VSTATUS_LDODROPOUTDET);
 }
